@@ -1,26 +1,22 @@
 # AXM 102 Grammar Body
 
-Status: RECOVERY / EXTRACTION IN PROGRESS
+Status: **RECOVERED STANDALONE TEST BODY**
 
-This repository is the clean standalone home for the AXM 102 code/language grammar body.
+This is the clean standalone home for the AXM 102 code/language grammar body.
 
-Recovery source checkpoint:
+It contains the actual recovered source and generated language-specific materializations for all 102 code/language organs, including grammar-native profiles, specialist eyes, machine template banks, machine keyboard banks, and machine cheatcode banks, together with their focused deterministic generators, registries, and checks.
+
+## Recovery checkpoint
+
 - source repository: `mike-axiom-mir/axm-collaboration-platform`
 - source branch: `codex/code-creation-fabric-102-grammar-integration-v2.12`
 - source commit: `386736aaae3993089dfaf970cf2360894959e3c0`
 - source PR: `#62`
 
-Scope for this repository:
-- the 102 language organ definitions
-- the 102 grammar-native profiles
-- grammar/language registries and generators required to load and verify them
-- focused selftests and source-bound receipts needed to show the recovered state
+## Deliberate boundary
 
-Explicitly out of scope here:
-- Grammar Glass / Code Twister
-- unrelated Work Context, Production Draft, sandbox, UI, and wider AXM platform layers unless a file is a direct dependency of the recovered 102-grammar body
-- links, submodules, or manifests that stand in for missing source
+Grammar Glass / Code Twister is **not** in this repository. It is a separate layer and can develop independently against this 102-grammar body.
 
-Rule: actual source bytes belong in this repository. A pointer to another repository is not a recovered body.
+The wider Creation Fabric session planner is also not copied here because it imports Work Context, Production Draft, Build Window, admission, and other platform layers. This repository keeps the 102-language body itself clean instead of smuggling the wider platform back in.
 
-The extraction is being verified against the source checkpoint before this status is changed from RECOVERY / EXTRACTION IN PROGRESS.
+See `RECOVERY_RECEIPT.md` for the exact recovery receipt and `language-organs/SOURCE_README.md` for the source package's original technical description.
