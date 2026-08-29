@@ -42,7 +42,33 @@ The placement plane accepts the receipt only while it is live and digest-intact.
 
 Focused filesystem tests cover extension, exact-basename, and path-context projects; current-byte drift; zero mutation; and holds for stale, future-dated, overlong, or tampered receipts, ambiguous inputs, missing/unmapped files, symlinks, traversal, broad roots, and limit escalation.
 
-This is a placement grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
+## Separately authorized editing Hand
+
+`workspace-edit-hand.js` applies the first narrow placement transaction without pretending to be the code author:
+
+```js
+const editHand = require('./workspace-edit-hand.js');
+
+const transactionReceipt = editHand.apply({
+  workspaceRoot,
+  declaration,
+  projectMapObservation,
+  placementPlan,
+  authorization,
+  candidates: {source, verification},
+  verifierAdapters
+});
+```
+
+The capable model or a deterministic renderer supplies the exact UTF-8 candidate bytes. A host must separately issue one `EXPLICIT_SINGLE_TRANSACTION` authorization, valid for no more than 60 seconds, binding the root identity, fresh observation, placement plan, both targets and candidate digests, the JavaScript parser, and every verifier adapter. The authorization digest detects changed fields; it is not a signature, identity, or consent proof.
+
+Before mutation, the Hand re-observes the complete declared project map, refuses drift or protected targets, rechecks existing target digests, and syntax-parses both candidates. It writes only the two planned source/test targets through same-directory temporary and backup files. It then re-reads and re-parses the installed bytes and invokes only the bound verifier adapters. A failed write, post-write check, parser, or verifier triggers reverse-order restoration of prior bytes or removal of newly created targets.
+
+The focused trial proves two successful transactions (replace and create), one intentional post-write verifier failure with both targets restored, 14 language-parse receipts, three registered-verifier receipts, and ten adversarial holds covering replay, parse failure, drift, stale/tampered/unbound authorization, target mismatch, inconsistent nested observation digests, and a forged protected-target plan. All workspaces are generated test fixtures; no production repository was edited.
+
+This v1 Hand supports only JavaScript under Node's CommonJS script parse goal, exactly two files, existing parent directories, candidates up to 1 MiB each, and up to eight verifier bindings. Its rollback and replay memory are process-local. It does not provide a durable crash journal, multi-file atomicity, inter-process locking, or elimination of concurrent mutation races. Verifier adapters are trusted registered code; the Hand limits the context it gives them but cannot prove their purity.
+
+This is a placement and application grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
 
 The v1.1 project-map convention requires one explicit language-binding kind and signal:
 

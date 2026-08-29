@@ -1,0 +1,76 @@
+{
+  "schema": "axm.code.workspace-edit-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.edit-candidate.v1",
+    "axm.code.edit-authorization.v1",
+    "axm.code.language-parse-receipt.v1",
+    "axm.code.workspace-verifier-receipt.v1",
+    "axm.code.workspace-edit-transaction-receipt.v1"
+  ],
+  "model": {
+    "candidate": "A capable model or deterministic renderer supplies exact UTF-8 source and verification bytes. The Hand does not generate or improve code.",
+    "authorization": "The host explicitly authorizes one digest-bound source/test transaction for one fresh observation and placement plan. The authorization digest is an integrity binding, not identity or consent proof.",
+    "preflight": "Immediately re-observe the declared project, require the same map digest, recheck target state, bind candidates, and parse both candidates before mutation.",
+    "transaction": "Replace or create only the two exact planned targets using same-directory temporary and backup files, then parse and verify the installed bytes.",
+    "rollback": "Any write, post-write digest, parse, or verifier failure restores prior bytes or removes newly created targets before returning when process-local rollback succeeds."
+  },
+  "supportedParserBindings": [
+    "javascript:node-vm-script-syntax-v1"
+  ],
+  "limits": {
+    "authorizationTtlMs": 60000,
+    "maxTargets": 2,
+    "maxCandidateBytesPerTarget": 1048576,
+    "maxVerifierBindings": 8,
+    "parentDirectoriesMustAlreadyExist": true
+  },
+  "truth": {
+    "handGeneratesCode": false,
+    "candidateQualityAutomaticallyClaimed": false,
+    "digestIsSignerOrConsentProof": false,
+    "freshnessIsCorrectness": false,
+    "javascriptSyntaxPassIsBehaviorProof": false,
+    "verifierReceiptIsUniversalProof": false,
+    "multiFileAtomicityClaimed": false,
+    "processCrashRecoveryClaimed": false,
+    "concurrentMutationRaceEliminated": false,
+    "processLocalRollbackProvided": true,
+    "processLocalReplayProtectionProvided": true,
+    "replayProtectionSurvivesRestart": false,
+    "adapterPurityCanBeProvenByHand": false,
+    "productionRepositoryTrialClaimed": false
+  },
+  "permissions": [
+    "bounded-explicit-root-workspace-read",
+    "explicit-two-target-workspace-write",
+    "same-directory-transaction-artifact-create",
+    "transaction-artifact-cleanup",
+    "rollback-restore",
+    "registered-verifier-adapter-invocation"
+  ],
+  "refuses": [
+    "code-generation",
+    "unobserved-project-map",
+    "stale-observation-or-authorization",
+    "plan-or-authorization-digest-mismatch",
+    "workspace-drift",
+    "unplanned-target",
+    "target-or-parent-symlink",
+    "protected-target-bypass",
+    "missing-requested-verifier-binding",
+    "candidate-over-one-mebibyte",
+    "unsupported-language-parser",
+    "failed-parser-or-verifier-as-success",
+    "authorization-replay-in-process",
+    "parent-directory-creation",
+    "user-file-deletion",
+    "network-access",
+    "dependency-install",
+    "deployment",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "EXPLICIT_SINGLE_TRANSACTION_WORKSPACE_EDIT"
+}

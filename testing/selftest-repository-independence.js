@@ -72,6 +72,7 @@ const adapterContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-dir
 const adapterCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-catalog.json'), 'utf8'));
 const placementContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-plane.contract.json'), 'utf8'));
 const projectMapHandContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'project-map-hand.contract.json'), 'utf8'));
+const workspaceEditHandContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'workspace-edit-hand.contract.json'), 'utf8'));
 const placementCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
@@ -121,6 +122,14 @@ assert.deepStrictEqual(projectMapHandContract.permissions, ['bounded-explicit-ro
 assert.strictEqual(projectMapHandContract.truth.filePathsAndBytesAreDirectlyObserved, true);
 assert.strictEqual(projectMapHandContract.truth.semanticRolesAreCallerDeclared, true);
 assert.strictEqual(projectMapHandContract.truth.observationIsMutationAuthority, false);
+assert.strictEqual(workspaceEditHandContract.schema, 'axm.code.workspace-edit-hand-contract.v1');
+assert.strictEqual(workspaceEditHandContract.authority, 'EXPLICIT_SINGLE_TRANSACTION_WORKSPACE_EDIT');
+assert(workspaceEditHandContract.permissions.includes('explicit-two-target-workspace-write'));
+assert.strictEqual(workspaceEditHandContract.truth.handGeneratesCode, false);
+assert.strictEqual(workspaceEditHandContract.truth.multiFileAtomicityClaimed, false);
+assert.strictEqual(workspaceEditHandContract.truth.processCrashRecoveryClaimed, false);
+assert.strictEqual(workspaceEditHandContract.truth.concurrentMutationRaceEliminated, false);
+assert.strictEqual(workspaceEditHandContract.truth.processLocalRollbackProvided, true);
 assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
 assert.strictEqual(placementCatalog.roles.length, 10);
 assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);
@@ -134,6 +143,7 @@ assert(readme.includes('frontier-direction-workbench.js'));
 assert(readme.includes('adapters/adapter-plane.js'));
 assert(readme.includes('placement/placement-plane.js'));
 assert(readme.includes('placement/project-map-hand.js'));
+assert(readme.includes('placement/workspace-edit-hand.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({

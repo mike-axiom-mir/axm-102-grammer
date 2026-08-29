@@ -125,4 +125,6 @@ const projectMapObservation = projectMapHand.inspect({workspaceRoot, declaration
 const observedPlan = placement.plan({projectMapObservation, change});
 ```
 
-A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. Neither the reader nor planner can mutate the workspace. See `placement/README.md` for the contracts and truth boundary.
+A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. Neither the reader nor planner can mutate the workspace.
+
+The separately authorized `placement/workspace-edit-hand.js` now exercises the next seam for JavaScript. It accepts model- or renderer-authored exact bytes, not a request to invent code; binds one 60-second authorization to two planned targets; re-observes and parses before mutation; re-parses and runs registered verifiers after writing; and restores both targets when a verifier fails. The focused trial covers replace, create, rollback, replay, drift, parser, authorization, target, and protection behavior in generated workspaces. Its rollback is process-local, not crash-safe multi-file atomicity, and no production repository trial is claimed. See `placement/README.md` for the contracts and full truth boundary.
