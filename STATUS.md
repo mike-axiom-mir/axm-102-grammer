@@ -91,6 +91,12 @@ All measurements below came from the successful recovery verification run before
 - beginner reference ready: 29/29 directions
 - production ready claimed: 0 directions
 - per-direction helpfulness and tuning observations: 29
+- concrete local adapters: 10 (one runtime, nine verifiers)
+- passed runtime adapter receipts: 58
+- passed verifier adapter receipts: 76
+- unsupported verifier targets retained: 20
+- directions with at least one concrete local verifier: 26/29
+- verifier categories still requiring external/specialized adapters: 11/20
 
 ## Truth boundaries retained
 
@@ -118,7 +124,8 @@ This lane adds a bounded composition surface without importing Grammar Glass or 
 - 29 reusable software-direction overlays, seven axis catalogs, hybrid composition, non-selecting suggestions, and caller-evidence gap reports;
 - optional direction binding in the standalone capability capsule.
 - a 58-build frontier-user maturity trial with per-direction usefulness and tuning logs.
+- a concrete local adapter plane with runtime/verifier receipts and explicit unsupported targets.
 
-Lane verification result: **18/18 checks passed**.
+Lane verification result: **19/19 checks passed**.
 
-The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, preserves real-world verifier gaps, and refuses production-readiness promotion. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial catalog and contract, parses every JSON file, and refuses symlinks or submodules.
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, preserves real-world verifier gaps, and refuses production-readiness promotion. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.

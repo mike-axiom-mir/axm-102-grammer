@@ -5,9 +5,10 @@ const registry = require('./direction-registry.js');
 const directionStack = require('./direction-stack.js');
 const gapDetector = require('./direction-gap-detector.js');
 const referenceBuilds = require('./frontier-reference-builds.js');
+const adapterPlane = require('./adapters/adapter-plane.js');
 const catalog = require('./frontier-trial-catalog.json');
 
-const AUTHORITY = referenceBuilds.AUTHORITY;
+const AUTHORITY = adapterPlane.AUTHORITY;
 const LEVELS = Object.freeze(['seed', 'stretch']);
 let INDEX = null;
 
@@ -46,9 +47,9 @@ function validateCatalog() {
     for (const level of LEVELS) {
       const challenge = trial[level];
       if (!challenge || typeof challenge.name !== 'string' || typeof challenge.goal !== 'string') throw Error(`FRONTIER_TRIAL_CHALLENGE_INVALID:${trial.directionId}:${level}`);
-      for (const field of ['requiredCapabilities', 'verifierEvidence', 'expectedChecks']) if (!Array.isArray(challenge[field]) || !challenge[field].length) throw Error(`FRONTIER_TRIAL_CHALLENGE_FIELD_INVALID:${trial.directionId}:${level}:${field}`);
+      for (const field of ['requiredCapabilities', 'requestedVerifiers', 'expectedChecks']) if (!Array.isArray(challenge[field]) || !challenge[field].length) throw Error(`FRONTIER_TRIAL_CHALLENGE_FIELD_INVALID:${trial.directionId}:${level}:${field}`);
       const unknownCapabilities = challenge.requiredCapabilities.filter(id => !profile.capabilityNeeds.includes(id));
-      const unknownVerifiers = challenge.verifierEvidence.filter(id => !profile.verifierNeeds.includes(id));
+      const unknownVerifiers = challenge.requestedVerifiers.filter(id => !profile.verifierNeeds.includes(id));
       if (unknownCapabilities.length) throw Error(`FRONTIER_TRIAL_CAPABILITY_OUTSIDE_PROFILE:${trial.directionId}:${level}:${unknownCapabilities.join(',')}`);
       if (unknownVerifiers.length) throw Error(`FRONTIER_TRIAL_VERIFIER_OUTSIDE_PROFILE:${trial.directionId}:${level}:${unknownVerifiers.join(',')}`);
       if (new Set(challenge.expectedChecks).size !== challenge.expectedChecks.length) throw Error(`FRONTIER_TRIAL_DUPLICATE_CHECK:${trial.directionId}:${level}`);
@@ -113,16 +114,18 @@ function runTrial(input = {}) {
     const body = {schema: 'axm.code.frontier-direction-trial-result.v1', version: '1.0.0', status: 'TEST', result: 'FRONTIER_DIRECTION_TRIAL_HELD', packet, authority: AUTHORITY};
     return freeze({...body, trialSha256: hash(body)});
   }
-  const build = referenceBuilds.run(packet);
+  const adapterExecution = adapterPlane.execute(packet);
+  const build = adapterExecution.build;
   const expectedChecks = packet.challenge.expectedChecks;
   const actualCheckNames = Object.keys(build.checks).sort();
   const expectedCheckNames = [...expectedChecks].sort();
   const checkSurfaceMatches = canon(actualCheckNames) === canon(expectedCheckNames);
   const failedChecks = expectedChecks.filter(name => build.checks[name] !== true);
   const capabilityEvidenceComplete = packet.challenge.requiredCapabilities.every(id => build.evidence.capabilities.includes(id));
-  const verifierEvidenceComplete = packet.challenge.verifierEvidence.every(id => build.evidence.verifiers.includes(id));
-  const gapReport = gapDetector.evaluate({stackInput: {directionIds: [packet.directionId]}, languageId: 'javascript', observed: build.evidence});
-  const passed = checkSurfaceMatches && failedChecks.length === 0 && capabilityEvidenceComplete && verifierEvidenceComplete && build.truth.humanInterventionDuringRun === false && build.authority.workspaceMutation === false && build.authority.toolExecution === false;
+  const adapterExecutionPassed = ['ADAPTER_EXECUTION_PASS', 'ADAPTER_EXECUTION_PASS_WITH_UNSUPPORTED_TARGETS'].includes(adapterExecution.result);
+  const adapterReceiptsValid = adapterExecution.runtimeReceipt.result === 'RUNTIME_ADAPTER_PASS' && adapterExecution.failedAdapterIds.length === 0;
+  const gapReport = gapDetector.evaluate({stackInput: {directionIds: [packet.directionId]}, languageId: 'javascript', observed: adapterExecution.evidence});
+  const passed = checkSurfaceMatches && failedChecks.length === 0 && capabilityEvidenceComplete && adapterExecutionPassed && adapterReceiptsValid && build.truth.humanInterventionDuringRun === false && build.authority.workspaceMutation === false && build.authority.toolExecution === false;
   const body = {
     schema: 'axm.code.frontier-direction-trial-result.v1',
     version: '1.0.0',
@@ -135,18 +138,26 @@ function runTrial(input = {}) {
     checkSurfaceMatches,
     failedChecks,
     capabilityEvidenceComplete,
-    verifierEvidenceComplete,
+    adapterExecutionPassed,
+    adapterReceiptsValid,
+    requestedVerifierCount: adapterExecution.adapterCoverage.requestedVerifierCount,
+    verifiedVerifierCount: adapterExecution.adapterCoverage.verifiedVerifierCount,
+    unsupportedVerifierCount: adapterExecution.adapterCoverage.unsupportedVerifierCount,
+    concreteAdapterCoveragePercent: adapterExecution.adapterCoverage.percent,
     modeledCapabilityCoveragePercent: gapReport.coverage.capabilityPercent,
     modeledVerifierCoveragePercent: gapReport.coverage.verifierPercent,
     missingRealWorldCapabilities: gapReport.missingCapabilities.map(item => item.id),
     missingRealWorldVerifiers: gapReport.missingVerifiers.map(item => item.id),
+    adapterExecution,
     build,
     truth: {
       beginnerReferenceProbeOnly: true,
       fullDirectionCapabilityClaimed: false,
       productionReady: false,
       gapMeansLanguageIncapability: false,
-      frontierObservationIsSingleModelEvidence: true
+      frontierObservationIsSingleModelEvidence: true,
+      requestedVerifierIsEvidence: false,
+      passedAdapterReceiptIsBoundedEvidence: true
     },
     authority: AUTHORITY
   };
@@ -165,8 +176,8 @@ function runAll() {
       directionId: profile.id,
       displayName: profile.displayName,
       family: profile.family,
-      seed: {result: seed.result, trialSha256: seed.trialSha256, capabilityCoveragePercent: seed.modeledCapabilityCoveragePercent, verifierCoveragePercent: seed.modeledVerifierCoveragePercent},
-      stretch: {result: stretch.result, trialSha256: stretch.trialSha256, capabilityCoveragePercent: stretch.modeledCapabilityCoveragePercent, verifierCoveragePercent: stretch.modeledVerifierCoveragePercent},
+      seed: {result: seed.result, trialSha256: seed.trialSha256, capabilityCoveragePercent: seed.modeledCapabilityCoveragePercent, verifierCoveragePercent: seed.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: seed.concreteAdapterCoveragePercent, verifiedVerifierCount: seed.verifiedVerifierCount, unsupportedVerifierCount: seed.unsupportedVerifierCount},
+      stretch: {result: stretch.result, trialSha256: stretch.trialSha256, capabilityCoveragePercent: stretch.modeledCapabilityCoveragePercent, verifierCoveragePercent: stretch.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: stretch.concreteAdapterCoveragePercent, verifiedVerifierCount: stretch.verifiedVerifierCount, unsupportedVerifierCount: stretch.unsupportedVerifierCount},
       beginnerReferenceReady,
       productionReady: false,
       helpfulForFrontierModel: observation.helpful,
@@ -175,6 +186,10 @@ function runAll() {
   }
   const passedBuildCount = directionReports.reduce((sum, item) => sum + Number(item.seed.result.endsWith('_PASS')) + Number(item.stretch.result.endsWith('_PASS')), 0);
   const beginnerReferenceReadyCount = directionReports.filter(item => item.beginnerReferenceReady).length;
+  const verifiedVerifierReceiptCount = directionReports.reduce((sum, item) => sum + item.seed.verifiedVerifierCount + item.stretch.verifiedVerifierCount, 0);
+  const unsupportedVerifierTargetCount = directionReports.reduce((sum, item) => sum + item.seed.unsupportedVerifierCount + item.stretch.unsupportedVerifierCount, 0);
+  const directionsWithConcreteVerifierAdapter = directionReports.filter(item => item.seed.verifiedVerifierCount + item.stretch.verifiedVerifierCount > 0).length;
+  const directionsWithUnsupportedVerifierTargets = directionReports.filter(item => item.seed.unsupportedVerifierCount + item.stretch.unsupportedVerifierCount > 0).length;
   const body = {
     schema: 'axm.code.frontier-direction-user-report.v1',
     version: '1.0.0',
@@ -186,6 +201,10 @@ function runAll() {
     passedBuildCount,
     beginnerReferenceReadyCount,
     productionReadyCount: 0,
+    verifiedVerifierReceiptCount,
+    unsupportedVerifierTargetCount,
+    directionsWithConcreteVerifierAdapter,
+    directionsWithUnsupportedVerifierTargets,
     directionReports,
     crossDirectionFindings: {
       helpful: [
@@ -194,7 +213,7 @@ function runAll() {
         'The gap detector kept modeled evidence separate from absent production, hardware, security, scale, and deployment evidence.'
       ],
       needsTuning: [
-        'Profiles need optional framework, platform, toolchain, and verifier-adapter bindings before they can drive real builds end to end.',
+        'The first adapter plane covers bounded local Node verification; framework, platform, toolchain, browser, infrastructure, and hardware bindings remain incomplete.',
         'Capability IDs need richer acceptance schemas so evidence can be stronger than a declared name plus bounded reference check.',
         'High-risk directions need domain-expert, hardware, infrastructure, or independent-review gates that a frontier model cannot self-award.',
         'A future local trial should compare multiple frontier/local models and record disagreements instead of treating this single-model pass as universal.'

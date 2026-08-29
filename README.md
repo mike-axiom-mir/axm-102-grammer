@@ -68,6 +68,8 @@ An explicit language may resolve a compatible ambiguous signal such as `.m`. It 
 
 `software-directions/frontier-direction-workbench.js` adds a bounded frontier-user trial over all 29 profiles: one seed build and one stretch build per direction. Its 58 executable reference models test whether the profiles guide a frontier model beyond labels while retaining absent production, hardware, security, deployment, and domain evidence as explicit gaps. The per-direction observations are in `software-directions/FRONTIER_USER_TRIAL_REPORT.md`.
 
+`software-directions/adapters/adapter-plane.js` turns requested verifier categories into actual local executions and digest-bound receipts. The first plane provides one bounded Node reference runtime and nine verifier adapters. Unsupported browser, compatibility, load, security-review, latency, conformance, fuzzing/property, type-check, and hardware targets remain explicit instead of being counted as evidence.
+
 ## Run every standalone check
 
 Requires Node.js 18+ and Python 3. The suite installs no dependencies and uses no network.
@@ -78,4 +80,4 @@ node testing/run-all.js
 
 In a normal local npm environment, `npm test` invokes that same runner. Set `AXM_PYTHON` only when the Python executable is not available as `python3` or `python`.
 
-The expanded suite contains 18 checks: five generated-material drift checks and thirteen deterministic selftests, including all 4,896 stable keyboard keys, all 29 software-direction profiles, 58 seed/stretch frontier reference builds, hybrid stacks, gap semantics, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.
+The expanded suite contains 19 checks: five generated-material drift checks and fourteen deterministic selftests, including all 4,896 stable keyboard keys, all 29 software-direction profiles, 58 seed/stretch frontier reference builds, concrete adapter receipts, hybrid stacks, gap semantics, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.

@@ -15,15 +15,40 @@ Every software direction received two executable, deterministic reference challe
 - **seed** — the smallest useful behavior that exercises core direction concerns;
 - **stretch** — a larger multi-concern challenge intended to expose whether the profile remains useful beyond a toy.
 
-The frontier model authored the bounded reference implementations from the direction catalog, then the workbench prepared and executed all 58 packets without per-run human input. A direction reached **beginner reference ready** only when both challenges passed, their declared check surfaces matched exactly, and their modeled evidence stayed inside that direction's catalog profile.
+The frontier model authored the bounded reference implementations from the direction catalog, then the workbench prepared and executed all 58 packets without per-run human input. A direction reached **beginner reference ready** only when both challenges passed, their declared check surfaces matched exactly, concrete local adapter receipts were valid, and unsupported real-world adapters stayed visible.
 
 These are in-memory reference models. They are not installed applications, production services, real networks, hardware runs, security certifications, app-store packages, or proof of arbitrary-program correctness.
 
-## Repair made during the trial
+## Repairs made during the trial
 
 The first catalog-validation run failed before awarding any pass because the backend stretch challenge requested `RETRY_IDEMPOTENCY`, which belongs to the distributed/cloud profile. The challenge was repaired to use the backend profile's `CONCURRENT_REQUEST_CONTROL` boundary while retaining repeated-request behavior in the executable check.
 
 This was a useful result: the profiles prevented two nearby software directions from silently borrowing each other's capability names.
+
+Binding the concrete adapter plane then exposed three more weaknesses that the earlier declared-target model had missed:
+
+- the creative-editor stretch case requested recovery without restoring an export, so export restoration was added;
+- the distributed/cloud stretch case requested recovery but only tested a successful rolling upgrade, so rollback restoration was added;
+- the firmware stretch case requested simulation without explicitly identifying its artifact as simulated, so the artifact boundary was corrected.
+
+The adapters were not weakened to accept those builds; the builds were strengthened.
+
+## Concrete adapter outcome
+
+The first adapter plane adds one bounded Node in-memory runtime plus nine executable verifier adapters. Across the 58 builds it produced:
+
+- 58 passed runtime receipts;
+- 76 passed verifier-adapter receipts;
+- 20 requested verifier targets retained as unsupported;
+- 26 of 29 directions with at least one concrete local verifier adapter;
+- 10 directions with one or more unsupported verifier targets;
+- seven individual build cases with zero concrete verifier coverage, kept visible rather than promoted.
+
+Supported locally: unit test, integration test, deterministic replay, structural parse, recovery test, simulation, numerical validation, data-quality check, and model evaluation.
+
+Still unsupported locally: type check, property test, fuzzing, UI end-to-end, accessibility audit, compatibility matrix, load test, security review, latency budget, conformance suite, and hardware-in-loop.
+
+The trial catalog now calls these fields **requested verifiers**. A requested name becomes evidence only after a concrete adapter runs and returns a passed digest-bound receipt.
 
 ## Per-direction frontier-user observations
 
@@ -63,7 +88,7 @@ This was a useful result: the profiles prevented two nearby software directions 
 
 The layer is already useful to a frontier model as a **pre-build directional checklist and gap lens**. It consistently changes what the model notices before writing code and reduces generic app-shaped reasoning.
 
-The biggest remaining weakness is adapter depth. Profiles describe what must matter, but they do not yet bind a concrete framework, toolchain, device, verifier, infrastructure target, or human/domain authority. Capability evidence is also still coarse: future versions should give important capability IDs richer acceptance schemas instead of relying on a name plus a bounded reference check.
+The first local adapter plane closes part of the earlier adapter gap, but depth remains the main weakness. It does not yet bind a concrete framework, browser, mobile/desktop package, compiler, device, cloud target, external verifier, or human/domain authority. Capability evidence is also still coarse: future versions should give important capability IDs richer acceptance schemas instead of relying on a name plus a bounded reference check.
 
 The next meaningful maturation step is a local comparison across multiple frontier and local models, with human observations added separately rather than silently merged into this machine-side report.
 
@@ -72,6 +97,7 @@ The next meaningful maturation step is a local comparison across multiple fronti
 - machine-readable challenges and per-direction observations: `frontier-trial-catalog.json`
 - executable reference builds: `frontier-reference-builds.js`
 - packet, assessment, and aggregate report logic: `frontier-direction-workbench.js`
+- concrete adapter registry, resolver, implementations, and receipts: `adapters/`
 - deterministic 58-build verification: `selftest-frontier-direction-workbench.js`
 
-Aggregate report digest from the first successful focused run: `e12901415fcbd6c2480a96d835b85788eed9f5377b8b55c3d76efd1a9cabe72d`
+Aggregate adapter-bound frontier report digest: `82056623ea40d2bf1e17aa3e62b9f1a3b53cb00e61ed1c194d98445be35de68a`

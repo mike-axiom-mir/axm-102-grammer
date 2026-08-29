@@ -90,3 +90,16 @@ const allDirections = workbench.runAll();
 The current bounded run executes 58 reference builds and marks a direction `beginnerReferenceReady` only if both levels pass deterministically. That state is deliberately weaker than production readiness. Real browsers, devices, networks, kernels, hardware, cloud infrastructure, security audits, app stores, and human/domain authority remain external evidence.
 
 See `FRONTIER_USER_TRIAL_REPORT.md` for the per-direction frontier-user observations, the first repair found by the trial, and the next tuning gaps.
+
+## Concrete adapter receipts
+
+`adapters/adapter-plane.js` resolves each trial's requested verifier categories against locally available adapters, executes the bounded Node reference runtime, and returns digest-bound runtime/verifier receipts.
+
+```js
+const adapters = require('./adapters/adapter-plane.js');
+
+const resolution = adapters.resolve(packet);
+const execution = adapters.execute(packet);
+```
+
+Resolution alone is not evidence. Only a passed adapter receipt enters `verifiedVerifierIds`. The first plane supports nine local verifier categories and keeps eleven external or specialized categories unsupported. See `adapters/README.md` for the exact partition and authority boundary.

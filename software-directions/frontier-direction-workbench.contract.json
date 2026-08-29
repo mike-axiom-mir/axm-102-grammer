@@ -15,23 +15,25 @@
     "totalReferenceBuilds": 58,
     "humanInterventionDuringIndividualRun": false,
     "singleFrontierModelPerspective": true,
-    "beginnerReferenceReady": "Both bounded executable probes pass deterministically with their declared modeled evidence and retained real-world gaps."
+    "beginnerReferenceReady": "Both bounded executable probes pass deterministically, concrete local adapter receipts are valid, and unsupported real-world adapters remain visible."
   },
   "truth": {
     "referenceBuildIsProductionBuild": false,
     "beginnerReferenceReadyIsProductionReady": false,
     "modeledTimingIsHardwareTiming": false,
     "modeledSecurityIsSecurityCertification": false,
-    "declaredEvidenceIsUniversalProof": false,
+    "requestedVerifierIsEvidence": false,
+    "passedAdapterReceiptIsUniversalProof": false,
     "singleFrontierModelTrialIsUniversalModelFinding": false,
     "missingEvidenceIsLanguageIncapability": false,
     "humanFollowupMayBeAddedLater": true
   },
-  "permissions": [],
+  "permissions": ["current-node-version-read", "bounded-in-memory-reference-execution"],
   "refuses": [
     "workspace-read",
     "workspace-mutation",
-    "tool-execution",
+    "external-tool-execution",
+    "child-process-execution",
     "network-access",
     "dependency-install",
     "real-deployment",
@@ -41,5 +43,5 @@
     "automatic-promotion",
     "automatic-canon"
   ],
-  "authority": "NONE"
+  "authority": "BOUNDED_LOCAL_ADAPTER_ONLY"
 }

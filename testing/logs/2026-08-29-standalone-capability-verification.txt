@@ -2,90 +2,94 @@ Branch: codex/standalone-capability-verification-v1
 Base commit: a44ccb298c7ef1e6dc04fbb5f2e150aac630dff9
 Command: node testing/run-all.js
 Runtime: Node v24.19.0; Python 3.12.13
-Observed: 2026-08-29T02:35:00Z through 2026-08-29T02:35:07Z (bounded local process stream)
+Observed: 2026-08-29T02:53:59Z through 2026-08-29T02:54:07Z (bounded local process stream)
 
-TEST 01/18: python3 language-organs/build-grammar-profiles.py --check
+TEST 01/19: python3 language-organs/build-grammar-profiles.py --check
 {"mode":"CHECK","organCount":102,"knowledgeCount":102,"profileCount":102,"uniqueProfileDigests":102,"failures":[],"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 02/18: node language-organs/selftest-grammar-profiles.js
+TEST 02/19: node language-organs/selftest-grammar-profiles.js
 {"ok":true,"profileCount":102,"mainPlannerGrammarCoverage":102,"uniqueProfileDigests":102,"snapshotSha256":"1b5616cdc5f0f55ecb43b86e48d602147c95801c3c5e7af6eabaafd21ded5e9c","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 03/18: python3 language-organs/build-specialist-eyes.py --check
+TEST 03/19: python3 language-organs/build-specialist-eyes.py --check
 {"ok":true,"specialistEyeCount":102,"languageOpportunityHintCount":102,"humanPerspectiveDigest":"8000f61b2ef5c81ef3fdc54d4c67682f17059b040c599883d7bec769f661c4ea","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 04/18: node language-organs/selftest-specialist-eyes.js
+TEST 04/19: node language-organs/selftest-specialist-eyes.js
 {"ok":true,"humanReviewDimensions":8,"specialistEyeCount":102,"uniqueEyeDigests":102,"rustDiscoveryState":"DISCOVERY_CANDIDATE","helmDiscoveryState":"DISCOVERY_CANDIDATE","daxDiscoveryState":"DISCOVERY_CANDIDATE","eyeSnapshotSha256":"3e2577cd3ae0b98005d74724c66b3a3e7a1961723611218f961def4be3e407c8","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 05/18: node language-organs/build-machine-templates.js --check
+TEST 05/19: node language-organs/build-machine-templates.js --check
 {"ok":true,"mode":"--check","bankCount":102,"verifiedTemplateCount":1224,"skeletonCount":816,"changed":0,"snapshotSha256":"d82480317b3b087bfc08b4285ddf32c46b556a41c328c9b0c81d103b33742b4b"}
 TEST_RESULT: PASS
 
-TEST 06/18: node language-organs/selftest-machine-templates.js
+TEST 06/19: node language-organs/selftest-machine-templates.js
 {"ok":true,"bankCount":102,"verifiedTemplateCount":1224,"structuralSkeletonCount":816,"minedCandidateCount":1,"snapshotSha256":"d82480317b3b087bfc08b4285ddf32c46b556a41c328c9b0c81d103b33742b4b","aiMachineSharedTopTemplate":"code.template.rust.safe-refactor-preflight.v1","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 07/18: node language-organs/build-machine-cheatcodes.js --check
+TEST 07/19: node language-organs/build-machine-cheatcodes.js --check
 {"ok":true,"mode":"--check","bankCount":102,"totalRuleCount":5100,"changed":0}
 TEST_RESULT: PASS
 
-TEST 08/18: node language-organs/selftest-machine-cheatcodes.js
+TEST 08/19: node language-organs/selftest-machine-cheatcodes.js
 {"ok":true,"bankCount":102,"rulesPerBank":50,"totalRuleCount":5100,"phaseCount":10,"uniqueBankDigests":102,"snapshotSha256":"6ffa100c40706754864f6d98f86ed528bd3631c797ab6b64f447cd768340d746","rustMatchCount":7,"helmDiscoveryMatches":2,"daxDiscoveryMatches":2,"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 09/18: node language-organs/selftest-machine-cheatcode-influence.js
+TEST 09/19: node language-organs/selftest-machine-cheatcode-influence.js
 {"ok":true,"meshCount":102,"totalNodeCount":5100,"totalEdgeCount":120125,"snapshotSha256":"bb69e9e22829ef6fb2632d37e3fea723e3c77e77282dbc4e98c0b350554a8be1","rustHard":7,"rustSoft":43,"helmHard":6,"helmSoft":44,"daxHard":7,"daxSoft":43,"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 10/18: node language-organs/build-machine-keyboards.js --check
+TEST 10/19: node language-organs/build-machine-keyboards.js --check
 {"mode":"CHECK","bankCount":102,"keysPerBank":48,"totalStableKeyCount":4896,"changed":0,"snapshotSha256":"72e510a51b497a86ae5577a47621682a868117ebd19d4ddc39922d25f79b008c","failures":[],"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 11/18: node language-organs/selftest-machine-keyboards.js
+TEST 11/19: node language-organs/selftest-machine-keyboards.js
 {"ok":true,"bankCount":102,"keysPerBank":48,"totalStableKeyCount":4896,"layoutHotKeyCount":12,"editIntentResult":"EDIT_INTENT_READY","controlIntentResult":"CONTROL_INTENT_READY","programResult":"EDIT_PROGRAM_READY","snapshotSha256":"72e510a51b497a86ae5577a47621682a868117ebd19d4ddc39922d25f79b008c","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 12/18: node language-organs/selftest.js
+TEST 12/19: node language-organs/selftest.js
 {"ok":true,"organCount":102,"uniqueDigests":102,"familyCount":23,"pythonSourceReviewedDonorBound":true,"pythonRuntimeCorrectness":"UNKNOWN","ambiguity":[".m",".v"],"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 13/18: node language-organs/selftest-adversarial.js
+TEST 13/19: node language-organs/selftest-adversarial.js
 {"ok":true,"organCount":102,"signalRoundTrips":263,"extensionAmbiguities":8,"basenameAmbiguities":0,"pathAmbiguities":0,"shebangAmbiguities":1,"snapshotSha256":"d3ae157d5c6f43ea73fb85b3976ebf988830e99eb1615554de73f9744073ff46","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 14/18: node software-directions/selftest-direction-registry.js
+TEST 14/19: node software-directions/selftest-direction-registry.js
 {"ok":true,"profileCount":29,"familyCounts":{"human-interface":8,"service-network":8,"data-intelligence":6,"system-hardware":3,"creation-operations":4},"runtimeAxisCount":11,"verificationAxisCount":20,"sourceCount":12,"snapshotSha256":"4f624f0678ed20caa19f43faf0ca7cb2d1f6686ee98a764227d79bca6d057628","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 15/18: node software-directions/selftest-direction-stack.js
+TEST 15/19: node software-directions/selftest-direction-stack.js
 {"ok":true,"individuallyComposedProfiles":29,"hybridDirectionCount":2,"hybridCapabilityCount":14,"hybridVerifierCount":7,"hybridTensionCount":1,"gameSuggestionCount":3,"roboticsCapabilityCoverage":28.57,"roboticsVerifierCoverage":16.67,"allDirectionCapabilityCount":194,"authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 16/18: node software-directions/selftest-frontier-direction-workbench.js
-{"ok":true,"directionCount":29,"executedBuildCount":58,"passedBuildCount":58,"beginnerReferenceReadyCount":29,"productionReadyCount":0,"singleFrontierModelTrial":true,"reportSha256":"e12901415fcbd6c2480a96d835b85788eed9f5377b8b55c3d76efd1a9cabe72d","result":"ALL_DIRECTIONS_BEGINNER_REFERENCE_READY","authority":"NONE"}
+TEST 16/19: node software-directions/adapters/selftest-adapter-plane.js
+{"ok":true,"adapterCount":10,"supportedVerifierAdapterCount":9,"unsupportedVerifierIdCount":11,"buildCount":58,"runtimeReceiptCount":58,"verifierReceiptCount":76,"unsupportedTargetCount":20,"zeroCoverageBuildCount":7,"snapshotSha256":"d9a5c21d82b31795cfcf963ebf06228a791218e946bd5fbde321de546eddd4e5","authority":"BOUNDED_LOCAL_ADAPTER_ONLY"}
 TEST_RESULT: PASS
 
-TEST 17/18: node language-organs/selftest-standalone-capability-router.js
+TEST 17/19: node software-directions/selftest-frontier-direction-workbench.js
+{"ok":true,"directionCount":29,"executedBuildCount":58,"passedBuildCount":58,"beginnerReferenceReadyCount":29,"productionReadyCount":0,"singleFrontierModelTrial":true,"verifiedVerifierReceiptCount":76,"unsupportedVerifierTargetCount":20,"directionsWithConcreteVerifierAdapter":26,"directionsWithUnsupportedVerifierTargets":10,"reportSha256":"82056623ea40d2bf1e17aa3e62b9f1a3b53cb00e61ed1c194d98445be35de68a","result":"ALL_DIRECTIONS_BEGINNER_REFERENCE_READY","authority":"BOUNDED_LOCAL_ADAPTER_ONLY"}
+TEST_RESULT: PASS
+
+TEST 18/19: node language-organs/selftest-standalone-capability-router.js
 {"ok":true,"readyLanguage":"rust","readyResult":"CAPABILITY_CAPSULE_READY_NO_EXECUTION_AUTHORITY","hardCheatcodeActivations":7,"softInfluenceCandidates":43,"selectedTemplates":5,"hotKeys":12,"explicitLanguageResolutionCount":102,"ambiguityHeld":["code.organ.matlab-octave.v1","code.organ.objective-c.v1","code.organ.power-query-m.v1"],"conflictHeld":"EXPLICIT_LANGUAGE_SIGNAL_CONFLICT","directionProfileCount":29,"suggestionOnlyTopCandidate":"information-website","hybridDirections":["game","collaboration-multiplayer"],"hybridGapCount":17,"invalidDirectionHeld":"UNKNOWN_DIRECTION","capsuleSha256":"c95716a0a08c5283e17a83d11386243501d04992dcea72689ea89494c3a63390","authority":"NONE"}
 TEST_RESULT: PASS
 
-TEST 18/18: node testing/selftest-repository-independence.js
-{"ok":true,"languageDirectoryCount":102,"perLanguagePayloadCount":612,"parsedJsonFileCount":626,"softwareDirectionProfileCount":29,"softwareDirectionAxisCount":7,"frontierDirectionTrialCount":58,"symlinkCount":0,"submoduleFilePresent":false,"capabilityContractAuthority":"NONE"}
+TEST 19/19: node testing/selftest-repository-independence.js
+{"ok":true,"languageDirectoryCount":102,"perLanguagePayloadCount":612,"parsedJsonFileCount":628,"softwareDirectionProfileCount":29,"softwareDirectionAxisCount":7,"frontierDirectionTrialCount":58,"concreteAdapterCount":10,"unsupportedVerifierAdapterCount":11,"symlinkCount":0,"submoduleFilePresent":false,"capabilityContractAuthority":"NONE"}
 TEST_RESULT: PASS
 
-SUITE_RESULT: passed=18 failed=0 total=18
+SUITE_RESULT: passed=19 failed=0 total=19
 
-Truth boundary: these checks verify deterministic bindings, drift, routing, holds, and authority boundaries. They do not claim semantic or runtime correctness for arbitrary programs in all 102 languages. Python runtime correctness remains UNKNOWN as recorded by the recovered body.
+Truth boundary: these checks verify deterministic bindings, drift, routing, holds, bounded in-memory reference execution, concrete local adapter receipts, and authority boundaries. They do not claim semantic or runtime correctness for arbitrary programs in all 102 languages. Python runtime correctness remains UNKNOWN as recorded by the recovered body. Unsupported external verifiers remain explicit rather than being promoted to evidence.
 
 Stream receipt:
-- claim: the expanded standalone repository suite passes all 18 checks, including 58 frontier direction builds, direction registry, hybrid stack/gap semantics, capsule integration, and repository independence
+- claim: the expanded standalone repository suite passes all 19 checks, including 58 frontier direction builds, 58 bounded runtime receipts, 76 concrete verifier receipts, direction registry, hybrid stack/gap semantics, capsule integration, and repository independence
 - stream: stdout/stderr from `node testing/run-all.js` in this branch
-- expected event: `SUITE_RESULT: passed=18 failed=0 total=18`; refuting event: any `TEST_RESULT: FAIL`, nonzero exit, or mismatched totals
-- matched event: expected suite result emitted at the end of the 7-second window; no refuting event was emitted
+- expected event: `SUITE_RESULT: passed=19 failed=0 total=19`; refuting event: any `TEST_RESULT: FAIL`, nonzero exit, or mismatched totals
+- matched event: expected suite result emitted at the end of the 8-second window; no refuting event was emitted
 - verdict: PASS
 - hearing seam: local child-process output only; reference builds are bounded in-memory models, not external deployments, hardware runs, security certification, or arbitrary-program runtime claims
-- buffer digest: 18 PASS events, 0 FAIL events, 58/58 frontier reference builds passed, process exit 0
+- buffer digest: 19 PASS events, 0 FAIL events, 58/58 frontier reference builds passed, 58 runtime receipts passed, 76 verifier receipts passed, 20 requested verifier targets explicitly unsupported, process exit 0
 - raw rolling buffer released: yes; this bounded transcript is the retained evidence

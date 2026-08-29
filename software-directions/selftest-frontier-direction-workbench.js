@@ -26,7 +26,10 @@ for (const profile of registry.all()) {
     assert.strictEqual(trial.checkSurfaceMatches, true);
     assert.deepStrictEqual(trial.failedChecks, []);
     assert.strictEqual(trial.capabilityEvidenceComplete, true);
-    assert.strictEqual(trial.verifierEvidenceComplete, true);
+    assert.strictEqual(trial.adapterExecutionPassed, true);
+    assert.strictEqual(trial.adapterReceiptsValid, true);
+    assert.strictEqual(trial.requestedVerifierCount, trial.verifiedVerifierCount + trial.unsupportedVerifierCount);
+    assert(trial.concreteAdapterCoveragePercent >= 0 && trial.concreteAdapterCoveragePercent <= 100);
     assert.strictEqual(trial.truth.productionReady, false);
     assert.strictEqual(trial.truth.fullDirectionCapabilityClaimed, false);
     assert.strictEqual(trial.build.truth.humanInterventionDuringRun, false);
@@ -34,7 +37,9 @@ for (const profile of registry.all()) {
     assert.strictEqual(trial.build.authority.workspaceMutation, false);
     assert.strictEqual(trial.build.authority.toolExecution, false);
     assert(trial.modeledCapabilityCoveragePercent > 0 && trial.modeledCapabilityCoveragePercent <= 100);
-    assert(trial.modeledVerifierCoveragePercent > 0 && trial.modeledVerifierCoveragePercent <= 100);
+    assert(trial.modeledVerifierCoveragePercent >= 0 && trial.modeledVerifierCoveragePercent <= 100);
+    assert.strictEqual(trial.truth.requestedVerifierIsEvidence, false);
+    assert.strictEqual(trial.truth.passedAdapterReceiptIsBoundedEvidence, true);
     assert(trial.missingRealWorldCapabilities.length > 0, `${profile.id}:${level}:reference probe must retain real-world capability gaps`);
     assert(trial.missingRealWorldVerifiers.length > 0, `${profile.id}:${level}:reference probe must retain real-world verifier gaps`);
     assert(/^[a-f0-9]{64}$/.test(trial.trialSha256));
@@ -57,6 +62,10 @@ assert.strictEqual(report.buildCount, 58);
 assert.strictEqual(report.passedBuildCount, 58);
 assert.strictEqual(report.beginnerReferenceReadyCount, 29);
 assert.strictEqual(report.productionReadyCount, 0);
+assert(report.verifiedVerifierReceiptCount > 0);
+assert(report.unsupportedVerifierTargetCount > 0);
+assert(report.directionsWithConcreteVerifierAdapter > 0 && report.directionsWithConcreteVerifierAdapter < 29);
+assert(report.directionsWithUnsupportedVerifierTargets > 0);
 assert.strictEqual(report.directionReports.length, 29);
 assert(report.directionReports.every(item => item.beginnerReferenceReady));
 assert(report.directionReports.every(item => item.productionReady === false));
@@ -68,7 +77,8 @@ assert.strictEqual(Object.isFrozen(report), true);
 assert(/^[a-f0-9]{64}$/.test(report.reportSha256));
 
 const byId = new Map(report.directionReports.map(item => [item.directionId, item]));
-assert.strictEqual(byId.get('xr-spatial').stretch.verifierCoveragePercent, 20, 'XR retains hardware and live UI gaps');
+assert.strictEqual(byId.get('xr-spatial').stretch.verifierCoveragePercent, 0, 'XR conformance remains unsupported by the local adapter plane');
+assert.strictEqual(byId.get('xr-spatial').stretch.concreteAdapterCoveragePercent, 0);
 assert(byId.get('kernel-driver-runtime').needsTuning.includes('userspace model'));
 assert(byId.get('robotics-industrial-control').needsTuning.includes('hardware-in-loop'));
 assert(byId.get('security-identity-cryptography').needsTuning.includes('certify security'));
@@ -80,8 +90,12 @@ console.log(JSON.stringify({
   passedBuildCount: report.passedBuildCount,
   beginnerReferenceReadyCount: report.beginnerReferenceReadyCount,
   productionReadyCount: report.productionReadyCount,
+  verifiedVerifierReceiptCount: report.verifiedVerifierReceiptCount,
+  unsupportedVerifierTargetCount: report.unsupportedVerifierTargetCount,
+  directionsWithConcreteVerifierAdapter: report.directionsWithConcreteVerifierAdapter,
+  directionsWithUnsupportedVerifierTargets: report.directionsWithUnsupportedVerifierTargets,
   singleFrontierModelTrial: report.truth.singleFrontierModelTrial,
   reportSha256: report.reportSha256,
   result: report.result,
-  authority: 'NONE'
+  authority: 'BOUNDED_LOCAL_ADAPTER_ONLY'
 }, null, 2));

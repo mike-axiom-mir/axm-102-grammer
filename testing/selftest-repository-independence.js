@@ -68,6 +68,8 @@ const directionCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-di
 const directionAxes = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'axis-catalog.json'), 'utf8'));
 const frontierContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'frontier-direction-workbench.contract.json'), 'utf8'));
 const frontierTrials = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'frontier-trial-catalog.json'), 'utf8'));
+const adapterContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-plane.contract.json'), 'utf8'));
+const adapterCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
 assert.deepStrictEqual(directionContract.permissions, []);
@@ -78,18 +80,29 @@ assert.strictEqual(directionCatalog.profiles.length, 29);
 assert.strictEqual(new Set(directionCatalog.profiles.map(profile => profile.id)).size, 29);
 assert.deepStrictEqual(Object.keys(directionAxes.axes).sort(), ['distribution', 'execution', 'quality', 'risk', 'runtime', 'state', 'verification']);
 assert.strictEqual(frontierContract.schema, 'axm.code.frontier-direction-workbench-contract.v1');
-assert.strictEqual(frontierContract.authority, 'NONE');
-assert.deepStrictEqual(frontierContract.permissions, []);
+assert.strictEqual(frontierContract.authority, 'BOUNDED_LOCAL_ADAPTER_ONLY');
+assert.deepStrictEqual(frontierContract.permissions, ['current-node-version-read', 'bounded-in-memory-reference-execution']);
 assert.strictEqual(frontierContract.truth.beginnerReferenceReadyIsProductionReady, false);
 assert.strictEqual(frontierTrials.trials.length, 29);
 assert.strictEqual(frontierTrials.method.trialCount, 58);
 assert.strictEqual(frontierTrials.method.humanInterventionDuringTrialRun, false);
 assert.strictEqual(frontierTrials.method.productionReadinessClaimed, false);
+assert.strictEqual(adapterContract.schema, 'axm.code.direction-adapter-plane-contract.v1');
+assert.strictEqual(adapterContract.authority, 'BOUNDED_LOCAL_ADAPTER_ONLY');
+assert.strictEqual(adapterContract.truth.requestedVerifierIsEvidence, false);
+assert.strictEqual(adapterContract.executionBoundary.workspaceRead, false);
+assert.strictEqual(adapterContract.executionBoundary.workspaceMutation, false);
+assert.strictEqual(adapterContract.executionBoundary.childProcessExecution, false);
+assert.strictEqual(adapterCatalog.adapters.length, 10);
+assert.strictEqual(adapterCatalog.adapters.filter(adapter => adapter.kind === 'runtime').length, 1);
+assert.strictEqual(adapterCatalog.adapters.filter(adapter => adapter.kind === 'verifier').length, 9);
+assert.strictEqual(adapterCatalog.knownUnsupportedVerifierIds.length, 11);
 
 const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 assert(readme.includes('standalone-capability-router.js'));
 assert(readme.includes('software-directions/direction-stack.js'));
 assert(readme.includes('frontier-direction-workbench.js'));
+assert(readme.includes('adapters/adapter-plane.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({
@@ -100,6 +113,8 @@ console.log(JSON.stringify({
   softwareDirectionProfileCount: directionCatalog.profiles.length,
   softwareDirectionAxisCount: Object.keys(directionAxes.axes).length,
   frontierDirectionTrialCount: frontierTrials.method.trialCount,
+  concreteAdapterCount: adapterCatalog.adapters.length,
+  unsupportedVerifierAdapterCount: adapterCatalog.knownUnsupportedVerifierIds.length,
   symlinkCount: 0,
   submoduleFilePresent: false,
   capabilityContractAuthority: contract.authority

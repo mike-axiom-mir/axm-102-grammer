@@ -6,13 +6,15 @@
     "axm.code.software-direction-profile.v1",
     "axm.code.software-direction-suggestion-report.v1",
     "axm.code.software-direction-stack.v1",
-    "axm.code.software-direction-gap-report.v1"
+    "axm.code.software-direction-gap-report.v1",
+    "axm.code.direction-adapter-execution-report.v1"
   ],
   "model": {
     "grammarRoot": "Language meaning, constructs, hazards, and native verification focus",
     "directionOverlay": "What the software is trying to become and what that direction expects",
     "hybridStack": "One or more reusable direction overlays plus explicit runtime, execution, state, quality, risk, verification, and distribution axes",
-    "gapComparison": "Direction expectations compared only with caller-supplied observed capability and verifier evidence"
+    "gapComparison": "Direction expectations compared only with caller-supplied observed capability and verifier evidence",
+    "adapterPlane": "Requested verifier categories resolved to concrete bounded adapters; only passed receipts become verifier evidence"
   },
   "principles": {
     "duplicateGrammarBodiesPerDirection": false,
@@ -21,7 +23,8 @@
     "missingEvidenceMeansImpossible": false,
     "tensionMeansInvalid": false,
     "directionStackIsAuthority": false,
-    "capabilityIsAuthority": false
+    "capabilityIsAuthority": false,
+    "requestedVerifierIsEvidence": false
   },
   "permissions": [],
   "refuses": [

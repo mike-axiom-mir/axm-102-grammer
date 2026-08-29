@@ -37,7 +37,7 @@ function artifact(packet, artifactType, output, checks, limitations = []) {
     checks,
     evidence: {
       capabilities: packet.challenge.requiredCapabilities,
-      verifiers: packet.challenge.verifierEvidence
+      verifierTargets: packet.challenge.requestedVerifiers
     },
     limitations,
     truth: {
@@ -128,8 +128,8 @@ const HANDLERS = {
       const original = Object.freeze({pixels: [1, 2, 3]}); const history = []; const edited = {pixels: original.pixels.map(value => value + 1)}; history.push(original); const undone = history.pop();
       return artifact(packet, 'non-destructive-editor-model', {original, edited, undone}, {nonDestructive: original.pixels[0] === 1 && edited.pixels[0] === 2, undoRestores: canon(undone) === canon(original)});
     }
-    const layers = [{id: 'background'}, {id: 'subject'}, {id: 'grade'}]; const chunks = [layers.slice(0, 2), layers.slice(2)]; const provenance = {input: 'asset-a', transforms: ['composite', 'grade'], exporter: 'reference-v1'}; const plugin = {permission: 'transform-only'};
-    return artifact(packet, 'layered-media-pipeline-model', {layers, chunks, provenance, plugin}, {layerGraph: layers.length === 3, streamBounded: chunks.every(chunk => chunk.length <= 2), provenanceExports: provenance.transforms.length === 2 && plugin.permission === 'transform-only'}, ['No media codec, GPU, or third-party plugin ran.']);
+    const layers = [{id: 'background'}, {id: 'subject'}, {id: 'grade'}]; const chunks = [layers.slice(0, 2), layers.slice(2)]; const provenance = {input: 'asset-a', transforms: ['composite', 'grade'], exporter: 'reference-v1'}; const plugin = {permission: 'transform-only'}; const exported = JSON.stringify({layers, provenance}); const restored = JSON.parse(exported);
+    return artifact(packet, 'layered-media-pipeline-model', {layers, chunks, provenance, plugin, restored}, {layerGraph: layers.length === 3, streamBounded: chunks.every(chunk => chunk.length <= 2), provenanceExports: provenance.transforms.length === 2 && plugin.permission === 'transform-only', exportRestores: canon(restored) === canon({layers, provenance})}, ['No media codec, GPU, or third-party plugin ran.']);
   },
   'backend-api': packet => {
     if (packet.level === 'seed') {
@@ -147,8 +147,8 @@ const HANDLERS = {
       apply('op-1'); apply('op-1');
       return artifact(packet, 'partial-failure-cluster-model', {nodes, applied: [...applied]}, {partialFailureContained: nodes.some(node => node.healthy) && nodes.some(node => !node.healthy), retryIdempotent: applied.size === 1});
     }
-    const replicas = [{id: 'a', version: 1}, {id: 'b', version: 1}, {id: 'c', version: 1}]; const quorum = Math.floor(replicas.length / 2) + 1; replicas.push({id: 'd', version: 1}); for (const replica of replicas) replica.version = 2;
-    return artifact(packet, 'rolling-replicated-service-model', {replicas, quorum, events: replicas.map(item => `upgraded:${item.id}`)}, {quorumDefined: quorum === 2, scales: replicas.length === 4, rollingChange: replicas.every(item => item.version === 2)});
+    const replicas = [{id: 'a', version: 1}, {id: 'b', version: 1}, {id: 'c', version: 1}]; const quorum = Math.floor(replicas.length / 2) + 1; replicas.push({id: 'd', version: 1}); const rollbackSnapshot = JSON.stringify(replicas); for (const replica of replicas) replica.version = 2; const restored = JSON.parse(rollbackSnapshot);
+    return artifact(packet, 'rolling-replicated-service-model', {replicas, restored, quorum, events: replicas.map(item => `upgraded:${item.id}`)}, {quorumDefined: quorum === 2, scales: replicas.length === 4, rollingChange: replicas.every(item => item.version === 2), rollbackRestores: restored.every(item => item.version === 1)});
   },
   'live-media-streaming': packet => {
     if (packet.level === 'seed') {
@@ -236,7 +236,7 @@ const HANDLERS = {
       return artifact(packet, 'bounded-firmware-simulation', {memory: [...memory], steps, deadlineSteps}, {memoryBounded: memory.byteLength === 8, deadlineMet: steps <= deadlineSteps}, ['Timing is modeled in steps, not measured on hardware.']);
     }
     const power = {sensorMw: 2, radioMw: 5, budgetMw: 10}; const registers = {read: address => address === 1 ? 7 : 0}; const active = {version: 1}; const candidate = {version: 2, bootOk: false}; const final = candidate.bootOk ? candidate : active;
-    return artifact(packet, 'firmware-update-safety-model', {power, registerValue: registers.read(1), final}, {powerBudgeted: power.sensorMw + power.radioMw <= power.budgetMw, registerIsolated: registers.read(1) === 7 && registers.read(99) === 0, rollbackSafe: final.version === 1}, ['No board, radio, register, or real-time measurement was used.']);
+    return artifact(packet, 'firmware-update-safety-simulation', {power, registerValue: registers.read(1), final}, {powerBudgeted: power.sensorMw + power.radioMw <= power.budgetMw, registerIsolated: registers.read(1) === 7 && registers.read(99) === 0, rollbackSafe: final.version === 1}, ['No board, radio, register, or real-time measurement was used.']);
   },
   'robotics-industrial-control': packet => {
     if (packet.level === 'seed') {
