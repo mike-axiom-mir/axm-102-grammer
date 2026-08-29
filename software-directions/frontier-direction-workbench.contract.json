@@ -1,0 +1,45 @@
+{
+  "schema": "axm.code.frontier-direction-workbench-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.frontier-direction-build-packet.v1",
+    "axm.code.frontier-direction-reference-build.v1",
+    "axm.code.frontier-direction-trial-result.v1",
+    "axm.code.frontier-direction-user-report.v1"
+  ],
+  "trialModel": {
+    "directionCount": 29,
+    "levelsPerDirection": 2,
+    "levelNames": ["seed", "stretch"],
+    "totalReferenceBuilds": 58,
+    "humanInterventionDuringIndividualRun": false,
+    "singleFrontierModelPerspective": true,
+    "beginnerReferenceReady": "Both bounded executable probes pass deterministically with their declared modeled evidence and retained real-world gaps."
+  },
+  "truth": {
+    "referenceBuildIsProductionBuild": false,
+    "beginnerReferenceReadyIsProductionReady": false,
+    "modeledTimingIsHardwareTiming": false,
+    "modeledSecurityIsSecurityCertification": false,
+    "declaredEvidenceIsUniversalProof": false,
+    "singleFrontierModelTrialIsUniversalModelFinding": false,
+    "missingEvidenceIsLanguageIncapability": false,
+    "humanFollowupMayBeAddedLater": true
+  },
+  "permissions": [],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "tool-execution",
+    "network-access",
+    "dependency-install",
+    "real-deployment",
+    "physical-control",
+    "hardware-evidence-without-hardware",
+    "security-certification",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "NONE"
+}

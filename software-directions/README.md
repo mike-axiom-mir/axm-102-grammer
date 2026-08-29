@@ -71,3 +71,22 @@ const capsule = compose({
 ```
 
 `provenance.json` records the primary sources used to synthesize the catalog and the limits of the taxonomy claim. The catalog is a tested design model, not a universal or exhaustive classification of software.
+
+## Frontier-model maturity trial
+
+`frontier-direction-workbench.js` prepares a bounded build packet for every profile and executes two reference challenges per direction through `frontier-reference-builds.js`:
+
+- `seed`: the smallest executable behavior exercising core concerns;
+- `stretch`: a larger multi-concern challenge.
+
+```js
+const workbench = require('./frontier-direction-workbench.js');
+
+const packet = workbench.prepare({directionId: 'game', level: 'stretch'});
+const trial = workbench.runTrial({directionId: 'game', level: 'stretch'});
+const allDirections = workbench.runAll();
+```
+
+The current bounded run executes 58 reference builds and marks a direction `beginnerReferenceReady` only if both levels pass deterministically. That state is deliberately weaker than production readiness. Real browsers, devices, networks, kernels, hardware, cloud infrastructure, security audits, app stores, and human/domain authority remain external evidence.
+
+See `FRONTIER_USER_TRIAL_REPORT.md` for the per-direction frontier-user observations, the first repair found by the trial, and the next tuning gaps.
