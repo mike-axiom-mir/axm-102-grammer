@@ -1,0 +1,25 @@
+{
+  "schema": "axm.code.local-adapter-pack-contract.v1",
+  "version": "1.0.0",
+  "defaultMode": {
+    "offline": true,
+    "aiRequired": false,
+    "networkRequired": false,
+    "workspaceMutation": false
+  },
+  "sections": {
+    "parsers": "languageId -> synchronous deterministic offline parser adapter",
+    "structures": "languageId -> synchronous deterministic offline structural fact adapter",
+    "semantics": "languageId -> synchronous deterministic offline semantic index adapter",
+    "intentRenderers": "languageId -> synchronous deterministic offline keyboard-intent renderer",
+    "verifiers": "languageId -> ordered array of synchronous local verifier adapters",
+    "deepAnalysis": "languageId -> optional synchronous deterministic offline deep-analysis adapter"
+  },
+  "truth": {
+    "toolNameIsNotCapability": true,
+    "adapterMustBeMeasured": true,
+    "runtimeDownloadIsDefault": false,
+    "unknownIsNotPass": true,
+    "candidateIsNotMutation": true
+  }
+}
