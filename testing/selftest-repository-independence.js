@@ -63,8 +63,22 @@ assert.strictEqual(contract.authority, 'NONE');
 assert.strictEqual(contract.truth.capabilityIsAuthority, false);
 assert.strictEqual(contract.truth.runtimeCorrectnessAutomaticallyClaimed, false);
 
+const directionContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'software-direction.contract.json'), 'utf8'));
+const directionCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'direction-catalog.json'), 'utf8'));
+const directionAxes = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'axis-catalog.json'), 'utf8'));
+assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
+assert.strictEqual(directionContract.authority, 'NONE');
+assert.deepStrictEqual(directionContract.permissions, []);
+assert.strictEqual(directionContract.principles.duplicateGrammarBodiesPerDirection, false);
+assert.strictEqual(directionContract.principles.suggestionIsSelection, false);
+assert.strictEqual(directionContract.principles.missingEvidenceMeansImpossible, false);
+assert.strictEqual(directionCatalog.profiles.length, 29);
+assert.strictEqual(new Set(directionCatalog.profiles.map(profile => profile.id)).size, 29);
+assert.deepStrictEqual(Object.keys(directionAxes.axes).sort(), ['distribution', 'execution', 'quality', 'risk', 'runtime', 'state', 'verification']);
+
 const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 assert(readme.includes('standalone-capability-router.js'));
+assert(readme.includes('software-directions/direction-stack.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({
@@ -72,6 +86,8 @@ console.log(JSON.stringify({
   languageDirectoryCount: organDirectories.length,
   perLanguagePayloadCount: payloadCount,
   parsedJsonFileCount: jsonFiles.length,
+  softwareDirectionProfileCount: directionCatalog.profiles.length,
+  softwareDirectionAxisCount: Object.keys(directionAxes.axes).length,
   symlinkCount: 0,
   submoduleFilePresent: false,
   capabilityContractAuthority: contract.authority

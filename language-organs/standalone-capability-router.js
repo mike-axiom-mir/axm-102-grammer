@@ -11,6 +11,9 @@ const keyboards = require('./machine-code-keyboard-fabric.js');
 const keyboardRouter = require('./machine-code-keyboard-router.js');
 const cheatcodes = require('./machine-cheatcode-fabric.js');
 const influence = require('./machine-cheatcode-influence-mesh.js');
+const directionRegistry = require('../software-directions/direction-registry.js');
+const directionStackRouter = require('../software-directions/direction-stack.js');
+const directionGapDetector = require('../software-directions/direction-gap-detector.js');
 
 const AUTHORITY = Object.freeze({
   workspaceRead: false,
@@ -79,6 +82,24 @@ function normalize(input) {
   }
   const observation = {};
   for (const field of OBSERVATION_FIELDS) observation[field] = stringArray(observationInput[field], `observation.${field}`);
+  const directionsInput = input.directions == null ? null : input.directions;
+  if (directionsInput !== null && (!directionsInput || typeof directionsInput !== 'object' || Array.isArray(directionsInput))) {
+    throw Error('COMPOSITION_DIRECTIONS_NOT_OBJECT');
+  }
+  let directions = null;
+  if (directionsInput) {
+    const observedInput = directionsInput.observed == null ? {} : directionsInput.observed;
+    if (!observedInput || typeof observedInput !== 'object' || Array.isArray(observedInput)) throw Error('COMPOSITION_DIRECTION_EVIDENCE_NOT_OBJECT');
+    directions = {
+      directionIds: stringArray(directionsInput.directionIds, 'directions.directionIds')
+    };
+    for (const axis of directionStackRouter.INPUT_AXES) directions[axis] = stringArray(directionsInput[axis], `directions.${axis}`);
+    directions.observed = {
+      capabilities: stringArray(observedInput.capabilities, 'directions.observed.capabilities'),
+      verifiers: stringArray(observedInput.verifiers, 'directions.observed.verifiers')
+    };
+    freeze(directions);
+  }
   const requestedStages = input.requestedStages == null ? [...registry.STAGES] : stringArray(input.requestedStages, 'requestedStages');
   const mode = text(input.mode, 'mode', 'MACHINE').toUpperCase();
   if (!['MACHINE', 'AI'].includes(mode)) throw Error('COMPOSITION_MODE_INVALID');
@@ -99,7 +120,8 @@ function normalize(input) {
     mode,
     topN,
     hotKeyCount,
-    observation
+    observation,
+    directions
   });
 }
 
@@ -144,13 +166,14 @@ function snapshotBindings() {
       specialistEyeRegistrySha256: eyes.snapshot().snapshotSha256,
       templateFabricSha256: templates.snapshot().snapshotSha256,
       cheatcodeFabricSha256: cheatcodes.snapshot().snapshotSha256,
-      keyboardFabricSha256: keyboards.snapshot().snapshotSha256
+      keyboardFabricSha256: keyboards.snapshot().snapshotSha256,
+      softwareDirectionRegistrySha256: directionRegistry.snapshot().snapshotSha256
     });
   }
   return SNAPSHOTS;
 }
 
-function held(result, input, resolution, errorCode = null) {
+function held(result, input, resolution, errorCode = null, details = {}) {
   const body = {
     schema: 'axm.code.standalone-capability-capsule.v1',
     version: '1.0.0',
@@ -159,6 +182,7 @@ function held(result, input, resolution, errorCode = null) {
     errorCode,
     inputSha256: input ? hash(input) : null,
     resolution,
+    ...details,
     sourceCode: null,
     truth: {
       semanticCorrectnessClaimed: false,
@@ -189,6 +213,34 @@ function compose(rawInput = {}) {
   const organ = resolution.organ;
   const activeLanguages = [...new Set([...input.observation.activeLanguages, languageId])];
   const observation = {...input.observation, activeLanguages};
+  const directionSuggestions = directionStackRouter.suggest({
+    goals: observation.goals,
+    requirements: observation.requirements,
+    constraints: observation.constraints,
+    capabilities: observation.capabilities,
+    risks: observation.risks,
+    notes: observation.notes
+  });
+  const hasDirectionInput = input.directions && (
+    input.directions.directionIds.length || directionStackRouter.INPUT_AXES.some(axis => input.directions[axis].length)
+  );
+  let selectedDirectionStack = null;
+  let directionGaps = null;
+  if (hasDirectionInput) {
+    selectedDirectionStack = directionStackRouter.compose(input.directions);
+    if (selectedDirectionStack.result !== 'DIRECTION_STACK_READY_NO_AUTHORITY') {
+      return held('DIRECTION_RESOLUTION_HELD', input, resolution, null, {directionStack: selectedDirectionStack, directionSuggestions});
+    }
+    directionGaps = directionGapDetector.evaluate({
+      stack: selectedDirectionStack,
+      languageId,
+      observed: input.directions.observed
+    });
+  }
+  const directionSignals = selectedDirectionStack
+    ? [...selectedDirectionStack.directionIds, ...selectedDirectionStack.expectations.capabilities.map(item => item.id.toLowerCase().replace(/_/g, ' '))]
+    : [];
+  const routingSignals = [...input.signals, ...directionSignals];
   const discoveryReport = discovery.review(observation);
   const selectedEyeReview = discoveryReport.eyes.find(item => item.languageId === languageId);
   const grammarPlan = grammar.plan({languageId, operation: input.operation});
@@ -199,7 +251,7 @@ function compose(rawInput = {}) {
   const templateSelection = templateRouter.select({
     languageId,
     intent: input.intent,
-    signals: input.signals,
+    signals: routingSignals,
     mode: input.mode,
     topN: input.topN
   });
@@ -207,7 +259,7 @@ function compose(rawInput = {}) {
     languageId,
     role: input.role,
     intent: input.intent,
-    signals: input.signals,
+    signals: routingSignals,
     hotKeyCount: input.hotKeyCount
   });
   const bank = keyboards.buildBank(languageId);
@@ -232,7 +284,12 @@ function compose(rawInput = {}) {
       cheatcodeBankSha256: cheatcodeBank.bankSha256,
       keyboardBankSha256: bank.keyboardSha256,
       discoveryReportSha256: discoveryReport.reportSha256,
-      influenceMeshSha256: influenceReport.meshSha256
+      influenceMeshSha256: influenceReport.meshSha256,
+      directionSuggestionReportSha256: directionSuggestions.reportSha256,
+      ...(selectedDirectionStack ? {
+        directionStackSha256: selectedDirectionStack.stackSha256,
+        directionGapReportSha256: directionGaps.reportSha256
+      } : {})
     },
     plans: {organ: organPlan, grammar: grammarPlan, specialistEye: eyePlan},
     review: selectedEyeReview,
@@ -240,6 +297,13 @@ function compose(rawInput = {}) {
     influence: influenceReport,
     templates: templateSelection,
     keyboard: keyboardLayout,
+    directions: {
+      selected: selectedDirectionStack,
+      gaps: directionGaps,
+      suggestions: directionSuggestions,
+      automaticSelection: false,
+      authority: 'NONE'
+    },
     sourceCode: null,
     truth: {
       languageResolutionDeterministic: true,
@@ -249,6 +313,8 @@ function compose(rawInput = {}) {
       templateSelectionIsNotCorrectnessProof: true,
       influenceIsNotEvidence: true,
       keyboardProducesIntentNotSource: true,
+      directionSuggestionIsNotSelection: true,
+      directionGapIsNotLanguageIncapability: true,
       automaticAction: false,
       workspaceMutated: false,
       toolExecuted: false

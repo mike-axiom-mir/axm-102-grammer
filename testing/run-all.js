@@ -36,6 +36,8 @@ const checks = [
   [process.execPath, ['language-organs/selftest-machine-keyboards.js']],
   [process.execPath, ['language-organs/selftest.js']],
   [process.execPath, ['language-organs/selftest-adversarial.js']],
+  [process.execPath, ['software-directions/selftest-direction-registry.js']],
+  [process.execPath, ['software-directions/selftest-direction-stack.js']],
   [process.execPath, ['language-organs/selftest-standalone-capability-router.js']],
   [process.execPath, ['testing/selftest-repository-independence.js']]
 ];

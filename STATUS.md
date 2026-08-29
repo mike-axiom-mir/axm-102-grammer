@@ -75,6 +75,18 @@ All measurements below came from the successful recovery verification run before
 - router surface present: `layout`, `press`
 - generated-keyboard drift during check: 0
 
+### Software-direction layer
+
+- reusable direction profiles: 29
+- direction families: 5
+- explicit direction axes: 7
+- runtime axis values: 11
+- verification axis values: 20
+- primary-source provenance records: 12
+- individually composed profiles: 29
+- profiles may compose into hybrid stacks without duplicating language grammars
+- caller-supplied evidence gaps remain distinct from language incapability
+
 ## Truth boundaries retained
 
 - The base organ selftest still reports Python runtime correctness as `UNKNOWN`; source review evidence is donor-bound and is not promoted into a stronger runtime claim.
@@ -98,7 +110,9 @@ This lane adds a bounded composition surface without importing Grammar Glass or 
 - a dedicated keyboard selftest covering 102 banks and all 4,896 stable keys;
 - a cross-platform Node test runner for all standalone checks;
 - a committed full-suite verification transcript.
+- 29 reusable software-direction overlays, seven axis catalogs, hybrid composition, non-selecting suggestions, and caller-evidence gap reports;
+- optional direction binding in the standalone capability capsule.
 
-Lane verification result: **15/15 checks passed**.
+Lane verification result: **17/17 checks passed**.
 
-The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, and the no-source/no-execution/no-mutation boundary. The repository-independence test verifies the 102 six-file bodies, parses every JSON file, and refuses symlinks or submodules.
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, parses every JSON file, and refuses symlinks or submodules.

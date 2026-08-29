@@ -13,7 +13,8 @@
     "cheatcodes": "Hard activations derived from caller-supplied observation facts",
     "influence": "Soft bounded candidates that remain evidence-held",
     "templates": "Deterministic machine or compact AI capsules",
-    "keyboard": "Context-ranked semantic intent keys, never raw source mutation"
+    "keyboard": "Context-ranked semantic intent keys, never raw source mutation",
+    "softwareDirections": "Optional reusable direction stack with non-selecting suggestions and caller-evidence gap comparison"
   },
   "resolutionPolicy": {
     "unknownLanguage": "HOLD",
@@ -27,6 +28,8 @@
     "templateSelectionIsCorrectness": false,
     "influenceIsEvidence": false,
     "keyboardIntentIsSourceCode": false,
+    "directionSuggestionIsSelection": false,
+    "directionGapIsLanguageIncapability": false,
     "runtimeCorrectnessAutomaticallyClaimed": false,
     "semanticCorrectnessAutomaticallyClaimed": false
   },
@@ -38,6 +41,8 @@
     "network-access",
     "dependency-install",
     "automatic-language-switch",
+    "automatic-direction-selection",
+    "missing-direction-evidence-as-language-incapability",
     "automatic-promotion",
     "automatic-canon",
     "conflicting-explicit-language-override",

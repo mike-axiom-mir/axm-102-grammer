@@ -30,7 +30,8 @@ See `RECOVERY_RECEIPT.md` for the exact recovery receipt and `language-organs/SO
 - the selected specialist review plus the bounded discovery report;
 - hard cheatcode activations and separately marked soft influence candidates;
 - deterministic machine/AI template capsules;
-- a context-ranked semantic keyboard layout.
+- a context-ranked semantic keyboard layout;
+- optional software-direction stacks and caller-evidence gap reports.
 
 It does not inspect a caller workspace, render source, execute tools, install anything, switch languages, mutate files, promote candidates, or change canon.
 
@@ -45,11 +46,25 @@ const capsule = compose({
   observation: {
     risks: ['unsafe boundaries'],
     factCodes: ['LIFETIME_CHANGED', 'VERIFIER_MISSING']
+  },
+  directions: {
+    directionIds: ['game', 'collaboration-multiplayer'],
+    execution: ['hard-real-time'],
+    observed: {
+      capabilities: ['FRAME_LOOP', 'SHARED_STATE_PROTOCOL'],
+      verifiers: ['unit-test', 'deterministic-replay']
+    }
   }
 });
 ```
 
 An explicit language may resolve a compatible ambiguous signal such as `.m`. It may not silently override a conflicting signal such as `languageId: rust` with a `.py` path.
+
+## Software direction layers
+
+`software-directions/direction-stack.js` supplies 29 composable software profiles plus runtime, execution, state, quality, risk, verification, and distribution axes. It separates language grammar from software purpose: one language profile can serve websites, games, services, firmware, data systems, or hybrids without duplicating the grammar body.
+
+`software-directions/direction-gap-detector.js` compares the selected direction's expectations only with caller-supplied capability and verifier evidence. Missing evidence is reported as a gap, never as proof that a language is incapable. The suggestion router ranks possible directions but does not choose one automatically. See `software-directions/README.md` for the catalog model and examples.
 
 ## Run every standalone check
 
@@ -61,4 +76,4 @@ node testing/run-all.js
 
 In a normal local npm environment, `npm test` invokes that same runner. Set `AXM_PYTHON` only when the Python executable is not available as `python3` or `python`.
 
-The expanded suite contains 15 checks: five generated-material drift checks and ten deterministic selftests, including all 4,896 stable keyboard keys, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.
+The expanded suite contains 17 checks: five generated-material drift checks and twelve deterministic selftests, including all 4,896 stable keyboard keys, all 29 software-direction profiles, hybrid stacks, gap semantics, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.
