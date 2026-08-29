@@ -7,6 +7,7 @@ const registry = require('./placement-registry.js');
 
 const AUTHORITY = Object.freeze({workspaceRead: false, workspaceMutation: false, toolExecution: false, network: false, install: false, deployment: false, promotion: false, canon: false});
 const STATUSES = new Set(['active', 'deprecated', 'locked']);
+const LANGUAGE_BINDING_KINDS = new Set(['extension', 'basename', 'path-context']);
 const HEX64 = /^[a-f0-9]{64}$/;
 const SIGNAL = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/;
 
@@ -38,7 +39,13 @@ function relativePath(value, code) {
   return value;
 }
 
+function relativeRoot(value, code) {
+  if (value === '.') return value;
+  return relativePath(value, code);
+}
+
 function below(target, root) {
+  if (root === '.') return typeof target === 'string' && !target.startsWith('/') && !target.startsWith('../');
   return target === root || target.startsWith(`${root}/`);
 }
 
@@ -52,10 +59,15 @@ function validateProjectMap(projectMap) {
   if (typeof projectMap.languageId !== 'string' || !projectMap.languageId) throw Error('PROJECT_MAP_LANGUAGE_REQUIRED');
   const conventions = projectMap.conventions;
   if (!conventions || typeof conventions !== 'object' || conventions.naming !== 'kebab-case') throw Error('PROJECT_MAP_CONVENTIONS_INVALID');
-  relativePath(conventions.sourceRoot, 'PROJECT_SOURCE_ROOT');
-  relativePath(conventions.testRoot, 'PROJECT_TEST_ROOT');
-  if (conventions.sourceRoot === conventions.testRoot || below(conventions.sourceRoot, conventions.testRoot) || below(conventions.testRoot, conventions.sourceRoot)) throw Error('PROJECT_ROOTS_OVERLAP');
+  relativeRoot(conventions.sourceRoot, 'PROJECT_SOURCE_ROOT');
+  relativeRoot(conventions.testRoot, 'PROJECT_TEST_ROOT');
+  if (conventions.sourceRoot === conventions.testRoot) throw Error('PROJECT_ROOTS_EQUAL');
+  if (conventions.testRoot === '.' || below(conventions.sourceRoot, conventions.testRoot)) throw Error('PROJECT_SOURCE_ROOT_INSIDE_TEST_ROOT');
   if (typeof conventions.fileExtension !== 'string' || !/^\.[A-Za-z0-9.+-]+$/.test(conventions.fileExtension)) throw Error('PROJECT_FILE_EXTENSION_INVALID');
+  if (!conventions.languageBinding || typeof conventions.languageBinding !== 'object' || !LANGUAGE_BINDING_KINDS.has(conventions.languageBinding.kind) || typeof conventions.languageBinding.signal !== 'string' || !conventions.languageBinding.signal) throw Error('PROJECT_LANGUAGE_BINDING_INVALID');
+  if (typeof conventions.sourceFilePattern !== 'string' || conventions.sourceFilePattern.includes('/') || typeof conventions.roleDirectory !== 'boolean') throw Error('PROJECT_SOURCE_PATTERN_INVALID');
+  const probeSourceName = conventions.sourceFilePattern.replaceAll('{name}', 'probe').replaceAll('{ext}', conventions.fileExtension);
+  if (!probeSourceName || !/^[A-Za-z0-9._+-]+$/.test(probeSourceName)) throw Error('PROJECT_SOURCE_PATTERN_UNSAFE');
   if (typeof conventions.testFilePattern !== 'string' || conventions.testFilePattern.includes('/') || !conventions.testFilePattern.includes('{name}') || !conventions.testFilePattern.includes('{ext}')) throw Error('PROJECT_TEST_PATTERN_INVALID');
   const probeTestName = conventions.testFilePattern.replaceAll('{name}', 'probe').replaceAll('{ext}', conventions.fileExtension);
   if (!/^[A-Za-z0-9._+-]+$/.test(probeTestName)) throw Error('PROJECT_TEST_PATTERN_UNSAFE');
@@ -75,7 +87,7 @@ function validateProjectMap(projectMap) {
     if (!module.path.endsWith(conventions.fileExtension)) throw Error(`PROJECT_MODULE_EXTENSION_MISMATCH:${module.id}`);
     if (!roleIds.has(module.role) || !STATUSES.has(module.status) || typeof module.mutable !== 'boolean') throw Error(`PROJECT_MODULE_CONTRACT_INVALID:${module.id}`);
     const expectedRoot = module.role === 'verification' ? conventions.testRoot : conventions.sourceRoot;
-    if (!below(module.path, expectedRoot)) throw Error(`PROJECT_MODULE_ROOT_MISMATCH:${module.id}`);
+    if (!below(module.path, expectedRoot) || (module.role !== 'verification' && below(module.path, conventions.testRoot))) throw Error(`PROJECT_MODULE_ROOT_MISMATCH:${module.id}`);
     if (!HEX64.test(module.contentSha256)) throw Error(`PROJECT_MODULE_DIGEST_INVALID:${module.id}`);
     strings(module.accepts, `PROJECT_MODULE_ACCEPTS:${module.id}`, {allowEmpty: true});
     if (module.accepts.some(kind => !kindIds.has(kind))) throw Error(`PROJECT_MODULE_CHANGE_KIND_UNKNOWN:${module.id}`);
@@ -113,6 +125,35 @@ function protectedTarget(target, protectedPaths) {
   return protectedPaths.some(item => target === item || target.startsWith(`${item}/`));
 }
 
+function bindLanguage(projectMap, organ, projectIndex) {
+  const conventions = projectIndex.conventions;
+  const binding = conventions.languageBinding;
+  const signal = binding.signal.toLowerCase();
+  if (binding.kind === 'extension') {
+    if (signal !== conventions.fileExtension.toLowerCase()) return {errorCode: 'PROJECT_LANGUAGE_BINDING_EXTENSION_MISMATCH'};
+    if (!organ.detect.ext.map(item => item.toLowerCase()).includes(signal)) return {errorCode: 'PROJECT_EXTENSION_NOT_OWNED_BY_LANGUAGE', allowedSignals: [...organ.detect.ext]};
+    if (!conventions.sourceFilePattern.includes('{name}') || !conventions.sourceFilePattern.includes('{ext}')) return {errorCode: 'PROJECT_EXTENSION_SOURCE_PATTERN_INVALID'};
+  } else if (binding.kind === 'basename') {
+    if (!organ.detect.base.map(item => item.toLowerCase()).includes(signal)) return {errorCode: 'PROJECT_BASENAME_NOT_OWNED_BY_LANGUAGE', allowedSignals: [...organ.detect.base]};
+    if (conventions.sourceFilePattern.toLowerCase() !== signal || conventions.roleDirectory !== false) return {errorCode: 'PROJECT_BASENAME_SOURCE_PATTERN_INVALID'};
+    if (!signal.endsWith(conventions.fileExtension.toLowerCase())) return {errorCode: 'PROJECT_BASENAME_EXTENSION_MISMATCH'};
+  } else {
+    if (!organ.detect.path.map(item => item.toLowerCase()).includes(signal)) return {errorCode: 'PROJECT_PATH_CONTEXT_NOT_OWNED_BY_LANGUAGE', allowedSignals: [...organ.detect.path]};
+    const rootContext = `/${conventions.sourceRoot === '.' ? '' : conventions.sourceRoot.replace(/^\/+|\/+$/g, '')}/`.toLowerCase();
+    if (!rootContext.includes(signal)) return {errorCode: 'PROJECT_SOURCE_ROOT_OUTSIDE_LANGUAGE_PATH_CONTEXT', sourceRoot: conventions.sourceRoot};
+    if (!conventions.sourceFilePattern.includes('{name}') || !conventions.sourceFilePattern.includes('{ext}')) return {errorCode: 'PROJECT_PATH_CONTEXT_SOURCE_PATTERN_INVALID'};
+  }
+  return {kind: binding.kind, signal: binding.signal, fileExtension: conventions.fileExtension};
+}
+
+function targetMatchesLanguage(targetPath, languageSignal) {
+  const target = targetPath.toLowerCase();
+  const signal = languageSignal.signal.toLowerCase();
+  if (languageSignal.kind === 'extension') return target.endsWith(signal);
+  if (languageSignal.kind === 'basename') return path.posix.basename(target) === signal;
+  return `/${target}`.includes(signal);
+}
+
 function ownerOverlap(module, signals) {
   return signals.filter(signal => module.owns.includes(signal)).length;
 }
@@ -137,7 +178,10 @@ function chooseSource(projectMap, change, role, projectIndex) {
     return {action: 'extend-existing', target: candidates[0].module, reason: 'UNIQUE_ROLE_AND_KIND_SEAM'};
   }
 
-  const targetPath = path.posix.join(projectIndex.conventions.sourceRoot, role.directory, `${slug(change.name)}${projectIndex.conventions.fileExtension}`);
+  const file = projectIndex.conventions.sourceFilePattern.replaceAll('{name}', slug(change.name)).replaceAll('{ext}', projectIndex.conventions.fileExtension);
+  const directory = projectIndex.conventions.roleDirectory ? path.posix.join(projectIndex.conventions.sourceRoot, role.directory) : projectIndex.conventions.sourceRoot;
+  const targetPath = path.posix.join(directory, file);
+  if (below(targetPath, projectIndex.conventions.testRoot)) return {hold: 'CREATED_TARGET_INSIDE_TEST_ROOT', targetPath};
   if (protectedTarget(targetPath, projectMap.protectedPaths)) return {hold: 'CREATED_TARGET_PROTECTED', targetPath};
   const collision = projectMap.modules.find(module => module.path === targetPath);
   if (collision || projectIndex.modulePaths.has(targetPath)) return {hold: 'CREATED_TARGET_COLLISION', targetPath, candidates: collision ? [collision.id] : []};
@@ -175,12 +219,12 @@ function plan({projectMap = null, change = null} = {}) {
   }
   const organ = organs.getByLanguageId(projectMap.languageId);
   if (!organ) return held('PLACEMENT_LANGUAGE_HELD', 'PROJECT_LANGUAGE_UNKNOWN', {languageId: projectMap.languageId});
-  if (!organ.detect.ext.map(item => item.toLowerCase()).includes(projectIndex.conventions.fileExtension.toLowerCase())) {
-    return held('PLACEMENT_LANGUAGE_HELD', 'PROJECT_EXTENSION_NOT_OWNED_BY_LANGUAGE', {languageId: projectMap.languageId, fileExtension: projectIndex.conventions.fileExtension, allowedExtensions: [...organ.detect.ext]});
-  }
+  const languageSignal = bindLanguage(projectMap, organ, projectIndex);
+  if (languageSignal.errorCode) return held('PLACEMENT_LANGUAGE_HELD', languageSignal.errorCode, {languageId: projectMap.languageId, binding: {...projectIndex.conventions.languageBinding}, ...languageSignal});
   const source = chooseSource(projectMap, change, role, projectIndex);
   if (source.hold) return held('PLACEMENT_DECISION_HELD', source.hold, {role: role.id, ...source});
   const targetPath = source.target ? source.target.path : source.targetPath;
+  if (!targetMatchesLanguage(targetPath, languageSignal)) return held('PLACEMENT_LANGUAGE_HELD', 'PLACEMENT_TARGET_NOT_OWNED_BY_LANGUAGE_SIGNAL', {languageId: projectMap.languageId, binding: {...projectIndex.conventions.languageBinding}, targetPath});
   const verification = chooseVerification(projectMap, change, role, targetPath, projectIndex);
   if (verification.hold) return held('PLACEMENT_DECISION_HELD', verification.hold, {role: role.id, sourceDecision: source, ...verification});
   const dependencyBindings = change.dependencyModuleIds.map(id => {
@@ -206,6 +250,9 @@ function plan({projectMap = null, change = null} = {}) {
       languageId: organ.languageId,
       organId: organ.organId,
       organSha256: organ.sha256,
+      signalKind: languageSignal.kind,
+      signal: languageSignal.signal,
+      fileExtension: languageSignal.fileExtension,
       grammarPlanResult: grammarPlan.result,
       grammarProfileSha256: grammarPlan.grammarProfileDigest,
       registrySnapshotSha256: grammarPlan.registrySnapshotDigest,
@@ -272,8 +319,11 @@ function plan({projectMap = null, change = null} = {}) {
       planIsMutation: false,
       placementAcceptedWithoutFreshPreflight: false,
       deterministicPlacementReplacesCodingCompetence: false,
-      extensionOwnedLanguageSignalRequiredInV1: true,
-      pathOrBasenameOnlyLanguageBindingSupportedInV1: false,
+      explicitLanguageBindingSignalRequired: true,
+      extensionLanguageBindingSupported: true,
+      basenameLanguageBindingSupported: true,
+      pathContextLanguageBindingSupported: true,
+      targetPathMustMatchDeclaredLanguageSignal: true,
       authorizedHandsRequiredForApplication: true
     },
     authority: AUTHORITY

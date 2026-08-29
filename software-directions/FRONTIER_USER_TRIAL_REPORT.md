@@ -64,9 +64,9 @@ The placement grammar defines ten architectural code roles and forty explicit ch
 - exact required Hands, construction stages, drift preconditions, parser/verifier receipts, and rollback evidence named before any future mutation;
 - zero workspace-read, mutation, execution, install, network, deployment, promotion, or canon authority.
 
-Separate adversarial probes hold rather than guess when ownership is duplicated, an owner is locked, a path traverses outside declared roots, the language/extension binding conflicts, the change kind is unknown, or a dependency is absent. A new-module probe also proves that the same planner can choose a convention-bound source and test path when no existing owner exists.
+Separate adversarial probes hold rather than guess when ownership is duplicated, an owner is locked, a path traverses outside declared roots, a language binding is missing, forged, conflicting, or inconsistent with the chosen target, the change kind is unknown, or a dependency is absent. A new-module probe also proves that the same planner can choose a convention-bound source and test path when no existing owner exists.
 
-Cross-language placement probes pass for all 97 organs that own an explicit file extension. Five path- or basename-detected organs—GitHub Actions, OpenAPI, Maven POM, Kubernetes manifests, and Ansible—remain held in v1 until the project-map contract can express those conventions directly. A generic YAML or XML suffix is not treated as proof that one of those language organs owns a target.
+Cross-language placement probes now pass for all 102 organs: 97 bind through an owned extension, OpenAPI/Maven POM/Ansible bind through exact basenames, and GitHub Actions/Kubernetes manifests bind through declared path contexts. Ansible's `/roles/` path-context route passes separately as a second valid binding. A generic YAML or XML suffix is still not proof; the caller must name a signal owned by the selected organ.
 
 These reference maps prove deterministic planner behavior only. They are not observations of a caller's live repository and the resulting plans are not source code. An authorized Code Fabric Hand must first produce a fresh project map, recheck every bound digest, perform the actual language-aware edit, run the parser/verifiers, and return rollback-capable receipts.
 
@@ -121,4 +121,4 @@ The next placement maturation step is a real read-only project-map adapter plus 
 - deterministic role catalog, placement planner, fixtures, and adversarial holds: `placement/`
 - deterministic 58-build verification: `selftest-frontier-direction-workbench.js`
 
-Aggregate adapter-and-placement-bound frontier report digest: `57db0a08018ffdb62137424dfe2c902773458b460eae0cf48ba9b38d0f7fd85d`
+Aggregate adapter-and-placement-bound frontier report digest: `55dac13a6bee7776c7be5a006678d3939b31b31c354a7c1960237a81f74e7969`

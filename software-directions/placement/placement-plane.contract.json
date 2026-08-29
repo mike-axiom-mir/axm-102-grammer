@@ -1,6 +1,6 @@
 {
   "schema": "axm.code.placement-plane-contract.v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "TEST",
   "provides": [
     "axm.code.project-map.v1",
@@ -9,7 +9,7 @@
     "axm.code.placement-registry-snapshot.v1"
   ],
   "model": {
-    "projectMap": "A caller-supplied, digest-bound description of existing modules, ownership, mutability, paths, and test seams.",
+    "projectMap": "A caller-supplied, digest-bound description of existing modules, ownership, mutability, paths, test seams, and an explicit extension, basename, or path-context language signal.",
     "changeIntent": "An explicit software direction, code-role kind, ownership signals, public seams, dependencies, and verifier targets.",
     "placementDecision": "A deterministic extend, create, or hold result bound to the language grammar and project map.",
     "authorizedExecution": "A later Hand may apply a fresh plan only after checking the named preconditions and returning receipts."
@@ -20,8 +20,11 @@
     "callerProjectMapIsFreshWorkspaceProof": false,
     "declaredOwnershipIsObservedOwnership": false,
     "languageGrammarBindingIsToolchainVerification": false,
-    "extensionOwnedLanguageSignalRequiredInV1": true,
-    "pathOrBasenameOnlyLanguageBindingSupportedInV1": false,
+    "explicitLanguageBindingSignalRequired": true,
+    "extensionLanguageBindingSupported": true,
+    "basenameLanguageBindingSupported": true,
+    "pathContextLanguageBindingSupported": true,
+    "targetPathMustMatchDeclaredLanguageSignal": true,
     "plannedPathIsValidAfterWorkspaceDrift": false,
     "deterministicPlacementReplacesCodingCompetence": false,
     "authorizedHandsMayApplyFreshPassingPlan": true,

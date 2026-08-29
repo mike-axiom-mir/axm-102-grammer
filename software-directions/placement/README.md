@@ -23,4 +23,10 @@ The planner never reads or mutates a workspace. A project map is an assertion su
 
 This is a placement grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
 
-The v1 language-path convention is deliberately narrower than the full 102-organ body. It verifies extension-owned placement for 97 language organs. Five path- or basename-detected organs—GitHub Actions, OpenAPI, Maven POM, Kubernetes manifests, and Ansible—hold until explicit path/basename project conventions are added; the planner does not borrow a generic YAML/XML extension and pretend the binding is unambiguous.
+The v1.1 project-map convention requires one explicit language-binding kind and signal:
+
+- `extension` for 97 extension-owned organs;
+- `basename` for OpenAPI, Maven POM, and Ansible;
+- `path-context` for GitHub Actions and Kubernetes manifests.
+
+All 102 organ bindings pass focused placement probes. Ansible's `/roles/` path-context signal also passes as an additional route alongside its basename route. A generic YAML or XML suffix is never treated as ownership proof: missing, forged, or mismatched signals hold before placement.

@@ -19,7 +19,7 @@ function forPacket(packet) {
     schema: 'axm.code.project-map.v1',
     projectId: `reference-${packet.directionId}`,
     languageId: 'javascript',
-    conventions: {sourceRoot: 'src', testRoot: 'testing', fileExtension: '.js', testFilePattern: '{name}.test{ext}', naming: 'kebab-case'},
+    conventions: {sourceRoot: 'src', testRoot: 'testing', fileExtension: '.js', languageBinding: {kind: 'extension', signal: '.js'}, sourceFilePattern: '{name}{ext}', roleDirectory: true, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'},
     modules: [
       {id: `${packet.directionId}-core`, path: sourcePath, role: role.id, status: 'active', mutable: true, accepts: [kind], owns: [signal], directionIds: [packet.directionId], exports: ['run'], verifies: [], contentSha256: contentDigest(`${packet.directionId}:source`)},
       {id: `${packet.directionId}-verification`, path: testPath, role: 'verification', status: 'active', mutable: true, accepts: ['test'], owns: [`${signal}_VERIFICATION`], directionIds: [packet.directionId], exports: [], verifies: [sourcePath], contentSha256: contentDigest(`${packet.directionId}:verification`)}

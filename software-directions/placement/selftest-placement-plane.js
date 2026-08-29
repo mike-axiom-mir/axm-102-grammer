@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const path = require('path');
 const languageOrgans = require('../../language-organs/registry.js');
 const directions = require('../direction-registry.js');
 const workbench = require('../frontier-direction-workbench.js');
@@ -16,30 +17,57 @@ assert.strictEqual(snapshot.directionHintCount, 29);
 assert.strictEqual(new Set(directions.all().map(profile => registry.hint(profile.id).directionId)).size, 29);
 assert(/^[a-f0-9]{64}$/.test(snapshot.snapshotSha256));
 
-let extensionBindableLanguageCount = 0; let nonExtensionLanguageHoldCount = 0;
-for (const organ of languageOrgans.all()) {
-  const fileExtension = organ.detect.ext[0] || '.yml';
-  const projectMap = {
-    schema: 'axm.code.project-map.v1',
-    projectId: `language-probe-${organ.languageId}`,
-    languageId: organ.languageId,
-    conventions: {sourceRoot: 'src', testRoot: 'testing', fileExtension, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'},
-    modules: [],
-    protectedPaths: []
-  };
-  const change = {schema: 'axm.code.change-intent.v1', changeId: `${organ.languageId}-placement-probe`, directionId: 'game', kind: 'rule', name: `${organ.languageId}-rule`, ownerSignals: [], expectedExports: [], dependencyModuleIds: [], requestedVerifiers: ['unit-test']};
-  const result = plane.plan({projectMap, change});
+function conventionFor(organ) {
   if (organ.detect.ext.length) {
-    assert.strictEqual(result.result, 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY', `${organ.languageId}:${result.errorCode}`);
-    assert.strictEqual(result.languageBinding.languageId, organ.languageId);
-    extensionBindableLanguageCount += 1;
-  } else {
-    assert.strictEqual(result.result, 'PLACEMENT_LANGUAGE_HELD', organ.languageId);
-    assert.strictEqual(result.errorCode, 'PROJECT_EXTENSION_NOT_OWNED_BY_LANGUAGE');
-    nonExtensionLanguageHoldCount += 1;
+    const fileExtension = organ.detect.ext[0];
+    return {sourceRoot: 'src', testRoot: 'testing', fileExtension, languageBinding: {kind: 'extension', signal: fileExtension}, sourceFilePattern: '{name}{ext}', roleDirectory: true, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'};
   }
+  if (organ.detect.base.length) {
+    const basename = organ.detect.base[0];
+    const fileExtension = path.posix.extname(basename);
+    return {sourceRoot: organ.languageId === 'maven-pom' ? '.' : 'src', testRoot: 'testing', fileExtension, languageBinding: {kind: 'basename', signal: basename}, sourceFilePattern: basename, roleDirectory: false, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'};
+  }
+  const signal = organ.detect.path[0];
+  const sourceRoot = signal.replace(/^\/+|\/+$/g, '');
+  const fileExtension = organ.languageId === 'github-actions' ? '.yml' : '.yaml';
+  return {sourceRoot, testRoot: 'testing', fileExtension, languageBinding: {kind: 'path-context', signal}, sourceFilePattern: '{name}{ext}', roleDirectory: false, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'};
 }
-assert.strictEqual(extensionBindableLanguageCount + nonExtensionLanguageHoldCount, 102);
+
+function languageProbeInput(organ, conventions = conventionFor(organ)) {
+  return {
+    projectMap: {schema: 'axm.code.project-map.v1', projectId: `language-probe-${organ.languageId}`, languageId: organ.languageId, conventions, modules: [], protectedPaths: []},
+    change: {schema: 'axm.code.change-intent.v1', changeId: `${organ.languageId}-placement-probe`, directionId: 'game', kind: 'rule', name: `${organ.languageId}-rule`, ownerSignals: [], expectedExports: [], dependencyModuleIds: [], requestedVerifiers: ['unit-test']}
+  };
+}
+
+let extensionLanguageBindingCount = 0; let basenameLanguageBindingCount = 0; let pathContextLanguageBindingCount = 0;
+const languagePlans = new Map();
+for (const organ of languageOrgans.all()) {
+  const input = languageProbeInput(organ);
+  const result = plane.plan(input);
+  assert.strictEqual(result.result, 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY', `${organ.languageId}:${result.errorCode}`);
+  assert.strictEqual(result.languageBinding.languageId, organ.languageId);
+  assert.strictEqual(result.languageBinding.signalKind, input.projectMap.conventions.languageBinding.kind);
+  languagePlans.set(organ.languageId, result);
+  if (result.languageBinding.signalKind === 'extension') extensionLanguageBindingCount += 1;
+  else if (result.languageBinding.signalKind === 'basename') basenameLanguageBindingCount += 1;
+  else pathContextLanguageBindingCount += 1;
+}
+assert.strictEqual(extensionLanguageBindingCount, 97);
+assert.strictEqual(basenameLanguageBindingCount, 3);
+assert.strictEqual(pathContextLanguageBindingCount, 2);
+assert.strictEqual(extensionLanguageBindingCount + basenameLanguageBindingCount + pathContextLanguageBindingCount, 102);
+assert.strictEqual(languagePlans.get('github-actions').sourcePlacement.targetPath, '.github/workflows/github-actions-rule.yml');
+assert.strictEqual(languagePlans.get('openapi').sourcePlacement.targetPath, 'src/openapi.json');
+assert.strictEqual(languagePlans.get('maven-pom').sourcePlacement.targetPath, 'pom.xml');
+assert.strictEqual(languagePlans.get('kubernetes-manifests').sourcePlacement.targetPath, 'k8s/kubernetes-manifests-rule.yaml');
+assert.strictEqual(languagePlans.get('ansible').sourcePlacement.targetPath, 'src/ansible.cfg');
+
+const ansible = languageOrgans.getByLanguageId('ansible');
+const ansiblePathConvention = {sourceRoot: 'roles', testRoot: 'testing', fileExtension: '.yml', languageBinding: {kind: 'path-context', signal: '/roles/'}, sourceFilePattern: '{name}{ext}', roleDirectory: false, testFilePattern: '{name}.test{ext}', naming: 'kebab-case'};
+const ansiblePathProbe = plane.plan(languageProbeInput(ansible, ansiblePathConvention));
+assert.strictEqual(ansiblePathProbe.result, 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY');
+assert.strictEqual(ansiblePathProbe.languageBinding.signalKind, 'path-context');
 
 let planCount = 0; let extendCount = 0;
 for (const profile of directions.all()) {
@@ -57,8 +85,10 @@ for (const profile of directions.all()) {
     assert.strictEqual(placement.preconditions.stopOnDrift, true);
     assert.strictEqual(placement.truth.planIsSourceCode, false);
     assert.strictEqual(placement.truth.planIsMutation, false);
-    assert.strictEqual(placement.truth.extensionOwnedLanguageSignalRequiredInV1, true);
-    assert.strictEqual(placement.truth.pathOrBasenameOnlyLanguageBindingSupportedInV1, false);
+    assert.strictEqual(placement.truth.explicitLanguageBindingSignalRequired, true);
+    assert.strictEqual(placement.truth.extensionLanguageBindingSupported, true);
+    assert.strictEqual(placement.truth.basenameLanguageBindingSupported, true);
+    assert.strictEqual(placement.truth.pathContextLanguageBindingSupported, true);
     assert.strictEqual(placement.authority.workspaceRead, false);
     assert.strictEqual(placement.authority.workspaceMutation, false);
     assert.strictEqual(placement.authority.toolExecution, false);
@@ -97,7 +127,23 @@ assert.strictEqual(extension.result, 'PLACEMENT_INPUT_HELD', 'module extensions 
 
 const languageMismatch = plane.plan({projectMap: {...emptyProject, conventions: {...emptyProject.conventions, fileExtension: '.py'}}, change: {...base.change, ownerSignals: []}});
 assert.strictEqual(languageMismatch.result, 'PLACEMENT_LANGUAGE_HELD');
-assert.strictEqual(languageMismatch.errorCode, 'PROJECT_EXTENSION_NOT_OWNED_BY_LANGUAGE');
+assert.strictEqual(languageMismatch.errorCode, 'PROJECT_LANGUAGE_BINDING_EXTENSION_MISMATCH');
+
+const missingBinding = plane.plan({projectMap: {...emptyProject, conventions: {...emptyProject.conventions, languageBinding: undefined}}, change: {...base.change, ownerSignals: []}});
+assert.strictEqual(missingBinding.result, 'PLACEMENT_INPUT_HELD');
+assert.strictEqual(missingBinding.errorCode, 'PROJECT_LANGUAGE_BINDING_INVALID');
+
+const openapi = languageOrgans.getByLanguageId('openapi');
+const forgedBasenameInput = languageProbeInput(openapi, {...conventionFor(openapi), languageBinding: {kind: 'basename', signal: 'random.yaml'}, sourceFilePattern: 'random.yaml'});
+const forgedBasename = plane.plan(forgedBasenameInput);
+assert.strictEqual(forgedBasename.result, 'PLACEMENT_LANGUAGE_HELD');
+assert.strictEqual(forgedBasename.errorCode, 'PROJECT_BASENAME_NOT_OWNED_BY_LANGUAGE');
+
+const openapiInput = languageProbeInput(openapi);
+const wrongBasenameOwner = {id: 'openapi-wrong-owner', path: 'src/random.json', role: 'domain', status: 'active', mutable: true, accepts: ['rule'], owns: ['OPENAPI_CORE'], directionIds: ['game'], exports: [], verifies: [], contentSha256: registry.hash('openapi-wrong-owner')};
+const wrongBasenameTarget = plane.plan({projectMap: {...openapiInput.projectMap, modules: [wrongBasenameOwner]}, change: {...openapiInput.change, ownerSignals: ['OPENAPI_CORE']}});
+assert.strictEqual(wrongBasenameTarget.result, 'PLACEMENT_LANGUAGE_HELD');
+assert.strictEqual(wrongBasenameTarget.errorCode, 'PLACEMENT_TARGET_NOT_OWNED_BY_LANGUAGE_SIGNAL');
 
 const unknownKind = plane.plan({projectMap: base.projectMap, change: {...base.change, kind: 'magic-code'}});
 assert.strictEqual(unknownKind.result, 'PLACEMENT_INPUT_HELD');
@@ -116,10 +162,13 @@ console.log(JSON.stringify({
   directionHintCount: snapshot.directionHintCount,
   placementPlanCount: planCount,
   extendExistingCount: extendCount,
-  extensionBindableLanguageCount,
-  nonExtensionLanguageHoldCount,
+  languageBindingCount: extensionLanguageBindingCount + basenameLanguageBindingCount + pathContextLanguageBindingCount,
+  extensionLanguageBindingCount,
+  basenameLanguageBindingCount,
+  pathContextLanguageBindingCount,
+  additionalPathContextProbePassed: ansiblePathProbe.result === 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY',
   createModuleProbePassed: created.sourcePlacement.action === 'create-module',
-  adversarialHoldCount: 7,
+  adversarialHoldCount: 10,
   snapshotSha256: snapshot.snapshotSha256,
   authority: 'NONE'
 }, null, 2));

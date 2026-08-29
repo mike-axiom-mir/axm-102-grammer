@@ -102,9 +102,12 @@ All measurements below came from the successful recovery verification run before
 - direction-to-role hint coverage: 29/29
 - frontier reference placement plans: 58/58 ready
 - placement holds during valid frontier references: 0
-- adversarial placement holds verified: 7
-- extension-owned language placement probes: 97/97 ready
-- path/basename-only language organs explicitly held in placement v1: 5
+- adversarial placement holds verified: 10
+- explicit language placement bindings: 102/102 ready
+- extension bindings: 97
+- exact-basename bindings: 3
+- path-context bindings: 2
+- additional Ansible path-context route: passed
 
 ## Truth boundaries retained
 

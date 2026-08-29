@@ -114,6 +114,6 @@ const placement = require('./placement/placement-plane.js');
 const plan = placement.plan({projectMap, change});
 ```
 
-The caller supplies a digest-bound project map and an explicit change intent. The planner resolves one of ten code roles and forty change kinds, binds the selected language organ, and either extends one unique owner, creates a convention-bound module, or holds on ambiguity, protection, traversal, language mismatch, or an unsafe verification seam.
+The caller supplies a digest-bound project map, an explicit extension/basename/path-context language signal, and a change intent. The planner resolves one of ten code roles and forty change kinds, binds the selected language organ, and either extends one unique owner, creates a convention-bound module, or holds on ambiguity, protection, traversal, missing/forged language signals, or an unsafe verification seam. Focused probes cover all 102 organs.
 
 A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. It performs no workspace read or mutation. See `placement/README.md` for the contract and truth boundary.

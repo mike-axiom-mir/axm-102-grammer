@@ -2,7 +2,7 @@ Branch: codex/standalone-capability-verification-v1
 Base commit: a44ccb298c7ef1e6dc04fbb5f2e150aac630dff9
 Command: node testing/run-all.js
 Runtime: Node v24.19.0; Python 3.12.13
-Observed: 2026-08-29T03:21:54Z through 2026-08-29T03:22:01Z (bounded local process stream)
+Observed: 2026-08-29T03:45:51Z through 2026-08-29T03:45:57Z (bounded local process stream)
 
 TEST 01/20: python3 language-organs/build-grammar-profiles.py --check
 {"mode":"CHECK","organCount":102,"knowledgeCount":102,"profileCount":102,"uniqueProfileDigests":102,"failures":[],"authority":"NONE"}
@@ -65,7 +65,7 @@ TEST 15/20: node software-directions/selftest-direction-stack.js
 TEST_RESULT: PASS
 
 TEST 16/20: node software-directions/placement/selftest-placement-plane.js
-{"ok":true,"roleCount":10,"changeKindCount":40,"directionHintCount":29,"placementPlanCount":58,"extendExistingCount":58,"extensionBindableLanguageCount":97,"nonExtensionLanguageHoldCount":5,"createModuleProbePassed":true,"adversarialHoldCount":7,"snapshotSha256":"3e12ebecc8dd0026f257375e6813c5bc3c767b0b3a4f1db67df8b52275f5ce6d","authority":"NONE"}
+{"ok":true,"roleCount":10,"changeKindCount":40,"directionHintCount":29,"placementPlanCount":58,"extendExistingCount":58,"languageBindingCount":102,"extensionLanguageBindingCount":97,"basenameLanguageBindingCount":3,"pathContextLanguageBindingCount":2,"additionalPathContextProbePassed":true,"createModuleProbePassed":true,"adversarialHoldCount":10,"snapshotSha256":"3e12ebecc8dd0026f257375e6813c5bc3c767b0b3a4f1db67df8b52275f5ce6d","authority":"NONE"}
 TEST_RESULT: PASS
 
 TEST 17/20: node software-directions/adapters/selftest-adapter-plane.js
@@ -73,7 +73,7 @@ TEST 17/20: node software-directions/adapters/selftest-adapter-plane.js
 TEST_RESULT: PASS
 
 TEST 18/20: node software-directions/selftest-frontier-direction-workbench.js
-{"ok":true,"directionCount":29,"executedBuildCount":58,"passedBuildCount":58,"beginnerReferenceReadyCount":29,"productionReadyCount":0,"verifiedVerifierReceiptCount":76,"unsupportedVerifierTargetCount":20,"directionsWithConcreteVerifierAdapter":26,"directionsWithUnsupportedVerifierTargets":10,"placementPlanCount":58,"placementHoldCount":0,"singleFrontierModelTrial":true,"reportSha256":"57db0a08018ffdb62137424dfe2c902773458b460eae0cf48ba9b38d0f7fd85d","result":"ALL_DIRECTIONS_BEGINNER_REFERENCE_READY","authority":"BOUNDED_LOCAL_ADAPTER_ONLY"}
+{"ok":true,"directionCount":29,"executedBuildCount":58,"passedBuildCount":58,"beginnerReferenceReadyCount":29,"productionReadyCount":0,"verifiedVerifierReceiptCount":76,"unsupportedVerifierTargetCount":20,"directionsWithConcreteVerifierAdapter":26,"directionsWithUnsupportedVerifierTargets":10,"placementPlanCount":58,"placementHoldCount":0,"singleFrontierModelTrial":true,"reportSha256":"55dac13a6bee7776c7be5a006678d3939b31b31c354a7c1960237a81f74e7969","result":"ALL_DIRECTIONS_BEGINNER_REFERENCE_READY","authority":"BOUNDED_LOCAL_ADAPTER_ONLY"}
 TEST_RESULT: PASS
 
 TEST 19/20: node language-organs/selftest-standalone-capability-router.js
@@ -86,14 +86,14 @@ TEST_RESULT: PASS
 
 SUITE_RESULT: passed=20 failed=0 total=20
 
-Truth boundary: these checks verify deterministic bindings, drift, routing, holds, bounded in-memory reference execution, concrete local adapter receipts, reference-project placement decisions, and authority boundaries. They do not claim semantic or runtime correctness for arbitrary programs in all 102 languages. Python runtime correctness remains UNKNOWN as recorded by the recovered body. Unsupported external verifiers remain explicit rather than being promoted to evidence. Reference project maps are not observations of a caller workspace, and placement plans are not source code or mutation authority.
+Truth boundary: these checks verify deterministic bindings, drift, routing, holds, bounded in-memory reference execution, concrete local adapter receipts, reference-project placement decisions, and authority boundaries. They do not claim semantic or runtime correctness for arbitrary programs in all 102 languages. Python runtime correctness remains UNKNOWN as recorded by the recovered body. Unsupported external verifiers remain explicit rather than being promoted to evidence. Reference project maps are not observations of a caller workspace, placement plans are not source code or mutation authority, and explicit extension/basename/path signals are caller assertions until a future project-map reader observes them.
 
 Stream receipt:
-- claim: the expanded standalone repository suite passes all 20 checks, including 58 frontier direction builds, 58 deterministic placement plans, seven adversarial placement holds, 58 bounded runtime receipts, 76 concrete verifier receipts, direction registry, hybrid stack/gap semantics, capsule integration, and repository independence
+- claim: the expanded standalone repository suite passes all 20 checks, including 58 frontier direction builds, 58 deterministic placement plans, explicit placement binding for all 102 language organs, ten adversarial placement holds, 58 bounded runtime receipts, 76 concrete verifier receipts, direction registry, hybrid stack/gap semantics, capsule integration, and repository independence
 - stream: stdout/stderr from `node testing/run-all.js` in this branch
 - expected event: `SUITE_RESULT: passed=20 failed=0 total=20`; refuting event: any `TEST_RESULT: FAIL`, nonzero exit, or mismatched totals
 - matched event: expected suite result emitted at the end of the 7-second window; no refuting event was emitted
 - verdict: PASS
 - hearing seam: local child-process output only; reference builds are bounded in-memory models and placement inputs are reference maps, not a live caller workspace, external deployment, hardware run, security certification, or arbitrary-program runtime claim
-- buffer digest: 20 PASS events, 0 FAIL events, 58/58 frontier reference builds passed, 58/58 placement plans ready, 97 extension-owned language placement probes passed, five path/basename-only language bindings held, seven adversarial placement holds passed, 58 runtime receipts passed, 76 verifier receipts passed, 20 requested verifier targets explicitly unsupported, process exit 0
+- buffer digest: 20 PASS events, 0 FAIL events, 58/58 frontier reference builds passed, 58/58 placement plans ready, 102/102 explicit language placement bindings passed (97 extension, three basename, two path context), one additional Ansible path-context route passed, ten adversarial placement holds passed, 58 runtime receipts passed, 76 verifier receipts passed, 20 requested verifier targets explicitly unsupported, process exit 0
 - raw rolling buffer released: yes; this bounded transcript is the retained evidence

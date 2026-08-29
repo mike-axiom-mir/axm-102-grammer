@@ -70,7 +70,7 @@ An explicit language may resolve a compatible ambiguous signal such as `.m`. It 
 
 `software-directions/adapters/adapter-plane.js` turns requested verifier categories into actual local executions and digest-bound receipts. The first plane provides one bounded Node reference runtime and nine verifier adapters. Unsupported browser, compatibility, load, security-review, latency, conformance, fuzzing/property, type-check, and hardware targets remain explicit instead of being counted as evidence.
 
-`software-directions/placement/placement-plane.js` adds a deterministic architectural placement grammar. From a caller-supplied project map and change intent it binds one of ten code roles and forty change kinds to a language organ, unique source owner, verification seam, preflight digests, required Hands, and rollback evidence. Ambiguous ownership, protected targets, unsafe paths, stale assumptions, and language/extension conflicts hold instead of being guessed.
+`software-directions/placement/placement-plane.js` adds a deterministic architectural placement grammar. From a caller-supplied project map and change intent it binds one of ten code roles and forty change kinds to a language organ, unique source owner, verification seam, preflight digests, required Hands, and rollback evidence. All 102 organs now pass explicit extension, basename, or path-context placement probes. Ambiguous ownership, protected targets, unsafe paths, stale assumptions, and missing/forged/conflicting language signals hold instead of being guessed.
 
 ## Run every standalone check
 
