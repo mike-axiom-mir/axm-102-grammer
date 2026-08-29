@@ -70,6 +70,8 @@ An explicit language may resolve a compatible ambiguous signal such as `.m`. It 
 
 `software-directions/adapters/adapter-plane.js` turns requested verifier categories into actual local executions and digest-bound receipts. The first plane provides one bounded Node reference runtime and nine verifier adapters. Unsupported browser, compatibility, load, security-review, latency, conformance, fuzzing/property, type-check, and hardware targets remain explicit instead of being counted as evidence.
 
+`software-directions/placement/placement-plane.js` adds a deterministic architectural placement grammar. From a caller-supplied project map and change intent it binds one of ten code roles and forty change kinds to a language organ, unique source owner, verification seam, preflight digests, required Hands, and rollback evidence. Ambiguous ownership, protected targets, unsafe paths, stale assumptions, and language/extension conflicts hold instead of being guessed.
+
 ## Run every standalone check
 
 Requires Node.js 18+ and Python 3. The suite installs no dependencies and uses no network.
@@ -80,4 +82,4 @@ node testing/run-all.js
 
 In a normal local npm environment, `npm test` invokes that same runner. Set `AXM_PYTHON` only when the Python executable is not available as `python3` or `python`.
 
-The expanded suite contains 19 checks: five generated-material drift checks and fourteen deterministic selftests, including all 4,896 stable keyboard keys, all 29 software-direction profiles, 58 seed/stretch frontier reference builds, concrete adapter receipts, hybrid stacks, gap semantics, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.
+The expanded suite contains 20 checks: five generated-material drift checks and fifteen deterministic selftests, including all 4,896 stable keyboard keys, all 29 software-direction profiles, 58 seed/stretch frontier reference builds, 58 deterministic placement plans, concrete adapter receipts, adversarial placement holds, hybrid stacks, gap semantics, the standalone composition boundary, and repository independence. The committed verification transcript is under `testing/logs/`.

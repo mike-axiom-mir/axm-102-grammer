@@ -6,7 +6,8 @@
     "axm.code.frontier-direction-build-packet.v1",
     "axm.code.frontier-direction-reference-build.v1",
     "axm.code.frontier-direction-trial-result.v1",
-    "axm.code.frontier-direction-user-report.v1"
+    "axm.code.frontier-direction-user-report.v1",
+    "axm.code.placement-plan.v1"
   ],
   "trialModel": {
     "directionCount": 29,
@@ -15,7 +16,7 @@
     "totalReferenceBuilds": 58,
     "humanInterventionDuringIndividualRun": false,
     "singleFrontierModelPerspective": true,
-    "beginnerReferenceReady": "Both bounded executable probes pass deterministically, concrete local adapter receipts are valid, and unsupported real-world adapters remain visible."
+    "beginnerReferenceReady": "Both bounded executable probes pass deterministically, concrete local adapter receipts are valid, deterministic reference placement plans are ready, and unsupported real-world adapters remain visible."
   },
   "truth": {
     "referenceBuildIsProductionBuild": false,
@@ -24,6 +25,9 @@
     "modeledSecurityIsSecurityCertification": false,
     "requestedVerifierIsEvidence": false,
     "passedAdapterReceiptIsUniversalProof": false,
+    "referenceProjectMapIsCallerWorkspace": false,
+    "placementPlanIsSourceCode": false,
+    "placementPlanIsWorkspaceMutation": false,
     "singleFrontierModelTrialIsUniversalModelFinding": false,
     "missingEvidenceIsLanguageIncapability": false,
     "humanFollowupMayBeAddedLater": true

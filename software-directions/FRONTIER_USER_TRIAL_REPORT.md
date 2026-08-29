@@ -15,7 +15,7 @@ Every software direction received two executable, deterministic reference challe
 - **seed** — the smallest useful behavior that exercises core direction concerns;
 - **stretch** — a larger multi-concern challenge intended to expose whether the profile remains useful beyond a toy.
 
-The frontier model authored the bounded reference implementations from the direction catalog, then the workbench prepared and executed all 58 packets without per-run human input. A direction reached **beginner reference ready** only when both challenges passed, their declared check surfaces matched exactly, concrete local adapter receipts were valid, and unsupported real-world adapters stayed visible.
+The frontier model authored the bounded reference implementations from the direction catalog, then the workbench prepared and executed all 58 packets without per-run human input. A direction reached **beginner reference ready** only when both challenges passed, their declared check surfaces matched exactly, concrete local adapter receipts were valid, deterministic reference placement plans were ready, and unsupported real-world adapters stayed visible.
 
 These are in-memory reference models. They are not installed applications, production services, real networks, hardware runs, security certifications, app-store packages, or proof of arbitrary-program correctness.
 
@@ -49,6 +49,26 @@ Supported locally: unit test, integration test, deterministic replay, structural
 Still unsupported locally: type check, property test, fuzzing, UI end-to-end, accessibility audit, compatibility matrix, load test, security review, latency budget, conformance suite, and hardware-in-loop.
 
 The trial catalog now calls these fields **requested verifiers**. A requested name becomes evidence only after a concrete adapter runs and returns a passed digest-bound receipt.
+
+## Deterministic placement outcome
+
+The next code-grammar atom addresses a different failure mode: a capable code agent may know how to write a change while still putting it in the wrong module, duplicating an existing owner, bypassing a protected seam, or attaching the wrong tests.
+
+The placement grammar defines ten architectural code roles and forty explicit change kinds. It consumes a caller-supplied project map rather than silently reading a workspace. Across the frontier trial it produced:
+
+- 58 of 58 deterministic reference placement plans ready;
+- 58 unique existing-source owner selections;
+- 58 matching existing verification-seam selections;
+- 29 of 29 software directions covered by ordered role hints;
+- language-organ, project-map, source-target, test-target, and dependency digests bound into every plan;
+- exact required Hands, construction stages, drift preconditions, parser/verifier receipts, and rollback evidence named before any future mutation;
+- zero workspace-read, mutation, execution, install, network, deployment, promotion, or canon authority.
+
+Separate adversarial probes hold rather than guess when ownership is duplicated, an owner is locked, a path traverses outside declared roots, the language/extension binding conflicts, the change kind is unknown, or a dependency is absent. A new-module probe also proves that the same planner can choose a convention-bound source and test path when no existing owner exists.
+
+Cross-language placement probes pass for all 97 organs that own an explicit file extension. Five path- or basename-detected organs—GitHub Actions, OpenAPI, Maven POM, Kubernetes manifests, and Ansible—remain held in v1 until the project-map contract can express those conventions directly. A generic YAML or XML suffix is not treated as proof that one of those language organs owns a target.
+
+These reference maps prove deterministic planner behavior only. They are not observations of a caller's live repository and the resulting plans are not source code. An authorized Code Fabric Hand must first produce a fresh project map, recheck every bound digest, perform the actual language-aware edit, run the parser/verifiers, and return rollback-capable receipts.
 
 ## Per-direction frontier-user observations
 
@@ -86,11 +106,11 @@ The trial catalog now calls these fields **requested verifiers**. A requested na
 
 ## Cross-direction finding
 
-The layer is already useful to a frontier model as a **pre-build directional checklist and gap lens**. It consistently changes what the model notices before writing code and reduces generic app-shaped reasoning.
+The layer is already useful to a frontier model as a **pre-build directional checklist, placement stabilizer, and gap lens**. It consistently changes what the model notices before writing code, reduces generic app-shaped reasoning, and gives actual code a deterministic architectural destination before an editing Hand receives authority.
 
 The first local adapter plane closes part of the earlier adapter gap, but depth remains the main weakness. It does not yet bind a concrete framework, browser, mobile/desktop package, compiler, device, cloud target, external verifier, or human/domain authority. Capability evidence is also still coarse: future versions should give important capability IDs richer acceptance schemas instead of relying on a name plus a bounded reference check.
 
-The next meaningful maturation step is a local comparison across multiple frontier and local models, with human observations added separately rather than silently merged into this machine-side report.
+The next placement maturation step is a real read-only project-map adapter plus an authorized language-aware editing Hand trial. That would test the full seam from current repository ownership through exact code placement, parser/verifier execution, and rollback without pretending these reference maps already prove it. A later comparison across frontier and local models can then measure how much the placement grammar reduces drift and repair work.
 
 ## Evidence entrypoints
 
@@ -98,6 +118,7 @@ The next meaningful maturation step is a local comparison across multiple fronti
 - executable reference builds: `frontier-reference-builds.js`
 - packet, assessment, and aggregate report logic: `frontier-direction-workbench.js`
 - concrete adapter registry, resolver, implementations, and receipts: `adapters/`
+- deterministic role catalog, placement planner, fixtures, and adversarial holds: `placement/`
 - deterministic 58-build verification: `selftest-frontier-direction-workbench.js`
 
-Aggregate adapter-bound frontier report digest: `82056623ea40d2bf1e17aa3e62b9f1a3b53cb00e61ed1c194d98445be35de68a`
+Aggregate adapter-and-placement-bound frontier report digest: `57db0a08018ffdb62137424dfe2c902773458b460eae0cf48ba9b38d0f7fd85d`

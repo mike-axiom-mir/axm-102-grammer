@@ -103,3 +103,17 @@ const execution = adapters.execute(packet);
 ```
 
 Resolution alone is not evidence. Only a passed adapter receipt enters `verifiedVerifierIds`. The first plane supports nine local verifier categories and keeps eleven external or specialized categories unsupported. See `adapters/README.md` for the exact partition and authority boundary.
+
+## Deterministic code placement
+
+`placement/placement-plane.js` addresses the architectural placement seam between knowing how to write code and knowing where that code belongs.
+
+```js
+const placement = require('./placement/placement-plane.js');
+
+const plan = placement.plan({projectMap, change});
+```
+
+The caller supplies a digest-bound project map and an explicit change intent. The planner resolves one of ten code roles and forty change kinds, binds the selected language organ, and either extends one unique owner, creates a convention-bound module, or holds on ambiguity, protection, traversal, language mismatch, or an unsafe verification seam.
+
+A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. It performs no workspace read or mutation. See `placement/README.md` for the contract and truth boundary.

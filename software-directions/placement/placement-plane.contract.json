@@ -1,0 +1,48 @@
+{
+  "schema": "axm.code.placement-plane-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.project-map.v1",
+    "axm.code.change-intent.v1",
+    "axm.code.placement-plan.v1",
+    "axm.code.placement-registry-snapshot.v1"
+  ],
+  "model": {
+    "projectMap": "A caller-supplied, digest-bound description of existing modules, ownership, mutability, paths, and test seams.",
+    "changeIntent": "An explicit software direction, code-role kind, ownership signals, public seams, dependencies, and verifier targets.",
+    "placementDecision": "A deterministic extend, create, or hold result bound to the language grammar and project map.",
+    "authorizedExecution": "A later Hand may apply a fresh plan only after checking the named preconditions and returning receipts."
+  },
+  "truth": {
+    "placementPlanIsSourceCode": false,
+    "placementPlanIsWorkspaceMutation": false,
+    "callerProjectMapIsFreshWorkspaceProof": false,
+    "declaredOwnershipIsObservedOwnership": false,
+    "languageGrammarBindingIsToolchainVerification": false,
+    "extensionOwnedLanguageSignalRequiredInV1": true,
+    "pathOrBasenameOnlyLanguageBindingSupportedInV1": false,
+    "plannedPathIsValidAfterWorkspaceDrift": false,
+    "deterministicPlacementReplacesCodingCompetence": false,
+    "authorizedHandsMayApplyFreshPassingPlan": true,
+    "ambiguousOwnerMayBeGuessed": false,
+    "protectedTargetMayBeBypassed": false
+  },
+  "permissions": [],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "tool-execution",
+    "network-access",
+    "dependency-install",
+    "ambiguous-owner-selection",
+    "path-traversal",
+    "path-or-basename-language-binding-without-explicit-convention",
+    "protected-target-bypass",
+    "stale-map-as-current-proof",
+    "plan-as-code-evidence",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "NONE"
+}

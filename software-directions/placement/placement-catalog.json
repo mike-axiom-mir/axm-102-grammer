@@ -1,0 +1,99 @@
+{
+  "schema": "axm.code.placement-role-catalog.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "roles": [
+    {
+      "id": "interface",
+      "directory": "interface",
+      "responsibility": "Human-visible presentation and interaction surfaces.",
+      "changeKinds": ["render", "interaction", "navigation", "presentation"]
+    },
+    {
+      "id": "application",
+      "directory": "application",
+      "responsibility": "Use-case coordination without owning domain rules or external mechanisms.",
+      "changeKinds": ["workflow", "command", "use-case", "coordination"]
+    },
+    {
+      "id": "domain",
+      "directory": "domain",
+      "responsibility": "Core rules, calculations, models, and deterministic transformations.",
+      "changeKinds": ["rule", "calculation", "simulation-model", "transformation"]
+    },
+    {
+      "id": "state",
+      "directory": "state",
+      "responsibility": "Persistence, caching, migration, and recovery of program state.",
+      "changeKinds": ["persistence", "cache", "migration", "recovery"]
+    },
+    {
+      "id": "boundary",
+      "directory": "boundary",
+      "responsibility": "Declared interfaces between the program and users, services, devices, or protocols.",
+      "changeKinds": ["api", "input-adapter", "output-adapter", "protocol"]
+    },
+    {
+      "id": "policy",
+      "directory": "policy",
+      "responsibility": "Authorization, validation, safety, and governance decisions.",
+      "changeKinds": ["authorization", "validation-policy", "safety-guard", "governance"]
+    },
+    {
+      "id": "runtime",
+      "directory": "runtime",
+      "responsibility": "Lifecycle, scheduling, concurrency, and bounded execution loops.",
+      "changeKinds": ["lifecycle", "scheduling", "concurrency", "device-loop"]
+    },
+    {
+      "id": "verification",
+      "directory": "verification",
+      "responsibility": "Tests, evaluations, conformance checks, and benchmarks.",
+      "changeKinds": ["test", "evaluation", "conformance", "benchmark"]
+    },
+    {
+      "id": "observability",
+      "directory": "observability",
+      "responsibility": "Logs, metrics, traces, and audit evidence without owning product decisions.",
+      "changeKinds": ["log", "metric", "trace", "audit"]
+    },
+    {
+      "id": "configuration",
+      "directory": "configuration",
+      "responsibility": "Configuration, build, deployment description, and dependency policy.",
+      "changeKinds": ["config", "build", "deployment", "dependency-policy"]
+    }
+  ],
+  "directionRoleHints": [
+    {"directionId": "information-website", "preferredRoles": ["interface", "boundary"]},
+    {"directionId": "interactive-web-app", "preferredRoles": ["interface", "application", "state"]},
+    {"directionId": "mobile-app", "preferredRoles": ["application", "interface", "state"]},
+    {"directionId": "desktop-app", "preferredRoles": ["application", "state", "interface"]},
+    {"directionId": "game", "preferredRoles": ["domain", "runtime", "state", "interface"]},
+    {"directionId": "simulation", "preferredRoles": ["domain", "runtime", "observability", "state"]},
+    {"directionId": "xr-spatial", "preferredRoles": ["interface", "runtime", "policy"]},
+    {"directionId": "creative-media-editor", "preferredRoles": ["application", "domain", "state", "interface"]},
+    {"directionId": "backend-api", "preferredRoles": ["boundary", "application", "policy", "state"]},
+    {"directionId": "distributed-cloud", "preferredRoles": ["runtime", "state", "observability", "configuration"]},
+    {"directionId": "live-media-streaming", "preferredRoles": ["boundary", "runtime", "policy"]},
+    {"directionId": "collaboration-multiplayer", "preferredRoles": ["domain", "runtime", "state", "boundary"]},
+    {"directionId": "enterprise-workflow", "preferredRoles": ["application", "policy", "state", "observability"]},
+    {"directionId": "database-storage-search", "preferredRoles": ["state", "domain", "boundary"]},
+    {"directionId": "batch-data-pipeline", "preferredRoles": ["application", "domain", "state", "observability"]},
+    {"directionId": "event-stream-processing", "preferredRoles": ["runtime", "domain", "state", "observability"]},
+    {"directionId": "analytics-bi", "preferredRoles": ["domain", "application", "observability"]},
+    {"directionId": "ai-ml", "preferredRoles": ["domain", "verification", "state", "runtime"]},
+    {"directionId": "scientific-hpc", "preferredRoles": ["domain", "runtime", "verification"]},
+    {"directionId": "kernel-driver-runtime", "preferredRoles": ["runtime", "boundary", "policy"]},
+    {"directionId": "embedded-firmware-iot", "preferredRoles": ["runtime", "boundary", "policy"]},
+    {"directionId": "robotics-industrial-control", "preferredRoles": ["runtime", "policy", "boundary"]},
+    {"directionId": "networking-telecom", "preferredRoles": ["boundary", "runtime", "policy"]},
+    {"directionId": "security-identity-cryptography", "preferredRoles": ["policy", "boundary", "observability"]},
+    {"directionId": "smart-contract-ledger", "preferredRoles": ["domain", "policy", "state"]},
+    {"directionId": "cli-automation", "preferredRoles": ["boundary", "application", "configuration"]},
+    {"directionId": "compiler-interpreter-runtime", "preferredRoles": ["domain", "boundary", "verification"]},
+    {"directionId": "library-sdk-plugin", "preferredRoles": ["boundary", "application", "verification"]},
+    {"directionId": "build-deployment-infrastructure", "preferredRoles": ["configuration", "application", "runtime"]}
+  ],
+  "authority": "NONE"
+}

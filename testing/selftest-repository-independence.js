@@ -70,6 +70,8 @@ const frontierContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-di
 const frontierTrials = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'frontier-trial-catalog.json'), 'utf8'));
 const adapterContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-plane.contract.json'), 'utf8'));
 const adapterCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-catalog.json'), 'utf8'));
+const placementContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-plane.contract.json'), 'utf8'));
+const placementCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
 assert.deepStrictEqual(directionContract.permissions, []);
@@ -97,12 +99,26 @@ assert.strictEqual(adapterCatalog.adapters.length, 10);
 assert.strictEqual(adapterCatalog.adapters.filter(adapter => adapter.kind === 'runtime').length, 1);
 assert.strictEqual(adapterCatalog.adapters.filter(adapter => adapter.kind === 'verifier').length, 9);
 assert.strictEqual(adapterCatalog.knownUnsupportedVerifierIds.length, 11);
+assert.strictEqual(placementContract.schema, 'axm.code.placement-plane-contract.v1');
+assert.strictEqual(placementContract.authority, 'NONE');
+assert.deepStrictEqual(placementContract.permissions, []);
+assert.strictEqual(placementContract.truth.placementPlanIsSourceCode, false);
+assert.strictEqual(placementContract.truth.placementPlanIsWorkspaceMutation, false);
+assert.strictEqual(placementContract.truth.ambiguousOwnerMayBeGuessed, false);
+assert.strictEqual(placementContract.truth.extensionOwnedLanguageSignalRequiredInV1, true);
+assert.strictEqual(placementContract.truth.pathOrBasenameOnlyLanguageBindingSupportedInV1, false);
+assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
+assert.strictEqual(placementCatalog.roles.length, 10);
+assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);
+assert.strictEqual(placementCatalog.directionRoleHints.length, 29);
+assert.strictEqual(new Set(placementCatalog.directionRoleHints.map(item => item.directionId)).size, 29);
 
 const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 assert(readme.includes('standalone-capability-router.js'));
 assert(readme.includes('software-directions/direction-stack.js'));
 assert(readme.includes('frontier-direction-workbench.js'));
 assert(readme.includes('adapters/adapter-plane.js'));
+assert(readme.includes('placement/placement-plane.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({
@@ -115,6 +131,9 @@ console.log(JSON.stringify({
   frontierDirectionTrialCount: frontierTrials.method.trialCount,
   concreteAdapterCount: adapterCatalog.adapters.length,
   unsupportedVerifierAdapterCount: adapterCatalog.knownUnsupportedVerifierIds.length,
+  placementRoleCount: placementCatalog.roles.length,
+  placementChangeKindCount: placementCatalog.roles.flatMap(role => role.changeKinds).length,
+  placementDirectionHintCount: placementCatalog.directionRoleHints.length,
   symlinkCount: 0,
   submoduleFilePresent: false,
   capabilityContractAuthority: contract.authority

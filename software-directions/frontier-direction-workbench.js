@@ -6,6 +6,8 @@ const directionStack = require('./direction-stack.js');
 const gapDetector = require('./direction-gap-detector.js');
 const referenceBuilds = require('./frontier-reference-builds.js');
 const adapterPlane = require('./adapters/adapter-plane.js');
+const placementPlane = require('./placement/placement-plane.js');
+const placementFixture = require('./placement/reference-placement-fixture.js');
 const catalog = require('./frontier-trial-catalog.json');
 
 const AUTHORITY = adapterPlane.AUTHORITY;
@@ -115,6 +117,7 @@ function runTrial(input = {}) {
     return freeze({...body, trialSha256: hash(body)});
   }
   const adapterExecution = adapterPlane.execute(packet);
+  const placementPlan = placementPlane.plan(placementFixture.forPacket(packet));
   const build = adapterExecution.build;
   const expectedChecks = packet.challenge.expectedChecks;
   const actualCheckNames = Object.keys(build.checks).sort();
@@ -124,8 +127,9 @@ function runTrial(input = {}) {
   const capabilityEvidenceComplete = packet.challenge.requiredCapabilities.every(id => build.evidence.capabilities.includes(id));
   const adapterExecutionPassed = ['ADAPTER_EXECUTION_PASS', 'ADAPTER_EXECUTION_PASS_WITH_UNSUPPORTED_TARGETS'].includes(adapterExecution.result);
   const adapterReceiptsValid = adapterExecution.runtimeReceipt.result === 'RUNTIME_ADAPTER_PASS' && adapterExecution.failedAdapterIds.length === 0;
+  const placementPlanningPassed = placementPlan.result === 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY';
   const gapReport = gapDetector.evaluate({stackInput: {directionIds: [packet.directionId]}, languageId: 'javascript', observed: adapterExecution.evidence});
-  const passed = checkSurfaceMatches && failedChecks.length === 0 && capabilityEvidenceComplete && adapterExecutionPassed && adapterReceiptsValid && build.truth.humanInterventionDuringRun === false && build.authority.workspaceMutation === false && build.authority.toolExecution === false;
+  const passed = checkSurfaceMatches && failedChecks.length === 0 && capabilityEvidenceComplete && adapterExecutionPassed && adapterReceiptsValid && placementPlanningPassed && build.truth.humanInterventionDuringRun === false && build.authority.workspaceMutation === false && build.authority.toolExecution === false;
   const body = {
     schema: 'axm.code.frontier-direction-trial-result.v1',
     version: '1.0.0',
@@ -140,6 +144,9 @@ function runTrial(input = {}) {
     capabilityEvidenceComplete,
     adapterExecutionPassed,
     adapterReceiptsValid,
+    placementPlanningPassed,
+    placementPlanSha256: placementPlan.planSha256,
+    placementAction: placementPlanningPassed ? placementPlan.sourcePlacement.action : null,
     requestedVerifierCount: adapterExecution.adapterCoverage.requestedVerifierCount,
     verifiedVerifierCount: adapterExecution.adapterCoverage.verifiedVerifierCount,
     unsupportedVerifierCount: adapterExecution.adapterCoverage.unsupportedVerifierCount,
@@ -148,6 +155,7 @@ function runTrial(input = {}) {
     modeledVerifierCoveragePercent: gapReport.coverage.verifierPercent,
     missingRealWorldCapabilities: gapReport.missingCapabilities.map(item => item.id),
     missingRealWorldVerifiers: gapReport.missingVerifiers.map(item => item.id),
+    placementPlan,
     adapterExecution,
     build,
     truth: {
@@ -157,7 +165,10 @@ function runTrial(input = {}) {
       gapMeansLanguageIncapability: false,
       frontierObservationIsSingleModelEvidence: true,
       requestedVerifierIsEvidence: false,
-      passedAdapterReceiptIsBoundedEvidence: true
+      passedAdapterReceiptIsBoundedEvidence: true,
+      referenceProjectMapIsCallerWorkspace: false,
+      placementPlanIsSourceCode: false,
+      placementPlanIsWorkspaceMutation: false
     },
     authority: AUTHORITY
   };
@@ -176,8 +187,8 @@ function runAll() {
       directionId: profile.id,
       displayName: profile.displayName,
       family: profile.family,
-      seed: {result: seed.result, trialSha256: seed.trialSha256, capabilityCoveragePercent: seed.modeledCapabilityCoveragePercent, verifierCoveragePercent: seed.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: seed.concreteAdapterCoveragePercent, verifiedVerifierCount: seed.verifiedVerifierCount, unsupportedVerifierCount: seed.unsupportedVerifierCount},
-      stretch: {result: stretch.result, trialSha256: stretch.trialSha256, capabilityCoveragePercent: stretch.modeledCapabilityCoveragePercent, verifierCoveragePercent: stretch.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: stretch.concreteAdapterCoveragePercent, verifiedVerifierCount: stretch.verifiedVerifierCount, unsupportedVerifierCount: stretch.unsupportedVerifierCount},
+      seed: {result: seed.result, trialSha256: seed.trialSha256, capabilityCoveragePercent: seed.modeledCapabilityCoveragePercent, verifierCoveragePercent: seed.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: seed.concreteAdapterCoveragePercent, verifiedVerifierCount: seed.verifiedVerifierCount, unsupportedVerifierCount: seed.unsupportedVerifierCount, placementPlanningPassed: seed.placementPlanningPassed, placementAction: seed.placementAction, placementPlanSha256: seed.placementPlanSha256},
+      stretch: {result: stretch.result, trialSha256: stretch.trialSha256, capabilityCoveragePercent: stretch.modeledCapabilityCoveragePercent, verifierCoveragePercent: stretch.modeledVerifierCoveragePercent, concreteAdapterCoveragePercent: stretch.concreteAdapterCoveragePercent, verifiedVerifierCount: stretch.verifiedVerifierCount, unsupportedVerifierCount: stretch.unsupportedVerifierCount, placementPlanningPassed: stretch.placementPlanningPassed, placementAction: stretch.placementAction, placementPlanSha256: stretch.placementPlanSha256},
       beginnerReferenceReady,
       productionReady: false,
       helpfulForFrontierModel: observation.helpful,
@@ -190,11 +201,13 @@ function runAll() {
   const unsupportedVerifierTargetCount = directionReports.reduce((sum, item) => sum + item.seed.unsupportedVerifierCount + item.stretch.unsupportedVerifierCount, 0);
   const directionsWithConcreteVerifierAdapter = directionReports.filter(item => item.seed.verifiedVerifierCount + item.stretch.verifiedVerifierCount > 0).length;
   const directionsWithUnsupportedVerifierTargets = directionReports.filter(item => item.seed.unsupportedVerifierCount + item.stretch.unsupportedVerifierCount > 0).length;
+  const placementPlanCount = directionReports.reduce((sum, item) => sum + Number(item.seed.placementPlanningPassed) + Number(item.stretch.placementPlanningPassed), 0);
+  const placementHoldCount = directionReports.length * 2 - placementPlanCount;
   const body = {
     schema: 'axm.code.frontier-direction-user-report.v1',
     version: '1.0.0',
     status: 'TEST',
-    result: passedBuildCount === 58 && beginnerReferenceReadyCount === 29 ? 'ALL_DIRECTIONS_BEGINNER_REFERENCE_READY' : 'DIRECTION_REFERENCE_GAPS_FOUND',
+    result: passedBuildCount === 58 && beginnerReferenceReadyCount === 29 && placementPlanCount === 58 ? 'ALL_DIRECTIONS_BEGINNER_REFERENCE_READY' : 'DIRECTION_REFERENCE_GAPS_FOUND',
     method: catalog.method,
     directionCount: directionReports.length,
     buildCount: directionReports.length * 2,
@@ -205,15 +218,19 @@ function runAll() {
     unsupportedVerifierTargetCount,
     directionsWithConcreteVerifierAdapter,
     directionsWithUnsupportedVerifierTargets,
+    placementPlanCount,
+    placementHoldCount,
     directionReports,
     crossDirectionFindings: {
       helpful: [
         'The direction packet consistently exposed runtime, state, quality, risk, capability, verifier, and gap-question concerns before implementation.',
         'The profiles reduced generic app-shaped reasoning and gave a frontier model domain-specific seams to preserve.',
-        'The gap detector kept modeled evidence separate from absent production, hardware, security, scale, and deployment evidence.'
+        'The gap detector kept modeled evidence separate from absent production, hardware, security, scale, and deployment evidence.',
+        'The placement grammar bound every reference challenge to a unique source owner, test seam, language organ, preflight digest, required Hand set, and rollback evidence requirement.'
       ],
       needsTuning: [
         'The first adapter plane covers bounded local Node verification; framework, platform, toolchain, browser, infrastructure, and hardware bindings remain incomplete.',
+        'Reference project maps prove planner behavior only; real project-map readers and authorized editing Hands must recheck current workspace digests before applying a plan.',
         'Capability IDs need richer acceptance schemas so evidence can be stronger than a declared name plus bounded reference check.',
         'High-risk directions need domain-expert, hardware, infrastructure, or independent-review gates that a frontier model cannot self-award.',
         'A future local trial should compare multiple frontier/local models and record disagreements instead of treating this single-model pass as universal.'
@@ -224,6 +241,9 @@ function runAll() {
       productionReadinessClaimed: false,
       fullDirectionCapabilityClaimed: false,
       runtimeCorrectnessForArbitraryBuildsClaimed: false,
+      placementPlanIsSourceCode: false,
+      placementPlanIsWorkspaceMutation: false,
+      referenceProjectMapIsCallerWorkspace: false,
       humanFollowupReservedForLaterLocalTrial: true
     },
     authority: AUTHORITY

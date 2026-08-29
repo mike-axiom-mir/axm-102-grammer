@@ -28,6 +28,17 @@ for (const profile of registry.all()) {
     assert.strictEqual(trial.capabilityEvidenceComplete, true);
     assert.strictEqual(trial.adapterExecutionPassed, true);
     assert.strictEqual(trial.adapterReceiptsValid, true);
+    assert.strictEqual(trial.placementPlanningPassed, true);
+    assert.strictEqual(trial.placementAction, 'extend-existing');
+    assert.strictEqual(trial.placementPlan.result, 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY');
+    assert.strictEqual(trial.placementPlan.sourcePlacement.action, 'extend-existing');
+    assert.strictEqual(trial.placementPlan.verificationPlacement.action, 'extend-existing-test');
+    assert.strictEqual(trial.placementPlan.truth.planIsSourceCode, false);
+    assert.strictEqual(trial.placementPlan.truth.planIsMutation, false);
+    assert.strictEqual(trial.placementPlan.authority.workspaceRead, false);
+    assert.strictEqual(trial.placementPlan.authority.workspaceMutation, false);
+    assert.strictEqual(trial.placementPlan.authority.toolExecution, false);
+    assert(/^[a-f0-9]{64}$/.test(trial.placementPlanSha256));
     assert.strictEqual(trial.requestedVerifierCount, trial.verifiedVerifierCount + trial.unsupportedVerifierCount);
     assert(trial.concreteAdapterCoveragePercent >= 0 && trial.concreteAdapterCoveragePercent <= 100);
     assert.strictEqual(trial.truth.productionReady, false);
@@ -66,6 +77,8 @@ assert(report.verifiedVerifierReceiptCount > 0);
 assert(report.unsupportedVerifierTargetCount > 0);
 assert(report.directionsWithConcreteVerifierAdapter > 0 && report.directionsWithConcreteVerifierAdapter < 29);
 assert(report.directionsWithUnsupportedVerifierTargets > 0);
+assert.strictEqual(report.placementPlanCount, 58);
+assert.strictEqual(report.placementHoldCount, 0);
 assert.strictEqual(report.directionReports.length, 29);
 assert(report.directionReports.every(item => item.beginnerReferenceReady));
 assert(report.directionReports.every(item => item.productionReady === false));
@@ -73,6 +86,8 @@ assert(report.directionReports.every(item => item.helpfulForFrontierModel.length
 assert(report.directionReports.every(item => item.needsTuning.length > 70));
 assert.strictEqual(report.truth.singleFrontierModelTrial, true);
 assert.strictEqual(report.truth.productionReadinessClaimed, false);
+assert.strictEqual(report.truth.placementPlanIsSourceCode, false);
+assert.strictEqual(report.truth.placementPlanIsWorkspaceMutation, false);
 assert.strictEqual(Object.isFrozen(report), true);
 assert(/^[a-f0-9]{64}$/.test(report.reportSha256));
 
@@ -94,6 +109,8 @@ console.log(JSON.stringify({
   unsupportedVerifierTargetCount: report.unsupportedVerifierTargetCount,
   directionsWithConcreteVerifierAdapter: report.directionsWithConcreteVerifierAdapter,
   directionsWithUnsupportedVerifierTargets: report.directionsWithUnsupportedVerifierTargets,
+  placementPlanCount: report.placementPlanCount,
+  placementHoldCount: report.placementHoldCount,
   singleFrontierModelTrial: report.truth.singleFrontierModelTrial,
   reportSha256: report.reportSha256,
   result: report.result,
