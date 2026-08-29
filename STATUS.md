@@ -86,3 +86,19 @@ All measurements below came from the successful recovery verification run before
 ## Repository independence
 
 The temporary recovery courier was removed after verification. The repository now contains the recovered bytes themselves and does not depend on a submodule, symlink, clone script, or source-repository pointer to function as the 102-language body.
+
+## Standalone capability verification lane
+
+Branch: `codex/standalone-capability-verification-v1`
+
+This lane adds a bounded composition surface without importing Grammar Glass or the wider Creation Fabric:
+
+- one deterministic capability capsule across organ, grammar, eye, discovery, cheatcode, influence, template, and semantic-keyboard layers;
+- exact language selection with fail-closed ambiguity, conflict, unknown, and case-alias handling;
+- a dedicated keyboard selftest covering 102 banks and all 4,896 stable keys;
+- a cross-platform Node test runner for all standalone checks;
+- a committed full-suite verification transcript.
+
+Lane verification result: **15/15 checks passed**.
+
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, and the no-source/no-execution/no-mutation boundary. The repository-independence test verifies the 102 six-file bodies, parses every JSON file, and refuses symlinks or submodules.
