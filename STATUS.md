@@ -108,6 +108,13 @@ All measurements below came from the successful recovery verification run before
 - exact-basename bindings: 3
 - path-context bindings: 2
 - additional Ansible path-context route: passed
+- bounded read-only project-map Hand: present
+- directly observed temporary workspaces: 3
+- directly observed module files: 6
+- live language-binding modes observed: extension, exact basename, path context
+- project-map observation lifetime: 5 minutes
+- no-mutation workspace snapshot probe: passed
+- project-map Hand adversarial holds verified: 13
 
 ## Truth boundaries retained
 
@@ -137,7 +144,8 @@ This lane adds a bounded composition surface without importing Grammar Glass or 
 - a 58-build frontier-user maturity trial with per-direction usefulness and tuning logs.
 - a concrete local adapter plane with runtime/verifier receipts and explicit unsupported targets.
 - a deterministic code-placement grammar with language binding, unique-owner selection, verification placement, drift preconditions, required Hands, and fail-closed ambiguity/protection/path rules.
+- a bounded read-only project-map Hand with complete matching-file coverage, current-byte digests, five-minute freshness, and fail-closed symlink/traversal/broad-root/stale/tamper rules.
 
-Lane verification result: **20/20 checks passed**.
+Lane verification result: **21/21 checks passed**.
 
-The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, project-map Hand, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.

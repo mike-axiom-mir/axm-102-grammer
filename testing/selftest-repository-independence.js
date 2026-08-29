@@ -71,6 +71,7 @@ const frontierTrials = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-dire
 const adapterContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-plane.contract.json'), 'utf8'));
 const adapterCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'adapters', 'adapter-catalog.json'), 'utf8'));
 const placementContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-plane.contract.json'), 'utf8'));
+const projectMapHandContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'project-map-hand.contract.json'), 'utf8'));
 const placementCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
@@ -105,12 +106,21 @@ assert.deepStrictEqual(placementContract.permissions, []);
 assert.strictEqual(placementContract.truth.placementPlanIsSourceCode, false);
 assert.strictEqual(placementContract.truth.placementPlanIsWorkspaceMutation, false);
 assert.strictEqual(placementContract.truth.ambiguousOwnerMayBeGuessed, false);
-assert.strictEqual(placementContract.version, '1.1.0');
+assert.strictEqual(placementContract.version, '1.2.0');
 assert.strictEqual(placementContract.truth.explicitLanguageBindingSignalRequired, true);
 assert.strictEqual(placementContract.truth.extensionLanguageBindingSupported, true);
 assert.strictEqual(placementContract.truth.basenameLanguageBindingSupported, true);
 assert.strictEqual(placementContract.truth.pathContextLanguageBindingSupported, true);
 assert.strictEqual(placementContract.truth.targetPathMustMatchDeclaredLanguageSignal, true);
+assert.strictEqual(placementContract.truth.plannerReadsWorkspace, false);
+assert.strictEqual(placementContract.truth.freshReadOnlyHandObservationMayBindPlanning, true);
+assert.strictEqual(placementContract.truth.liveObservationRemovesPreMutationRecheck, false);
+assert.strictEqual(projectMapHandContract.schema, 'axm.code.project-map-hand-contract.v1');
+assert.strictEqual(projectMapHandContract.authority, 'BOUNDED_WORKSPACE_READ_ONLY');
+assert.deepStrictEqual(projectMapHandContract.permissions, ['bounded-explicit-root-workspace-read']);
+assert.strictEqual(projectMapHandContract.truth.filePathsAndBytesAreDirectlyObserved, true);
+assert.strictEqual(projectMapHandContract.truth.semanticRolesAreCallerDeclared, true);
+assert.strictEqual(projectMapHandContract.truth.observationIsMutationAuthority, false);
 assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
 assert.strictEqual(placementCatalog.roles.length, 10);
 assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);
@@ -123,6 +133,7 @@ assert(readme.includes('software-directions/direction-stack.js'));
 assert(readme.includes('frontier-direction-workbench.js'));
 assert(readme.includes('adapters/adapter-plane.js'));
 assert(readme.includes('placement/placement-plane.js'));
+assert(readme.includes('placement/project-map-hand.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({

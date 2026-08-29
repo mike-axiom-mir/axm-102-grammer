@@ -230,7 +230,7 @@ function runAll() {
       ],
       needsTuning: [
         'The first adapter plane covers bounded local Node verification; framework, platform, toolchain, browser, infrastructure, and hardware bindings remain incomplete.',
-        'Reference project maps prove planner behavior only; real project-map readers and authorized editing Hands must recheck current workspace digests before applying a plan.',
+        'The focused read-only project-map Hand now observes bounded workspaces, but these 58 frontier maps remain references; an authorized editing Hand must still recheck current digests before applying a plan.',
         'Capability IDs need richer acceptance schemas so evidence can be stronger than a declared name plus bounded reference check.',
         'High-risk directions need domain-expert, hardware, infrastructure, or independent-review gates that a frontier model cannot self-award.',
         'A future local trial should compare multiple frontier/local models and record disagreements instead of treating this single-model pass as universal.'

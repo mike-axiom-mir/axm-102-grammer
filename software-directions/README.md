@@ -116,4 +116,13 @@ const plan = placement.plan({projectMap, change});
 
 The caller supplies a digest-bound project map, an explicit extension/basename/path-context language signal, and a change intent. The planner resolves one of ten code roles and forty change kinds, binds the selected language organ, and either extends one unique owner, creates a convention-bound module, or holds on ambiguity, protection, traversal, missing/forged language signals, or an unsafe verification seam. Focused probes cover all 102 organs.
 
-A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. It performs no workspace read or mutation. See `placement/README.md` for the contract and truth boundary.
+A caller can also ask the separately bounded `placement/project-map-hand.js` to observe one explicit absolute workspace root. That Hand combines caller-declared architectural meaning with current path and byte digests, requires complete mapping of matching language files, refuses symlinks and unsafe/broad roots, and emits a five-minute receipt. The planner validates that receipt without acquiring read authority itself:
+
+```js
+const projectMapHand = require('./placement/project-map-hand.js');
+
+const projectMapObservation = projectMapHand.inspect({workspaceRoot, declaration});
+const observedPlan = placement.plan({projectMapObservation, change});
+```
+
+A ready plan includes its source/test destinations, existing target digests, dependency bindings, required Hands, ordered construction stages, drift preconditions, and required parser/verifier/rollback receipts. Neither the reader nor planner can mutate the workspace. See `placement/README.md` for the contracts and truth boundary.

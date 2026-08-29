@@ -10,6 +10,8 @@ const STATUSES = new Set(['active', 'deprecated', 'locked']);
 const LANGUAGE_BINDING_KINDS = new Set(['extension', 'basename', 'path-context']);
 const HEX64 = /^[a-f0-9]{64}$/;
 const SIGNAL = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/;
+const MAX_OBSERVATION_TTL_MS = 5 * 60 * 1000;
+const MAX_CLOCK_SKEW_MS = 5000;
 
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -22,6 +24,39 @@ function freeze(value) {
 function held(result, errorCode = null, details = {}) {
   const body = {schema: 'axm.code.placement-plan.v1', version: '1.0.0', status: 'TEST', result, errorCode, ...details, authority: AUTHORITY};
   return freeze({...body, planSha256: registry.hash(body)});
+}
+
+function resolveProjectInput(projectMap, projectMapObservation) {
+  if (projectMap && projectMapObservation) throw Error('PROJECT_MAP_INPUT_AMBIGUOUS');
+  if (!projectMapObservation) return {projectMap, evidence: {kind: 'caller-declaration', observationSha256: null, observedAt: null, expiresAt: null, freshness: 'UNOBSERVED'}};
+  const observation = projectMapObservation;
+  if (!observation || typeof observation !== 'object' || Array.isArray(observation) || observation.schema !== 'axm.code.project-map-observation.v1' || observation.version !== '1.0.0' || observation.status !== 'TEST' || observation.result !== 'PROJECT_MAP_OBSERVED_READ_ONLY') throw Error('PROJECT_MAP_OBSERVATION_INVALID');
+  if (!observation.projectMap || registry.hash(observation.projectMap) !== observation.projectMapSha256) throw Error('PROJECT_MAP_OBSERVATION_PROJECT_DIGEST_MISMATCH');
+  const receiptBody = {...observation};
+  delete receiptBody.observationSha256;
+  if (!HEX64.test(observation.observationSha256 || '') || registry.hash(receiptBody) !== observation.observationSha256) throw Error('PROJECT_MAP_OBSERVATION_RECEIPT_DIGEST_MISMATCH');
+  if (observation.projectId !== observation.projectMap.projectId || !HEX64.test(observation.declarationSha256 || '') || !HEX64.test(observation.workspaceRootIdentitySha256 || '')) throw Error('PROJECT_MAP_OBSERVATION_BINDING_INVALID');
+  if (observation.authority?.workspaceRead !== true || observation.authority?.workspaceMutation !== false || observation.authority?.toolExecution !== false) throw Error('PROJECT_MAP_OBSERVATION_AUTHORITY_INVALID');
+  const observedAt = Date.parse(observation.observedAt);
+  const expiresAt = Date.parse(observation.expiresAt);
+  if (!Number.isFinite(observedAt) || !Number.isFinite(expiresAt) || new Date(observedAt).toISOString() !== observation.observedAt || new Date(expiresAt).toISOString() !== observation.expiresAt || expiresAt <= observedAt || observation.ttlMs !== expiresAt - observedAt || observation.ttlMs > MAX_OBSERVATION_TTL_MS) throw Error('PROJECT_MAP_OBSERVATION_TIME_INVALID');
+  const now = Date.now();
+  if (observedAt > now + MAX_CLOCK_SKEW_MS) return {hold: 'PROJECT_MAP_OBSERVATION_FUTURE', details: {observationSha256: observation.observationSha256, observedAt: observation.observedAt}};
+  if (now > expiresAt) return {hold: 'PROJECT_MAP_OBSERVATION_STALE', details: {observationSha256: observation.observationSha256, observedAt: observation.observedAt, expiresAt: observation.expiresAt}};
+  if (observation.coverage?.allMatchingFilesMapped !== true || observation.coverage?.symlinksFollowed !== false || !Number.isSafeInteger(observation.coverage?.observedFileCount) || observation.coverage.observedFileCount < 0 || !Number.isSafeInteger(observation.coverage?.observedByteCount) || observation.coverage.observedByteCount < 0 || !HEX64.test(observation.coverage?.discoveredPathsSha256 || '') || observation.truth?.workspaceMutated !== false || observation.truth?.fileBytesDigestBound !== true || observation.truth?.semanticRolesCallerDeclared !== true || observation.truth?.preMutationRecheckStillRequired !== true) throw Error('PROJECT_MAP_OBSERVATION_COVERAGE_INVALID');
+  return {
+    projectMap: observation.projectMap,
+    evidence: {
+      kind: 'read-only-project-map-hand',
+      observationSha256: observation.observationSha256,
+      observedAt: observation.observedAt,
+      expiresAt: observation.expiresAt,
+      freshness: 'LIVE',
+      observedFileCount: observation.coverage.observedFileCount,
+      observedByteCount: observation.coverage.observedByteCount,
+      discoveredPathsSha256: observation.coverage.discoveredPathsSha256
+    }
+  };
 }
 
 function strings(value, code, {allowEmpty = false, pattern = null} = {}) {
@@ -209,9 +244,13 @@ function chooseVerification(projectMap, change, role, targetPath, projectIndex) 
   return {action: 'create-test-module', target: null, targetPath: testPath, reason: 'NO_EXISTING_VERIFICATION_SEAM'};
 }
 
-function plan({projectMap = null, change = null} = {}) {
-  let projectIndex; let role;
+function plan({projectMap = null, projectMapObservation = null, change = null} = {}) {
+  let projectIndex; let role; let projectEvidence;
   try {
+    const resolved = resolveProjectInput(projectMap, projectMapObservation);
+    if (resolved.hold) return held('PLACEMENT_OBSERVATION_HELD', resolved.hold, resolved.details);
+    projectMap = resolved.projectMap;
+    projectEvidence = resolved.evidence;
     projectIndex = validateProjectMap(projectMap);
     role = validateChange(change, projectMap, projectIndex);
   } catch (error) {
@@ -241,6 +280,7 @@ function plan({projectMap = null, change = null} = {}) {
     result: 'PLACEMENT_PLAN_READY_NO_MUTATION_AUTHORITY',
     projectId: projectMap.projectId,
     projectMapSha256,
+    projectMapEvidence: projectEvidence,
     changeId: change.changeId,
     changeIntentSha256,
     directionId: change.directionId,
@@ -315,6 +355,9 @@ function plan({projectMap = null, change = null} = {}) {
     ],
     truth: {
       callerProjectMapObservedByPlanner: false,
+      plannerReadWorkspace: false,
+      projectMapObservedByReadOnlyHand: projectEvidence.kind === 'read-only-project-map-hand',
+      observationFreshAtPlanning: projectEvidence.freshness === 'LIVE',
       planIsSourceCode: false,
       planIsMutation: false,
       placementAcceptedWithoutFreshPreflight: false,
@@ -331,4 +374,4 @@ function plan({projectMap = null, change = null} = {}) {
   return freeze({...body, planSha256: registry.hash(body)});
 }
 
-module.exports = {AUTHORITY, plan};
+module.exports = {AUTHORITY, plan, validateProjectMap};

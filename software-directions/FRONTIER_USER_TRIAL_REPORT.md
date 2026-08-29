@@ -68,7 +68,17 @@ Separate adversarial probes hold rather than guess when ownership is duplicated,
 
 Cross-language placement probes now pass for all 102 organs: 97 bind through an owned extension, OpenAPI/Maven POM/Ansible bind through exact basenames, and GitHub Actions/Kubernetes manifests bind through declared path contexts. Ansible's `/roles/` path-context route passes separately as a second valid binding. A generic YAML or XML suffix is still not proof; the caller must name a signal owned by the selected organ.
 
-These reference maps prove deterministic planner behavior only. They are not observations of a caller's live repository and the resulting plans are not source code. An authorized Code Fabric Hand must first produce a fresh project map, recheck every bound digest, perform the actual language-aware edit, run the parser/verifiers, and return rollback-capable receipts.
+These 58 reference maps prove deterministic planner behavior only. They are not observations of a caller's live repository and the resulting plans are not source code. Before applying a comparable plan to a real project, the new read-only Hand must produce a fresh observation and a separately authorized editing Hand must recheck every bound digest, perform the language-aware edit, run the parser/verifiers, and return rollback-capable receipts.
+
+## Read-only project-map Hand outcome
+
+The first filesystem Hand now closes the observation part of that gap without gaining editing authority. In focused tests it observed three isolated workspaces representing extension, exact-basename, and path-context language binding; mapped six declared modules; hashed their current bytes; and passed the resulting fresh receipt directly into the placement plane.
+
+The Hand requires the caller to declare semantic roles, ownership, mutability, exports, and verification relationships because filesystem bytes cannot prove those meanings. It then directly checks the bounded facts that a caller declaration could previously invent: source/test roots, complete matching-file coverage, exact paths, regular-file status, and content digests. Receipts expire after five minutes and every future edit still requires an immediate digest recheck.
+
+The focused test snapshots the temporary workspace before and after observation and found no path or byte mutation. It also proved that changed bytes produce a different project-map and observation digest, and verified 13 fail-closed cases covering stale, future-dated, overlong, or tampered receipts; ambiguous direct/observed inputs; unmapped or missing files; absent roots; symlinks; traversal; filesystem-root scope; relative roots; and limit escalation.
+
+This is real filesystem observation, but only inside generated test workspaces. It is not yet an editing trial on a production repository, a semantic ownership inference engine, signer proof, parser execution, or arbitrary-program correctness evidence.
 
 ## Per-direction frontier-user observations
 
@@ -110,7 +120,7 @@ The layer is already useful to a frontier model as a **pre-build directional che
 
 The first local adapter plane closes part of the earlier adapter gap, but depth remains the main weakness. It does not yet bind a concrete framework, browser, mobile/desktop package, compiler, device, cloud target, external verifier, or human/domain authority. Capability evidence is also still coarse: future versions should give important capability IDs richer acceptance schemas instead of relying on a name plus a bounded reference check.
 
-The next placement maturation step is a real read-only project-map adapter plus an authorized language-aware editing Hand trial. That would test the full seam from current repository ownership through exact code placement, parser/verifier execution, and rollback without pretending these reference maps already prove it. A later comparison across frontier and local models can then measure how much the placement grammar reduces drift and repair work.
+The next placement maturation step is a separately authorized language-aware editing Hand trial. It should consume only a fresh passing observation and placement plan, recheck exact target digests immediately before writing, use a rollback-capable exact-byte transaction, run language/parser and requested verifier adapters, and restore on failure. A later comparison across frontier and local models can then measure how much the placement grammar reduces drift and repair work.
 
 ## Evidence entrypoints
 
@@ -119,6 +129,7 @@ The next placement maturation step is a real read-only project-map adapter plus 
 - packet, assessment, and aggregate report logic: `frontier-direction-workbench.js`
 - concrete adapter registry, resolver, implementations, and receipts: `adapters/`
 - deterministic role catalog, placement planner, fixtures, and adversarial holds: `placement/`
+- bounded read-only workspace observer, freshness receipt, and no-mutation/adversarial tests: `placement/project-map-hand.js`, `placement/selftest-project-map-hand.js`
 - deterministic 58-build verification: `selftest-frontier-direction-workbench.js`
 
-Aggregate adapter-and-placement-bound frontier report digest: `55dac13a6bee7776c7be5a006678d3939b31b31c354a7c1960237a81f74e7969`
+Aggregate adapter-and-placement-bound frontier report digest: `ba3b8b043e92ff06c8d76add495d6f0c2463274094e302f75bc7e2aad8f7709b`
