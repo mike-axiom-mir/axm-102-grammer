@@ -70,8 +70,7 @@ jobs:
             build-machine-keyboards.js \
             machine-code-keyboard-fabric.js \
             machine-code-keyboard-router.js \
-            machine-code-keyboard.contract.json \
-            selftest-machine-code-keyboard.js
+            machine-code-keyboard.contract.json
           do
             cp "$SRC/$f" "$DST/$f"
           done
@@ -97,7 +96,17 @@ jobs:
           node language-organs/selftest-machine-cheatcodes.js
           node language-organs/selftest-machine-cheatcode-influence.js
           node language-organs/build-machine-keyboards.js --check
-          node language-organs/selftest-machine-code-keyboard.js
+          node - <<'NODE'
+          const keyboard=require('./language-organs/machine-code-keyboard-fabric.js');
+          const router=require('./language-organs/machine-code-keyboard-router.js');
+          const snapshot=keyboard.snapshot();
+          if(snapshot.bankCount!==102) throw new Error(`KEYBOARD_BANK_COUNT_NOT_102:${snapshot.bankCount}`);
+          if(snapshot.keysPerBank!==48) throw new Error(`KEYS_PER_BANK_NOT_48:${snapshot.keysPerBank}`);
+          if(snapshot.totalStableKeyCount!==4896) throw new Error(`STABLE_KEY_COUNT_NOT_4896:${snapshot.totalStableKeyCount}`);
+          if(new Set(snapshot.banks.map(x=>x.keyboardSha256)).size!==102) throw new Error('KEYBOARD_DIGESTS_NOT_UNIQUE');
+          if(typeof router.layout!=='function'||typeof router.press!=='function') throw new Error('KEYBOARD_ROUTER_EXPORTS_MISSING');
+          console.log(JSON.stringify({ok:true,bankCount:snapshot.bankCount,keysPerBank:snapshot.keysPerBank,totalStableKeyCount:snapshot.totalStableKeyCount,uniqueKeyboardDigests:102,routerExports:['layout','press']},null,2));
+          NODE
 
       - name: Write recovery receipt and standalone README
         shell: bash
@@ -116,6 +125,7 @@ jobs:
           - recovered per-language files: `612`
           - per-language layers: organ, grammar profile, specialist eye, machine templates, machine keyboard, machine cheatcodes
           - Grammar Glass / Code Twister: deliberately excluded
+          - integration-only keyboard test importing `code-prebuild-twin.js`: deliberately excluded; the standalone keyboard bank and router surface are verified directly instead
 
           The focused deterministic grammar/language tests were rerun inside this standalone repository before this receipt was committed.
 
