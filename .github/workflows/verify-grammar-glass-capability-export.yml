@@ -1,0 +1,44 @@
+name: Verify Grammar Glass capability export
+
+on:
+  pull_request:
+    paths:
+      - "language-organs/export-grammar-glass-capability-snapshot.js"
+      - "language-organs/selftest-grammar-glass-capability-snapshot.js"
+      - ".github/workflows/verify-grammar-glass-capability-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Syntax
+        run: |
+          node --check language-organs/export-grammar-glass-capability-snapshot.js
+          node --check language-organs/selftest-grammar-glass-capability-snapshot.js
+      - name: Verify portable export
+        run: node language-organs/selftest-grammar-glass-capability-snapshot.js
+      - name: Verify exact checked-out provenance export
+        run: |
+          COMMIT="$(git rev-parse HEAD)"
+          TREE="$(git rev-parse 'HEAD^{tree}')"
+          node language-organs/export-grammar-glass-capability-snapshot.js --pretty --out /tmp/grammar-102-capability.json
+          node - "$COMMIT" "$TREE" <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('/tmp/grammar-102-capability.json','utf8'));
+          if(p.schema!=='axm.grammar-102.capability-snapshot.v1')throw Error('schema');
+          if(p.source.commitSha!==process.argv[2])throw Error('commit binding');
+          if(p.source.treeSha!==process.argv[3])throw Error('tree binding');
+          if(p.grammarIdentity.profileCount!==102)throw Error('profiles');
+          if(p.layers.semanticKeyboards.totalStableKeyCount!==4896)throw Error('keys');
+          if(p.layers.cheatcodeInfluence.nodeCount!==5100)throw Error('cheatcodes');
+          if(p.truth.sourceRepositoryRuntimeDependency!==false)throw Error('standalone boundary');
+          NODE
