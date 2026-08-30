@@ -2,6 +2,7 @@
 
 const placementRegistry = require('./placement-registry.js');
 const activeRecipeRegistry = require('./bounded-python-recipe-registry.js');
+const evidenceObserver = require('./bounded-python-recipe-evidence-observer-hand.js');
 
 const HEX64 = /^[a-f0-9]{64}$/;
 const SAFE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -58,6 +59,18 @@ function validateEvidence(value, proposal) {
   return value;
 }
 
+function validateEvidenceObservation(value, proposal, evidence) {
+  evidenceObserver.validateObservation(value);
+  if (value.proposalSha256 !== proposal.proposalSha256 || value.evidenceSha256 !== evidence.evidenceSha256) throw Error('RECIPE_ADMISSION_EVIDENCE_OBSERVATION_BINDING_INVALID');
+  const observed = new Map(value.files.map(item => [item.kind, item]));
+  for (const item of evidence.evidenceItems) {
+    if (observed.get(item.kind)?.sha256 !== item.sha256) throw Error('RECIPE_ADMISSION_EVIDENCE_OBSERVATION_DIGEST_SET_MISMATCH');
+  }
+  if (observed.get('author-source')?.sha256 !== proposal.builderSha256 || observed.get('parameter-contract')?.sha256 !== proposal.recipeSha256 || observed.get('verifier-source')?.sha256 !== proposal.verifierRunnerSha256) throw Error('RECIPE_ADMISSION_EVIDENCE_OBSERVATION_PROPOSAL_DIGEST_MISMATCH');
+  if (value.truth.currentByteDigestsMatchedEvidence !== true || value.truth.filesParsedWithoutImport !== true || value.truth.callerTestClaimsReproduced !== false || value.truth.semanticSafetyIndependentlyVerified !== false || value.truth.humanReviewCompleted !== false || value.truth.workspaceMutated !== false || value.truth.proposedModuleLoaded !== false || value.truth.candidateExecuted !== false || value.truth.registryMutated !== false || value.truth.promotionOccurred !== false) throw Error('RECIPE_ADMISSION_EVIDENCE_OBSERVATION_TRUTH_INVALID');
+  return value;
+}
+
 function candidateEntry(proposal) {
   const body = {
     recipeId: proposal.recipeId, recipeSha256: proposal.recipeSha256,
@@ -82,20 +95,22 @@ function activationGaps() {
 function receipt(body) { return freeze({...body, admissionReceiptSha256: placementRegistry.hash(body)}); }
 
 function held(errorCode) {
-  return receipt({schema: 'axm.code.bounded-python-recipe-admission-receipt.v1', version: '1.0.0', status: 'TEST', result: 'RECIPE_ADMISSION_HELD', errorCode, truth: {proposalStructurallyValidated: false, callerEvidenceBound: false, proposedSourceBytesRead: false, proposedModuleLoaded: false, authorInvoked: false, verifierInvoked: false, candidateGenerated: false, candidateExecuted: false, childProcessSpawned: false, activeRegistryMutated: false, recipeSelectionIssued: false, activationAuthorizationIssued: false, promotionOccurred: false, canonChanged: false}, authority: AUTHORITY});
+  return receipt({schema: 'axm.code.bounded-python-recipe-admission-receipt.v1', version: '1.1.0', status: 'TEST', result: 'RECIPE_ADMISSION_HELD', errorCode, truth: {proposalStructurallyValidated: false, callerEvidenceBound: false, evidenceFilesObservedByReadOnlyHand: false, currentEvidenceByteDigestsObserved: false, evidenceFilesParsedWithoutImport: false, callerTestClaimsReproduced: false, semanticSafetyIndependentlyVerified: false, proposedSourceBytesReadByAdmissionPlane: false, proposedSourceBytesReadByObserver: false, proposedModuleLoaded: false, authorInvoked: false, verifierInvoked: false, candidateGenerated: false, candidateExecuted: false, childProcessSpawned: false, activeRegistryMutated: false, recipeSelectionIssued: false, activationAuthorizationIssued: false, promotionOccurred: false, canonChanged: false}, authority: AUTHORITY});
 }
 
-function stage({proposal = null, evidence = null, activeRegistry = null} = {}) {
+function stage({proposal = null, evidence = null, evidenceObservation = null, activeRegistry = null} = {}) {
   try {
     activeRecipeRegistry.validateRegistry(activeRegistry);
     const validatedProposal = validateProposal(proposal, activeRegistry);
     const validatedEvidence = validateEvidence(evidence, validatedProposal);
+    const validatedObservation = validateEvidenceObservation(evidenceObservation, validatedProposal, validatedEvidence);
     const entry = candidateEntry(validatedProposal); const registryPreview = previewRegistry(activeRegistry, entry); const gaps = activationGaps();
     return receipt({
-      schema: 'axm.code.bounded-python-recipe-admission-receipt.v1', version: '1.0.0', status: 'TEST', result: 'RECIPE_ADMISSION_STAGED_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY', errorCode: null,
+      schema: 'axm.code.bounded-python-recipe-admission-receipt.v1', version: '1.1.0', status: 'TEST', result: 'RECIPE_ADMISSION_STAGED_FROM_READ_ONLY_EVIDENCE_OBSERVATION_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY', errorCode: null,
       proposalId: validatedProposal.proposalId, proposalSha256: validatedProposal.proposalSha256, evidenceSha256: validatedEvidence.evidenceSha256,
+      evidenceObservationSha256: validatedObservation.observationSha256, evidenceDeclarationSha256: validatedObservation.declarationSha256, evidenceWorkspaceRootIdentitySha256: validatedObservation.workspaceRootIdentitySha256,
       activeRegistrySha256: activeRegistry.registrySha256, candidateEntry: entry, registryPreview, activationGaps: gaps,
-      truth: {proposalStructurallyValidated: true, callerEvidenceBound: true, callerEvidenceIndependentlyVerifiedByPlane: false, humanReviewCompleted: false, proposedSourceBytesRead: false, proposedModuleLoaded: false, authorInvoked: false, verifierInvoked: false, candidateGenerated: false, candidateExecuted: false, childProcessSpawned: false, activeRegistryMutated: false, stagedEntryIsActive: false, recipeSelectionIssued: false, activationAuthorizationIssued: false, promotionOccurred: false, canonChanged: false, digestIsConsentOrIdentityProof: false},
+      truth: {proposalStructurallyValidated: true, callerEvidenceBound: true, evidenceFilesObservedByReadOnlyHand: true, currentEvidenceByteDigestsObserved: true, evidenceFilesParsedWithoutImport: true, callerTestClaimsReproduced: false, semanticSafetyIndependentlyVerified: false, humanReviewCompleted: false, proposedSourceBytesReadByAdmissionPlane: false, proposedSourceBytesReadByObserver: true, proposedModuleLoaded: false, authorInvoked: false, verifierInvoked: false, candidateGenerated: false, candidateExecuted: false, childProcessSpawned: false, activeRegistryMutated: false, stagedEntryIsActive: false, recipeSelectionIssued: false, activationAuthorizationIssued: false, promotionOccurred: false, canonChanged: false, digestIsConsentOrIdentityProof: false},
       authority: AUTHORITY
     });
   } catch (error) {
@@ -105,7 +120,7 @@ function stage({proposal = null, evidence = null, activeRegistry = null} = {}) {
 
 function validateReceipt(value) {
   digestReceipt(value, 'admissionReceiptSha256', 'RECIPE_ADMISSION_RECEIPT');
-  if (value.schema !== 'axm.code.bounded-python-recipe-admission-receipt.v1' || value.version !== '1.0.0' || value.status !== 'TEST' || !['RECIPE_ADMISSION_HELD', 'RECIPE_ADMISSION_STAGED_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY'].includes(value.result) || value.truth?.activeRegistryMutated !== false || value.truth?.candidateExecuted !== false || value.truth?.promotionOccurred !== false || value.authority?.registryMutation !== false || value.authority?.activationAuthorization !== false) throw Error('RECIPE_ADMISSION_RECEIPT_BINDING_OR_AUTHORITY_INVALID');
+  if (value.schema !== 'axm.code.bounded-python-recipe-admission-receipt.v1' || value.version !== '1.1.0' || value.status !== 'TEST' || !['RECIPE_ADMISSION_HELD', 'RECIPE_ADMISSION_STAGED_FROM_READ_ONLY_EVIDENCE_OBSERVATION_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY'].includes(value.result) || value.truth?.activeRegistryMutated !== false || value.truth?.candidateExecuted !== false || value.truth?.promotionOccurred !== false || value.authority?.registryMutation !== false || value.authority?.activationAuthorization !== false) throw Error('RECIPE_ADMISSION_RECEIPT_BINDING_OR_AUTHORITY_INVALID');
   return value;
 }
 
