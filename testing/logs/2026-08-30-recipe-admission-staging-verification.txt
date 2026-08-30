@@ -1,0 +1,118 @@
+AXM 102 GRAMMAR — NON-EXECUTING RECIPE ADMISSION/STAGING VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: 176e6abac8281239cbdbf16f7c8b83c5f855a1c3
+Lane parent tree: 3bfd462b0b010be1a32d849911ea5fd4cc3f7b52
+Production repositories edited by trials: 0
+
+PURPOSE
+Create a deterministic place to inspect and receipt a possible future recipe entry without
+turning proposal intake into code loading, registry mutation, selection, execution,
+authorization, promotion, or canon authority.
+
+ACTIVE STATE BEFORE AND AFTER
+- active registry digest: 4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e
+- active recipe count: 2
+- active registry mutations: 0
+- staged proposal: bounded-python-enum-map descriptor only
+- proposed implementation source supplied or read: no
+- staged recipe selectable: no
+
+STAGING CONTRACT
+The proposal binds:
+- Python pair scope
+- recipe, builder, author-receipt, and verifier identities/digests
+- proposed-unreviewed provenance
+- explicit refusal of general authoring, arbitrary execution, and dynamic module loading
+
+The caller evidence envelope binds six distinct digests:
+1. author source
+2. author contract
+3. verifier source
+4. verifier contract
+5. parameter contract
+6. adversarial-test receipt
+
+The plane treats all six as caller claims. It does not inspect their source bytes, reproduce
+their tests, identify a reviewer, or convert a digest into signature, identity, consent,
+or human-review proof.
+
+COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-admission-plane.js
+
+RESULT
+{
+  "ok": true,
+  "deterministicStageReceipts": 2,
+  "activeRegistryRecipeCount": 2,
+  "stagedCandidateEntryCount": 1,
+  "hypotheticalNextRegistryEntryCount": 3,
+  "activationGapCount": 5,
+  "callerEvidenceIndependentlyVerified": false,
+  "proposedSourceBytesRead": 0,
+  "proposedModulesLoaded": 0,
+  "authorsInvoked": 0,
+  "verifiersInvoked": 0,
+  "candidatesGenerated": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawned": 0,
+  "activeRegistryMutations": 0,
+  "selectionsIssued": 0,
+  "activationAuthorizationsIssued": 0,
+  "promotions": 0,
+  "adversarialHolds": 15
+}
+
+UNRESOLVED ACTIVATION GAPS RETAINED
+1. HUMAN_REVIEW_REQUIRED
+2. EXPLICIT_REGISTRY_SOURCE_CHANGE_REQUIRED
+3. FULL_REGRESSION_REQUIRED
+4. FRESH_FOUNDRY_MANIFEST_REQUIRED
+5. FRESH_HOST_AUTHORIZATION_REQUIRED
+
+ADVERSARIAL HOLDS
+1. missing active registry
+2. proposal content changed without matching digest
+3. traversal-shaped recipe identifier
+4. proposal claiming general Python authoring
+5. proposal requesting dynamic module loading
+6. recipe identity already active
+7. builder identity collision with an active entry
+8. verifier-runner digest collision with an active entry
+9. evidence bound to another proposal
+10. missing required evidence item
+11. duplicated evidence digest
+12. test claims reporting workspace mutation
+13. evidence falsely claiming completed human review
+14. attempted module-path injection through an extra proposal field
+15. digest-valid registry object that does not equal the active registry
+
+Every hold returned with no proposed code loading, child process, active registry mutation,
+selection, activation authorization, promotion, or canon change.
+
+COMMAND
+npm test
+
+RESULT
+SUITE_RESULT: passed=32 failed=0 total=32
+Process exit: 0
+Observed completion: 2026-08-30T20:13:04Z
+
+REGRESSION EVIDENCE RETAINED
+- language organs: 102
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- active bounded Python recipes: 2
+- both active recipes activated through Foundry: pass
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- pair recovery rollbacks: 14
+- graph recovery rollbacks: 20
+
+TRUTH BOUNDARY
+This proves structural staging of a descriptor and caller evidence. It does not prove that
+the proposed recipe exists, compiles, generates candidates, passes tests, was human-reviewed,
+is safe, or belongs in the registry. It provides no automated admission or activation path.
+Only an explicit reviewed source change followed by full regression, a fresh Foundry manifest,
+and fresh host authorization could make a future entry usable.

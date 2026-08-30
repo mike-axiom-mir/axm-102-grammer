@@ -44,6 +44,7 @@ const checks = [
   [process.execPath, ['software-directions/placement/selftest-hand-foundry-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-bounded-python-application.js']],
   [process.execPath, ['software-directions/placement/selftest-bounded-python-recipe-registry.js']],
+  [process.execPath, ['software-directions/placement/selftest-bounded-python-recipe-admission-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-foundry-activation-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-edit-graph-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-workspace-edit-hand.js']],

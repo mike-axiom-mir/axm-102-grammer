@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.bounded-python-recipe-admission-plane-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-recipe-admission-proposal.v1", "axm.code.bounded-python-recipe-admission-evidence.v1", "axm.code.bounded-python-recipe-admission-receipt.v1", "axm.code.bounded-python-recipe-registry-preview.v1"],
+  "model": {
+    "scope": "Structurally inspect and digest-bind one proposed bounded Python recipe entry against the current active registry without loading or executing its implementation.",
+    "evidence": "Bind caller-supplied source, contract, parameter, and adversarial-test receipt digests. These claims are not independently verified by this plane and are not identity, signature, consent, or human-review proof.",
+    "staging": "Emit a candidate entry, hypothetical next-registry digest, and explicit activation gaps. No promotion function exists; activation still requires an explicit reviewed registry source change, full regression, fresh Foundry manifest, and fresh host authorization."
+  },
+  "limits": {"language": "python", "scope": "pair", "proposalsPerReceipt": 1, "requiredEvidenceItems": 6, "dynamicModuleLoading": false, "proposedSourceBytesRead": false},
+  "truth": {"stagingMeansActiveAdmission": false, "callerEvidenceIndependentlyVerified": false, "humanReviewCompletedByPlane": false, "activeRegistryMutationAvailable": false, "recipeSelectionAvailable": false, "activationAuthorizationAvailable": false, "candidateGenerationAvailable": false, "candidateExecutionAvailable": false, "automaticPromotionAvailable": false, "automaticCanonAvailable": false},
+  "permissions": ["proposal-structure-validation", "caller-evidence-digest-binding", "candidate-entry-digest-computation", "hypothetical-registry-digest-computation"],
+  "refuses": ["active-recipe-duplicate", "implementation-id-or-digest-collision", "missing-or-unsafe-test-claims", "general-python-authoring", "arbitrary-candidate-execution", "dynamic-module-loading", "proposed-source-byte-read", "workspace-read", "workspace-mutation", "active-registry-mutation", "recipe-selection", "activation-authorization", "network-use", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "STAGING_ONLY_NO_REGISTRY_OR_EXECUTION_AUTHORITY"
+}

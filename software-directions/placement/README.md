@@ -158,6 +158,14 @@ The focused trial proves one complete Python application transaction, four pre/p
 
 Selections bind the registry digest plus the exact entry digest, builder, verifier runner, and parameters. Adding or changing an entry changes the registry digest, so old manifests, selections, and activation authorizations no longer match. Runtime dispatch captures and freezes exact author/receipt/verifier functions rather than exposing mutable module routers. The registry loads no dynamic plugins and grants no mutation or execution authority. Eight direct adversarial holds cover registry/selection drift, unknown recipes, author or verifier substitution, candidate substitution, invalid parameters, and cross-recipe receipts.
 
+## Non-executing recipe admission and staging
+
+`bounded-python-recipe-admission-plane.js` structurally checks one proposed future registry entry without importing its implementation. The proposal cannot contain a module path and must explicitly refuse general Python authoring, arbitrary execution, and dynamic loading. A separate caller evidence envelope binds six distinct digests: author source/contract, verifier source/contract, parameter contract, and adversarial-test receipt. Test claims must report author generation, exact-candidate verification, substitution refusal, cross-recipe refusal, no workspace mutation, and no arbitrary candidate execution.
+
+Those claims remain caller evidence. The plane does not inspect the proposed source bytes, independently reproduce the tests, or claim human review. A successful receipt contains a digest-bound candidate entry, a hypothetical three-entry registry preview, and five unresolved gaps: human review, explicit registry source change, full regression, fresh Foundry manifest, and fresh host authorization. It cannot make the entry active, select it, execute it, authorize it, promote it, or change canon; no promotion API exists.
+
+The focused trial produces the same staging receipt twice, leaves the active two-entry registry byte-identical, and confirms the staged recipe remains unselectable. Zero proposed source reads, proposed module loads, author/verifier calls, candidates, child processes, registry mutations, selections, authorizations, or promotions occur. Fifteen adversarial holds cover missing/forged registries, proposal/evidence digest drift, unsafe identifiers or authority, active and implementation collisions, incomplete/duplicated evidence, unsafe test claims, forged review state, and attempted module-path injection.
+
 ## Foundry activation plane
 
 `foundry-activation-plane.js` assembles the bounded Python path without requiring the caller to manually pass candidate bytes, a parser context, or verifier adapters:
