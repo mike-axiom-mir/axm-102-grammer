@@ -149,6 +149,32 @@ Other capsules truthfully route what exists: the read-only map Hand is available
 
 The focused trial proves one complete Python application transaction, four pre/post Python parser receipts, one provenance-locked runtime pass, one intentional verifier failure with both files restored, and eleven adversarial holds for missing or mismatched parser bindings, syntax failure, drift, stale authorization, wrong donor layout, invalid parameters, tampered plans, forged author receipts, substituted runtime content, and environment path drift. It does not claim general Python authoring or universal runtime correctness.
 
+## Foundry activation plane
+
+`foundry-activation-plane.js` assembles the bounded Python path without requiring the caller to manually pass candidate bytes, a parser context, or verifier adapters:
+
+```js
+const activation = require('./foundry-activation-plane.js');
+
+const activationReceipt = activation.activate({
+  workspaceRoot,
+  journalRoot,
+  declaration,
+  projectMapObservation,
+  placementPlan,
+  manifest,
+  environmentObservation,
+  recipeSelection,
+  authorization
+});
+```
+
+The recipe selection binds the exact donor recipe, builder digests, and parameters. The separate `EXPLICIT_SINGLE_ACTIVATION` authorization binds that selection plus the manifest, placement plan, project/environment receipts, workspace and journal identities, parser capsule, author implementation, verifier implementation, TTL, rollback, and durable recovery. The plane validates that authority and deterministically narrows it into the existing exact candidate-bound edit authorization; it does not create or broaden permission.
+
+The focused activation trial supplies zero candidate bundles, zero parser contexts, and zero verifier adapters from the caller. It automatically assembles the author, parser, verifier, writer, and required rollback capsule, commits one two-target Python transaction, produces four parser receipts and one provenance-locked runtime pass, and leaves an unrelated human file unchanged. Thirteen holds cover repeat activation after state change, missing authority, manifest tamper, missing rollback implementation, selection tamper, unsupported recipe, invalid parameters, authorization binding/authority/staleness, parser mismatch, environment tamper, and workspace drift. All hold fixtures remain byte-identical at return.
+
+This is still one recipe, one Python pair, and one explicit activation. There is no general recipe registry, arbitrary candidate activation, graph activation, self-authorization, deployment, promotion, or canon authority. Durable rollback, recovery, replay refusal, and lease behavior come from the already-tested pair Hand rather than being reimplemented.
+
 The v1.1 project-map convention requires one explicit language-binding kind and signal:
 
 - `extension` for 97 extension-owned organs;

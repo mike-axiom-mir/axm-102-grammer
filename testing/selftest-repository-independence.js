@@ -79,6 +79,7 @@ const toolchainEnvironmentHandContract = JSON.parse(fs.readFileSync(path.join(RO
 const handFoundryPlaneContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'hand-foundry-plane.contract.json'), 'utf8'));
 const boundedPythonAuthorContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'bounded-python-record-transform-author-hand.contract.json'), 'utf8'));
 const boundedPythonVerifierContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'bounded-python-record-transform-verifier-adapter.contract.json'), 'utf8'));
+const foundryActivationContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'foundry-activation-plane.contract.json'), 'utf8'));
 const placementCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
@@ -178,6 +179,14 @@ assert.strictEqual(boundedPythonAuthorContract.donor.builderSha256, 'ad281fa5a13
 assert.strictEqual(boundedPythonVerifierContract.authority, 'PROVENANCE_LOCKED_RUNTIME_VERIFICATION_ONLY');
 assert.strictEqual(boundedPythonVerifierContract.truth.arbitraryCandidateExecution, false);
 assert.strictEqual(boundedPythonVerifierContract.truth.hostNamespaceSandbox, false);
+assert.strictEqual(foundryActivationContract.schema, 'axm.code.foundry-activation-plane-contract.v1');
+assert.strictEqual(foundryActivationContract.authority, 'EXPLICIT_SINGLE_BOUNDED_RECIPE_ACTIVATION');
+assert.strictEqual(foundryActivationContract.limits.maxTargets, 2);
+assert.strictEqual(foundryActivationContract.limits.generalRecipeRegistryPresent, false);
+assert.strictEqual(foundryActivationContract.truth.foundrySelfAuthorizes, false);
+assert.strictEqual(foundryActivationContract.truth.hostAuthorizationIsNarrowedToExactCandidates, true);
+assert.strictEqual(foundryActivationContract.truth.arbitraryCandidateExecution, false);
+assert.strictEqual(foundryActivationContract.truth.underlyingDurableRollbackAndRecoveryReused, true);
 assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
 assert.strictEqual(placementCatalog.roles.length, 10);
 assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);
@@ -198,6 +207,7 @@ assert(readme.includes('placement/hand-foundry-plane.js'));
 assert(readme.includes('placement/spawned-parser-hand.js'));
 assert(readme.includes('placement/bounded-python-record-transform-author-hand.js'));
 assert(readme.includes('placement/bounded-python-record-transform-verifier-adapter.js'));
+assert(readme.includes('placement/foundry-activation-plane.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({

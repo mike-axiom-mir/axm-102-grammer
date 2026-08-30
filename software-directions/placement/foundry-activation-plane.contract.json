@@ -1,0 +1,35 @@
+{
+  "schema": "axm.code.foundry-activation-plane-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.foundry-recipe-selection.v1", "axm.code.foundry-activation-authorization.v1", "axm.code.foundry-activation-receipt.v1"],
+  "model": {
+    "scope": "Activate one Python pair manifest for the exact bounded-python-record-transform donor recipe.",
+    "assembly": "Validate the manifest, plan, observation, environment, recipe, parser, author, verifier, writer, and rollback capsules; author exact candidates; construct the provenance-locked verifier; narrow an explicit host activation authorization into the exact candidate-bound edit authorization; invoke the existing durable pair Hand.",
+    "authority": "The plane consumes explicit single-activation host authority. It cannot create that authority, broaden it, change recipe parameters after approval, or activate a generic model-authored candidate.",
+    "failure": "Missing or mismatched manifest, recipe applicability, environment, authority, project state, parser, verifier, writer, or rollback evidence holds. Underlying post-mutation failure follows the durable writer's rollback/recovery result."
+  },
+  "limits": {
+    "language": "python",
+    "scope": "pair",
+    "recipeId": "bounded-python-record-transform",
+    "maxActivationAuthorizationTtlMs": 60000,
+    "maxTargets": 2,
+    "generalRecipeRegistryPresent": false,
+    "arbitraryCandidateActivationPresent": false
+  },
+  "truth": {
+    "foundrySelfAuthorizes": false,
+    "activationAuthorizationDigestIsConsentOrIdentityProof": false,
+    "hostAuthorizationIsNarrowedToExactCandidates": true,
+    "parserExecutesCandidate": false,
+    "provenanceLockedVerifierMayExecuteExactCandidate": true,
+    "arbitraryCandidateExecution": false,
+    "generalPythonAuthoringClaimed": false,
+    "recipeApplicabilityProvesGeneralCompetence": false,
+    "underlyingDurableRollbackAndRecoveryReused": true
+  },
+  "permissions": ["manifest-and-receipt-validation", "bounded-donor-candidate-generation", "bounded-python-parser-process-execution", "provenance-locked-runtime-verification", "explicit-two-target-workspace-write", "rollback-restore", "separate-explicit-journal-root-read-write"],
+  "refuses": ["activation-without-explicit-host-authorization", "authorization-replay", "manifest-plan-environment-mismatch", "unsupported-language-or-graph", "unsupported-recipe-or-layout", "candidate-substitution", "generic-model-candidate-execution", "arbitrary-python-execution", "network-use", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "EXPLICIT_SINGLE_BOUNDED_RECIPE_ACTIVATION"
+}
