@@ -8,6 +8,7 @@ const environmentHand = require('./toolchain-environment-hand.js');
 const foundry = require('./hand-foundry-plane.js');
 const activationPlane = require('./foundry-activation-plane.js');
 const fixtureFactory = require('./foundry-activation-test-fixture.js');
+const recipeRegistry = require('./bounded-python-recipe-registry.js');
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
 function redigest(value, field) { delete value[field]; value[field] = registry.hash(value); return value; }
@@ -57,6 +58,27 @@ try {
   assert.strictEqual(fs.readFileSync(path.join(successFixture.workspaceRoot, 'notes/human.txt'), 'utf8'), 'do not touch\n');
   const committedSnapshot = fixtureFactory.snapshot(successFixture.workspaceRoot);
 
+  const secondFixture = fixture('axm-activation-required-fields-success-');
+  const secondSelection = fixtureFactory.recipeSelection(null, 'bounded-python-required-fields');
+  const secondAuthorization = fixtureFactory.authorization(secondFixture, environment, secondSelection);
+  const secondInput = fixtureFactory.input(secondFixture, environment, secondSelection, secondAuthorization);
+  assert.strictEqual(Object.hasOwn(secondInput, 'candidates'), false);
+  assert.strictEqual(Object.hasOwn(secondInput, 'parserContext'), false);
+  assert.strictEqual(Object.hasOwn(secondInput, 'verifierAdapters'), false);
+  const second = activationPlane.activate(secondInput);
+  assert.strictEqual(second.result, 'FOUNDRY_ACTIVATION_COMMITTED', second.errorCode);
+  assert.strictEqual(second.recipeId, 'bounded-python-required-fields');
+  assert.strictEqual(second.recipeRegistrySha256, recipeRegistry.REGISTRY.registrySha256);
+  assert.strictEqual(second.authorReceipt.result, 'PYTHON_REQUIRED_FIELDS_AUTHOR_CANDIDATES_READY_NO_APPLICATION_AUTHORITY');
+  assert.strictEqual(second.authorReceipt.parameters.requiredFields.length, 2);
+  assert.match(second.authorReceipt.candidates.source.content, /REQUIRED_FIELDS_MISSING/);
+  assert.strictEqual(second.transactionReceipt.parserReceipts.length, 4);
+  assert.strictEqual(second.transactionReceipt.verifierReceipts[0].result, 'WORKSPACE_VERIFIER_PASS');
+  assert.strictEqual(second.transactionReceipt.verifierReceipts[0].observations.exactRegisteredCandidateExecuted, true);
+  assert.strictEqual(second.truth.candidateExecutedByProvenanceVerifier, true);
+  assert.strictEqual(second.truth.crossRecipeDispatch, false);
+  assert.strictEqual(fs.readFileSync(path.join(secondFixture.workspaceRoot, 'notes/human.txt'), 'utf8'), 'do not touch\n');
+
   const replay = activationPlane.activate(activationInput);
   assert.strictEqual(replay.result, 'FOUNDRY_ACTIVATION_HELD');
   assert.strictEqual(replay.transactionReceipt.errorCode, 'EDIT_WORKSPACE_DRIFT_SINCE_PLACEMENT');
@@ -84,20 +106,43 @@ try {
   const rollbackCapsuleAuthorization = fixtureFactory.authorization(rollbackCapsuleFixture, environment, rollbackCapsuleSelection);
   hold(rollbackCapsuleFixture, rollbackCapsuleSelection, rollbackCapsuleAuthorization, /WRITER_CAPSULE_INVALID/);
 
+  const manifestRegistryFixture = fixture('axm-activation-manifest-registry-');
+  const manifestRegistrySelection = fixtureFactory.recipeSelection();
+  const registryManifest = clone(manifestRegistryFixture.manifest);
+  const authorIndex = registryManifest.handCapsules.findIndex(value => ['language-aware-file-creator', 'language-aware-structural-editor'].includes(value.handRole));
+  registryManifest.handCapsules[authorIndex].implementationSha256 = '0'.repeat(64);
+  registryManifest.handCapsules[authorIndex].recipeRegistryBinding.registrySha256 = '0'.repeat(64);
+  redigest(registryManifest.handCapsules[authorIndex], 'capsuleSha256'); redigest(registryManifest, 'manifestSha256');
+  manifestRegistryFixture.manifest = registryManifest; foundry.validateManifest(registryManifest);
+  const manifestRegistryAuthorization = fixtureFactory.authorization(manifestRegistryFixture, environment, manifestRegistrySelection);
+  hold(manifestRegistryFixture, manifestRegistrySelection, manifestRegistryAuthorization, /AUTHOR_CAPSULE_INVALID/);
+
   const tamperedSelectionFixture = fixture('axm-activation-selection-digest-');
-  const tamperedSelection = fixtureFactory.recipeSelection(); tamperedSelection.parameters.sourceField = 'forged';
-  const tamperedSelectionAuthorization = fixtureFactory.authorization(tamperedSelectionFixture, environment, tamperedSelection);
-  hold(tamperedSelectionFixture, tamperedSelection, tamperedSelectionAuthorization, /RECIPE_SELECTION_DIGEST_MISMATCH/);
+  const validTamperedSelection = fixtureFactory.recipeSelection(); const tamperedSelectionAuthorization = fixtureFactory.authorization(tamperedSelectionFixture, environment, validTamperedSelection); const tamperedSelection = clone(validTamperedSelection); tamperedSelection.parameters.sourceField = 'forged';
+  hold(tamperedSelectionFixture, tamperedSelection, tamperedSelectionAuthorization, /SELECTION_DIGEST_MISMATCH/);
 
   const unsupportedRecipeFixture = fixture('axm-activation-recipe-');
-  const unsupportedRecipe = fixtureFactory.recipeSelection(); unsupportedRecipe.recipeId = 'general-python'; redigest(unsupportedRecipe, 'selectionSha256');
-  const unsupportedRecipeAuthorization = fixtureFactory.authorization(unsupportedRecipeFixture, environment, unsupportedRecipe);
-  hold(unsupportedRecipeFixture, unsupportedRecipe, unsupportedRecipeAuthorization, /RECIPE_SELECTION_UNSUPPORTED/);
+  const supportedRecipe = fixtureFactory.recipeSelection(); const unsupportedRecipeAuthorization = fixtureFactory.authorization(unsupportedRecipeFixture, environment, supportedRecipe);
+  const unsupportedRecipe = clone(supportedRecipe); unsupportedRecipe.recipeId = 'general-python'; redigest(unsupportedRecipe, 'selectionSha256');
+  hold(unsupportedRecipeFixture, unsupportedRecipe, unsupportedRecipeAuthorization, /RECIPE_UNSUPPORTED/);
 
   const invalidParametersFixture = fixture('axm-activation-parameters-');
-  const invalidParameters = fixtureFactory.recipeSelection({...fixtureFactory.recipeSelection().parameters, maxInputKeys: 0});
-  const invalidParametersAuthorization = fixtureFactory.authorization(invalidParametersFixture, environment, invalidParameters);
+  const validParameters = fixtureFactory.recipeSelection(); const invalidParametersAuthorization = fixtureFactory.authorization(invalidParametersFixture, environment, validParameters);
+  const invalidParameters = clone(validParameters); invalidParameters.parameters.maxInputKeys = 0; redigest(invalidParameters, 'selectionSha256');
   hold(invalidParametersFixture, invalidParameters, invalidParametersAuthorization, /maxInputKeys is outside the bounded range/);
+
+  const registryBindingFixture = fixture('axm-activation-registry-binding-');
+  const registryBindingSelection = fixtureFactory.recipeSelection();
+  const registryBindingAuthorization = fixtureFactory.authorization(registryBindingFixture, environment, registryBindingSelection);
+  const forgedRegistrySelection = clone(registryBindingSelection); forgedRegistrySelection.registrySha256 = '0'.repeat(64); redigest(forgedRegistrySelection, 'selectionSha256');
+  hold(registryBindingFixture, forgedRegistrySelection, registryBindingAuthorization, /SELECTION_HEADER_INVALID/);
+
+  const crossRecipeFixture = fixture('axm-activation-cross-recipe-');
+  const requiredSelection = fixtureFactory.recipeSelection(null, 'bounded-python-required-fields');
+  const crossRecipeAuthorization = fixtureFactory.authorization(crossRecipeFixture, environment, requiredSelection);
+  const recordSelection = fixtureFactory.recipeSelection();
+  const crossRecipeSelection = clone(requiredSelection); crossRecipeSelection.builderId = recordSelection.builderId; crossRecipeSelection.builderSha256 = recordSelection.builderSha256; redigest(crossRecipeSelection, 'selectionSha256');
+  hold(crossRecipeFixture, crossRecipeSelection, crossRecipeAuthorization, /SELECTION_BINDING_INVALID/);
 
   const authorizationBindingFixture = fixture('axm-activation-auth-binding-');
   const authorizationBindingSelection = fixtureFactory.recipeSelection();
@@ -140,17 +185,21 @@ try {
 
   console.log(JSON.stringify({
     ok: true,
-    automaticHandAssembliesCommitted: 1,
+    registrySha256: recipeRegistry.REGISTRY.registrySha256,
+    registeredRecipeCount: recipeRegistry.REGISTRY.entries.length,
+    distinctRegisteredRecipesActivated: 2,
+    automaticHandAssembliesCommitted: 2,
     callerSuppliedCandidateBundles: 0,
     callerSuppliedParserContexts: 0,
     callerSuppliedVerifierAdapters: 0,
-    authorReceipts: 1,
-    pythonParserReceipts: success.transactionReceipt.parserReceipts.length,
-    provenanceLockedVerifierPasses: 1,
-    durableWriterTransactions: 1,
+    authorReceipts: 2,
+    pythonParserReceipts: success.transactionReceipt.parserReceipts.length + second.transactionReceipt.parserReceipts.length,
+    provenanceLockedVerifierPasses: 2,
+    durableWriterTransactions: 2,
     rollbackCapsuleRequired: true,
     repeatedCommittedActivationsHeldByStateDrift: 1,
     underlyingDurableReplayProtectionReused: true,
+    crossRecipeDispatches: 0,
     adversarialHolds,
     foundrySelfAuthorizations: 0,
     arbitraryCandidateExecutions: 0,

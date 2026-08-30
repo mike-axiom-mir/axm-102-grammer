@@ -8,7 +8,7 @@ const registry = require('./placement-registry.js');
 const placementPlane = require('./placement-plane.js');
 const projectMapHand = require('./project-map-hand.js');
 const foundry = require('./hand-foundry-plane.js');
-const authorHand = require('./bounded-python-record-transform-author-hand.js');
+const recipeRegistry = require('./bounded-python-recipe-registry.js');
 const activationPlane = require('./foundry-activation-plane.js');
 
 function sha256(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
@@ -58,21 +58,20 @@ function create(environmentObservation, prefix = 'axm-foundry-activation-') {
   return {harnessRoot, workspaceRoot, journalRoot, declaration, change, observation, placementPlan, manifest};
 }
 
-function recipeSelection(parameters = null) {
-  const body = {
-    schema: 'axm.code.foundry-recipe-selection.v1', version: '1.0.0',
-    recipeId: authorHand.DONOR.recipeId, recipeSha256: authorHand.DONOR.recipeSha256,
-    builderId: authorHand.DONOR.builderId, builderSha256: authorHand.DONOR.builderSha256,
-    parameters: parameters || {resultSchemaId: 'axm.python.status-normalized/v1', sourceField: 'status', targetField: 'normalized_status', defaultValue: 'unknown', maxInputKeys: 16, maxInputBytes: 4096}
-  };
-  return {...body, selectionSha256: registry.hash(body)};
+function recipeSelection(parameters = null, recipeId = 'bounded-python-record-transform') {
+  const defaults = recipeId === 'bounded-python-required-fields'
+    ? {resultSchemaId: 'axm.python.required-record/v1', requiredFields: ['request_id', 'status'], allowExtraFields: false, maxInputKeys: 16, maxInputBytes: 4096}
+    : {resultSchemaId: 'axm.python.status-normalized/v1', sourceField: 'status', targetField: 'normalized_status', defaultValue: 'unknown', maxInputKeys: 16, maxInputBytes: 4096};
+  return recipeRegistry.createSelection(recipeId, parameters || defaults);
 }
 
 let authorizationSequence = 0;
 function authorization(fixture, environmentObservation, selection, mutate = null, times = null) {
   authorizationSequence += 1;
   const parser = fixture.manifest.handCapsules.find(value => value.handRole === 'language-parser');
+  const author = fixture.manifest.handCapsules.find(value => ['language-aware-file-creator', 'language-aware-structural-editor'].includes(value.handRole));
   const verifier = fixture.manifest.handCapsules.find(value => value.handRole === 'verification-runner');
+  const runtime = recipeRegistry.validateSelection(selection);
   const issuedMs = times?.issuedMs ?? Date.now();
   const expiresMs = times?.expiresMs ?? Math.min(issuedMs + activationPlane.AUTHORIZATION_TTL_MS, Date.parse(fixture.observation.expiresAt), Date.parse(environmentObservation.expiresAt));
   const body = (mutate || (value => value))({
@@ -82,8 +81,9 @@ function authorization(fixture, environmentObservation, selection, mutate = null
     workspaceRootIdentitySha256: registry.hash(path.resolve(fixture.workspaceRoot)), journalRootIdentitySha256: registry.hash(path.resolve(fixture.journalRoot)),
     projectMapObservationSha256: fixture.observation.observationSha256, placementPlanSha256: fixture.placementPlan.planSha256,
     manifestSha256: fixture.manifest.manifestSha256, environmentObservationSha256: environmentObservation.environmentObservationSha256,
-    recipeSelectionSha256: selection.selectionSha256, authorImplementationSha256: authorHand.DONOR.builderSha256,
-    parserCapsuleSha256: parser.capsuleSha256, verifierImplementationSha256: verifier.implementationSha256,
+    recipeRegistrySha256: recipeRegistry.REGISTRY.registrySha256, recipeSelectionSha256: selection.selectionSha256,
+    authorCapsuleSha256: author.capsuleSha256, authorImplementationSha256: runtime.descriptor.builderSha256,
+    parserCapsuleSha256: parser.capsuleSha256, verifierCapsuleSha256: verifier.capsuleSha256, verifierImplementationSha256: runtime.descriptor.verifierRunnerSha256,
     rollbackRequired: true, durableRecoveryRequired: true,
     authority: {workspaceMutation: true, rollbackWrite: true, provenanceLockedCandidateExecution: true, arbitraryCandidateExecution: false, network: false, install: false, deployment: false},
     truth: {digestIsSignerOrConsentProof: false, foundryMaySelfAuthorize: false}

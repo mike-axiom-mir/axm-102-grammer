@@ -1,0 +1,145 @@
+AXM 102 GRAMMAR — BOUNDED PYTHON RECIPE REGISTRY VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: 16dff4b8795ece67c2933e893ac7cb7a002b605e
+Lane parent tree: 3f87dac681c7b81bd1eec8db7802f1fe53ec6722
+Production repositories edited by trials: 0
+
+ENVIRONMENT RECEIPT
+Contract OS / actual: Linux / Linux 6.18.35 x86_64
+Contract Node / actual: >=18 / v24.19.0
+Contract Python / actual: Python 3 / Python 3.12.13
+Contract hard limits / actual: prlimit / util-linux 2.39.3 usable
+Contract namespace sandbox / actual: optional truthful seam / bubblewrap 0.9.0 installed but unusable
+Environment seam: HOST_SANDBOX_UNAVAILABLE:NAMESPACE_PERMISSION_DENIED
+Safe to execute: exact receipt-bound registered candidates only
+Safe to execute arbitrary Python: no
+
+REGISTRY MODEL
+Registry schema: axm.code.bounded-python-recipe-registry.v1
+Registry digest: 4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e
+Registered entries: 2
+
+Entry 1: bounded-python-record-transform
+- provenance: externally reviewed PR #51 donor digest
+- author: bounded-python-record-transform-v1
+- verifier: bounded-python-record-transform-unit-test
+- exact receipt regeneration required: yes
+
+Entry 2: bounded-python-required-fields
+- provenance: current source and adversarial tests
+- author: bounded-python-required-fields-v1
+- verifier: bounded-python-required-fields-unit-test
+- purpose: validate one bounded list of required non-empty string fields
+- exact receipt regeneration required: yes
+- human review claimed: no
+
+The registry digest covers each entry's recipe, builder, author receipt schema/result,
+verifier runner, provenance class, and authority refusals. Runtime routing captures frozen
+author/receipt/verifier function references. No dynamic modules or arbitrary candidates
+can enter through a selection.
+
+COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-registry.js
+
+RESULT
+{
+  "ok": true,
+  "registrySha256": "4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e",
+  "registeredRecipeCount": 2,
+  "independentlyBoundBuilderCount": 2,
+  "independentlyBoundVerifierRunnerCount": 2,
+  "requiredFieldsAuthorReceipts": 1,
+  "requiredFieldsProvenanceLockedVerifierPasses": 1,
+  "crossRecipeDispatches": 0,
+  "mutableModuleRouterSurfaces": 0,
+  "arbitraryCandidateExecutions": 0,
+  "workspaceMutations": 0,
+  "adversarialHolds": 8
+}
+
+REGISTRY ADVERSARIAL HOLDS
+1. registry entry changed without a matching registry digest
+2. recipe parameters changed without a matching selection digest
+3. unregistered recipe identity
+4. selected builder substituted across recipes
+5. selected verifier runner substituted across recipes
+6. required field list outside its bounded range
+7. record-transform author receipt passed to the required-fields verifier
+8. candidate content substituted after the required-fields author receipt
+
+COMMAND
+node software-directions/placement/selftest-foundry-activation-plane.js
+
+RESULT
+{
+  "ok": true,
+  "registrySha256": "4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e",
+  "registeredRecipeCount": 2,
+  "distinctRegisteredRecipesActivated": 2,
+  "automaticHandAssembliesCommitted": 2,
+  "callerSuppliedCandidateBundles": 0,
+  "callerSuppliedParserContexts": 0,
+  "callerSuppliedVerifierAdapters": 0,
+  "authorReceipts": 2,
+  "pythonParserReceipts": 8,
+  "provenanceLockedVerifierPasses": 2,
+  "durableWriterTransactions": 2,
+  "rollbackCapsuleRequired": true,
+  "repeatedCommittedActivationsHeldByStateDrift": 1,
+  "underlyingDurableReplayProtectionReused": true,
+  "crossRecipeDispatches": 0,
+  "adversarialHolds": 16,
+  "foundrySelfAuthorizations": 0,
+  "arbitraryCandidateExecutions": 0,
+  "generalPythonAuthoringClaimed": false,
+  "hostNamespaceSandboxUsable": false
+}
+
+ACTIVATION ADVERSARIAL HOLDS
+1. repeated activation after committed state changed
+2. missing activation authorization
+3. tampered manifest digest
+4. digest-valid substituted rollback implementation
+5. digest-valid manifest bound to another recipe-registry digest
+6. tampered recipe-selection digest
+7. unregistered recipe identity
+8. invalid bounded recipe parameters
+9. recipe selection bound to another registry digest
+10. cross-recipe builder substitution
+11. authorization bound to another manifest
+12. authorization requesting arbitrary candidate execution
+13. stale activation authorization
+14. authorization bound to another parser capsule
+15. tampered environment observation
+16. workspace drift after observation
+
+Every held activation matched its exact before/after workspace snapshot at return.
+
+COMMAND
+npm test
+
+RESULT
+SUITE_RESULT: passed=31 failed=0 total=31
+Process exit: 0
+Observed completion: 2026-08-30T20:00:38Z
+
+REGRESSION EVIDENCE RETAINED
+- language organs: 102
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- direct record-transform commit and rollback: pass
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- pair recovery rollbacks: 14
+- graph recovery rollbacks: 20
+
+TRUTH BOUNDARY
+This proves deterministic registry routing and activation for two exact Python recipes.
+It does not prove general Python authoring, arbitrary model-candidate execution, dynamic
+recipe loading, graph activation, namespace/filesystem/network isolation, deployment,
+promotion, canon authority, universal correctness, or universal sudden-power-loss safety.
+The second recipe is current-source/test bound and has not been claimed as human-reviewed.
+Registry, selection, authorization, and receipt digests are bindings, not identity,
+signature, or consent proof.

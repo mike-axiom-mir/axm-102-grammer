@@ -5,6 +5,7 @@ const registry = require('./placement-registry.js');
 const editGraphPlane = require('./edit-graph-plane.js');
 const environmentHand = require('./toolchain-environment-hand.js');
 const spawnedParser = require('./spawned-parser-hand.js');
+const pythonRecipeRegistry = require('./bounded-python-recipe-registry.js');
 
 const MIN_PLANS = 1;
 const MAX_PLANS = 4;
@@ -85,10 +86,11 @@ function capsule(base, details) {
 function sourceAuthorDetails(organ) {
   if (organ.execution === 'PR51_SOURCE_REVIEWED_DONOR_BOUND_RUNTIME_UNKNOWN' && organ.donor) {
     return {
-      status: 'RECIPE_INPUT_REQUIRED', implementationId: organ.donor.builder, implementationSha256: organ.donor.builderSha256,
+      status: 'RECIPE_SELECTION_REQUIRED', implementationId: pythonRecipeRegistry.REGISTRY_ID, implementationSha256: pythonRecipeRegistry.REGISTRY.registrySha256,
+      recipeRegistryBinding: pythonRecipeRegistry.capsuleBinding(),
       donorBinding: {pr: organ.donor.pr, head: organ.donor.head, profile: organ.donor.profile, profileSha256: organ.donor.profileSha256, recipe: organ.donor.recipe, recipeSha256: organ.donor.recipeSha256, builder: organ.donor.builder, builderSha256: organ.donor.builderSha256, candidateEntry: organ.donor.candidateEntry, runtimeCorrectness: organ.donor.runtimeCorrectness},
-      errorCode: 'BOUNDED_RECIPE_LAYOUT_AND_PARAMETERS_REQUIRED',
-      truth: {donorMetadataMeansSourcePresent: true, implementationPresent: true, boundedRecipeOnly: true, generalLanguageAuthoringAvailable: false, runtimeCorrectnessRequiresBoundVerifier: true, codeGenerated: false, foundryGrantedExecutionAuthority: false}
+      errorCode: 'BOUNDED_RECIPE_SELECTION_LAYOUT_AND_PARAMETERS_REQUIRED',
+      truth: {donorMetadataMeansSourcePresent: true, implementationPresent: true, boundedRecipeRegistryPresent: true, registeredRecipeCount: pythonRecipeRegistry.REGISTRY.entries.length, boundedRecipeOnly: true, generalLanguageAuthoringAvailable: false, runtimeCorrectnessRequiresBoundVerifier: true, codeGenerated: false, foundryGrantedExecutionAuthority: false}
     };
   }
   return {status: 'DELEGATED', implementationId: null, implementationSha256: null, errorCode: 'EXACT_CANDIDATE_AUTHOR_REQUIRED', truth: {donorMetadataMeansSourcePresent: false, implementationRuntimeProven: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
@@ -118,8 +120,8 @@ function parserDetails(languageId, environmentObservation) {
 function verifierDetails(languageId, environmentObservation) {
   const sandbox = environmentObservation.candidateExecutionIsolation;
   if (languageId === 'python') {
-    const implementationId = 'bounded-python-record-transform-verifier-adapter-v1';
-    return {status: 'RECIPE_SELECTION_REQUIRED', implementationId, implementationSha256: registry.hash(implementationId), errorCode: 'BOUNDED_AUTHOR_RECEIPT_OR_HOST_VERIFIER_REQUIRED', truth: {implementationPresent: true, provenanceLockedRecipeOnly: true, arbitraryCandidateExecutionAvailable: false, hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
+    const implementationId = 'bounded-python-recipe-registry-verifier-router-v1';
+    return {status: 'RECIPE_SELECTION_REQUIRED', implementationId, implementationSha256: pythonRecipeRegistry.REGISTRY.registrySha256, recipeRegistryBinding: pythonRecipeRegistry.capsuleBinding(), errorCode: 'REGISTERED_BOUNDED_AUTHOR_RECEIPT_REQUIRED', truth: {implementationPresent: true, boundedRecipeRegistryPresent: true, registeredRecipeCount: pythonRecipeRegistry.REGISTRY.entries.length, provenanceLockedRecipeOnly: true, arbitraryCandidateExecutionAvailable: false, hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
   }
   if (languageId === 'javascript') return {status: 'HOST_BINDING_REQUIRED', implementationId: 'host-digest-bound-verifier-adapter-v1', implementationSha256: registry.hash('host-digest-bound-verifier-adapter-v1'), errorCode: 'REQUESTED_VERIFIER_ADAPTER_REQUIRED', truth: {hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
   return {status: 'IMPLEMENTATION_HELD', implementationId: null, implementationSha256: null, errorCode: 'LANGUAGE_VERIFICATION_RUNNER_NOT_BOUND', truth: {hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};

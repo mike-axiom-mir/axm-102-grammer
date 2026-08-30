@@ -6,6 +6,7 @@ const registry = require('./placement-registry.js');
 const foundry = require('./hand-foundry-plane.js');
 const parser = require('./spawned-parser-hand.js');
 const environmentHand = require('./toolchain-environment-hand.js');
+const pythonRecipeRegistry = require('./bounded-python-recipe-registry.js');
 const pythonFixtureFactory = require('./python-hand-foundry-test-fixture.js');
 const graphFixtureFactory = require('./edit-graph-test-fixture.js');
 
@@ -24,7 +25,7 @@ try {
   assert.strictEqual(pythonManifest.result, 'HAND_SPAWN_MANIFEST_READY_WITH_HOLDS');
   assert.strictEqual(pythonManifest.languageId, 'python'); assert.strictEqual(pythonManifest.scope, 'pair'); assert.strictEqual(pythonManifest.handCapsuleCount, 6);
   const pythonAuthor = capsule(pythonManifest, 'language-aware-structural-editor');
-  assert.strictEqual(pythonAuthor.status, 'RECIPE_INPUT_REQUIRED'); assert.strictEqual(pythonAuthor.errorCode, 'BOUNDED_RECIPE_LAYOUT_AND_PARAMETERS_REQUIRED'); assert.strictEqual(pythonAuthor.truth.donorMetadataMeansSourcePresent, true); assert.strictEqual(pythonAuthor.truth.generalLanguageAuthoringAvailable, false); assert.strictEqual(pythonAuthor.donorBinding.runtimeCorrectness, 'UNKNOWN');
+  assert.strictEqual(pythonAuthor.status, 'RECIPE_SELECTION_REQUIRED'); assert.strictEqual(pythonAuthor.errorCode, 'BOUNDED_RECIPE_SELECTION_LAYOUT_AND_PARAMETERS_REQUIRED'); assert.strictEqual(pythonAuthor.implementationId, pythonRecipeRegistry.REGISTRY_ID); assert.strictEqual(pythonAuthor.implementationSha256, pythonRecipeRegistry.REGISTRY.registrySha256); assert.strictEqual(pythonAuthor.recipeRegistryBinding.recipeCount, 2); assert.strictEqual(pythonAuthor.truth.donorMetadataMeansSourcePresent, true); assert.strictEqual(pythonAuthor.truth.generalLanguageAuthoringAvailable, false); assert.strictEqual(pythonAuthor.donorBinding.runtimeCorrectness, 'UNKNOWN');
   assert.strictEqual(capsule(pythonManifest, 'exact-byte-writer').status, 'AUTHORIZATION_REQUIRED');
   assert.strictEqual(capsule(pythonManifest, 'exact-byte-writer').implementationId, 'workspace-edit-hand-v1');
   assert.strictEqual(capsule(pythonManifest, 'rollback-writer').status, 'AUTHORIZATION_REQUIRED');
@@ -37,8 +38,10 @@ try {
   for (const receipt of [validSource, validVerification, invalidSource]) { assert.strictEqual(receipt.truth.candidateExecuted, false); assert.strictEqual(receipt.truth.workspaceRead, false); assert.strictEqual(receipt.truth.workspaceMutation, false); }
   const pythonVerifier = capsule(pythonManifest, 'verification-runner');
   assert.strictEqual(pythonVerifier.status, 'RECIPE_SELECTION_REQUIRED');
-  assert.strictEqual(pythonVerifier.implementationId, 'bounded-python-record-transform-verifier-adapter-v1');
-  assert.strictEqual(pythonVerifier.errorCode, 'BOUNDED_AUTHOR_RECEIPT_OR_HOST_VERIFIER_REQUIRED');
+  assert.strictEqual(pythonVerifier.implementationId, 'bounded-python-recipe-registry-verifier-router-v1');
+  assert.strictEqual(pythonVerifier.implementationSha256, pythonRecipeRegistry.REGISTRY.registrySha256);
+  assert.strictEqual(pythonVerifier.recipeRegistryBinding.recipeCount, 2);
+  assert.strictEqual(pythonVerifier.errorCode, 'REGISTERED_BOUNDED_AUTHOR_RECEIPT_REQUIRED');
   assert.strictEqual(pythonVerifier.truth.arbitraryCandidateExecutionAvailable, false);
   assert.deepStrictEqual(pythonFixtureFactory.snapshot(pythonFixture.workspaceRoot), pythonBefore);
 

@@ -4,8 +4,7 @@ const path = require('path');
 const registry = require('./placement-registry.js');
 const foundry = require('./hand-foundry-plane.js');
 const environmentHand = require('./toolchain-environment-hand.js');
-const authorHand = require('./bounded-python-record-transform-author-hand.js');
-const verifierFactory = require('./bounded-python-record-transform-verifier-adapter.js');
+const pythonRecipeRegistry = require('./bounded-python-recipe-registry.js');
 const editHand = require('./workspace-edit-hand.js');
 
 const HEX64 = /^[a-f0-9]{64}$/;
@@ -29,13 +28,7 @@ function digestReceipt(value, field, code) {
 }
 
 function selection(value) {
-  digestReceipt(value, 'selectionSha256', 'FOUNDRY_ACTIVATION_RECIPE_SELECTION');
-  const keys = Object.keys(value).sort();
-  const expectedKeys = ['builderId', 'builderSha256', 'parameters', 'recipeId', 'recipeSha256', 'schema', 'selectionSha256', 'version'].sort();
-  if (registry.canon(keys) !== registry.canon(expectedKeys)) throw Error('FOUNDRY_ACTIVATION_RECIPE_SELECTION_KEYS_INVALID');
-  if (value.schema !== 'axm.code.foundry-recipe-selection.v1' || value.version !== '1.0.0' || value.recipeId !== authorHand.DONOR.recipeId || value.recipeSha256 !== authorHand.DONOR.recipeSha256 || value.builderId !== authorHand.DONOR.builderId || value.builderSha256 !== authorHand.DONOR.builderSha256) throw Error('FOUNDRY_ACTIVATION_RECIPE_SELECTION_UNSUPPORTED');
-  authorHand.buildPythonRecordTransform(value.parameters);
-  return value;
+  return pythonRecipeRegistry.validateSelection(value);
 }
 
 function capsule(manifest, role) {
@@ -55,10 +48,10 @@ function validateAssembly(manifest, observation, plan, environmentObservation) {
   const parser = capsule(manifest, 'language-parser');
   const verifier = capsule(manifest, 'verification-runner');
   const rollback = capsule(manifest, 'rollback-writer');
-  if (!author || author.status !== 'RECIPE_INPUT_REQUIRED' || author.implementationId !== authorHand.DONOR.builderId || author.implementationSha256 !== authorHand.DONOR.builderSha256) throw Error('FOUNDRY_ACTIVATION_AUTHOR_CAPSULE_INVALID');
+  if (!author || author.status !== 'RECIPE_SELECTION_REQUIRED' || author.implementationId !== pythonRecipeRegistry.REGISTRY_ID || author.implementationSha256 !== pythonRecipeRegistry.REGISTRY.registrySha256 || registry.canon(author.recipeRegistryBinding) !== registry.canon(pythonRecipeRegistry.capsuleBinding())) throw Error('FOUNDRY_ACTIVATION_AUTHOR_CAPSULE_INVALID');
   if (!writer || writer.status !== 'AUTHORIZATION_REQUIRED' || writer.implementationId !== 'workspace-edit-hand-v1' || !rollback || rollback.status !== 'AUTHORIZATION_REQUIRED' || rollback.implementationId !== 'workspace-edit-hand-v1') throw Error('FOUNDRY_ACTIVATION_WRITER_CAPSULE_INVALID');
   if (!parser || parser.status !== 'SPAWNED_NO_EXECUTION_AUTHORITY' || parser.parserId !== 'python-ast-exec-syntax-v1') throw Error('FOUNDRY_ACTIVATION_PARSER_CAPSULE_INVALID');
-  if (!verifier || verifier.status !== 'RECIPE_SELECTION_REQUIRED' || verifier.implementationId !== 'bounded-python-record-transform-verifier-adapter-v1') throw Error('FOUNDRY_ACTIVATION_VERIFIER_CAPSULE_INVALID');
+  if (!verifier || verifier.status !== 'RECIPE_SELECTION_REQUIRED' || verifier.implementationId !== 'bounded-python-recipe-registry-verifier-router-v1' || verifier.implementationSha256 !== pythonRecipeRegistry.REGISTRY.registrySha256 || registry.canon(verifier.recipeRegistryBinding) !== registry.canon(pythonRecipeRegistry.capsuleBinding())) throw Error('FOUNDRY_ACTIVATION_VERIFIER_CAPSULE_INVALID');
   return {author, writer, parser, verifier, rollback};
 }
 
@@ -75,7 +68,7 @@ function validateAuthorization(value, context) {
   const issuedAt = Date.parse(value.issuedAt); const expiresAt = Date.parse(value.expiresAt); const now = Date.now();
   if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt) || new Date(issuedAt).toISOString() !== value.issuedAt || new Date(expiresAt).toISOString() !== value.expiresAt || expiresAt <= issuedAt || value.ttlMs !== expiresAt - issuedAt || value.ttlMs > AUTHORIZATION_TTL_MS || issuedAt > now + 5000) throw Error('FOUNDRY_ACTIVATION_AUTHORIZATION_TIME_INVALID');
   if (now > expiresAt || expiresAt > Date.parse(context.observation.expiresAt) || expiresAt > Date.parse(context.environment.expiresAt)) throw Error('FOUNDRY_ACTIVATION_AUTHORIZATION_STALE');
-  if (value.workspaceRootIdentitySha256 !== registry.hash(context.workspaceRoot) || value.journalRootIdentitySha256 !== registry.hash(context.journalRoot) || value.projectMapObservationSha256 !== context.observation.observationSha256 || value.placementPlanSha256 !== context.plan.planSha256 || value.manifestSha256 !== context.manifest.manifestSha256 || value.environmentObservationSha256 !== context.environment.environmentObservationSha256 || value.recipeSelectionSha256 !== context.recipeSelection.selectionSha256 || value.authorImplementationSha256 !== authorHand.DONOR.builderSha256 || value.parserCapsuleSha256 !== context.capsules.parser.capsuleSha256 || value.verifierImplementationSha256 !== context.capsules.verifier.implementationSha256 || value.rollbackRequired !== true || value.durableRecoveryRequired !== true) throw Error('FOUNDRY_ACTIVATION_AUTHORIZATION_BINDING_INVALID');
+  if (value.workspaceRootIdentitySha256 !== registry.hash(context.workspaceRoot) || value.journalRootIdentitySha256 !== registry.hash(context.journalRoot) || value.projectMapObservationSha256 !== context.observation.observationSha256 || value.placementPlanSha256 !== context.plan.planSha256 || value.manifestSha256 !== context.manifest.manifestSha256 || value.environmentObservationSha256 !== context.environment.environmentObservationSha256 || value.recipeRegistrySha256 !== pythonRecipeRegistry.REGISTRY.registrySha256 || value.recipeSelectionSha256 !== context.recipeSelection.selectionSha256 || value.authorCapsuleSha256 !== context.capsules.author.capsuleSha256 || value.authorImplementationSha256 !== context.runtime.descriptor.builderSha256 || value.parserCapsuleSha256 !== context.capsules.parser.capsuleSha256 || value.verifierCapsuleSha256 !== context.capsules.verifier.capsuleSha256 || value.verifierImplementationSha256 !== context.runtime.descriptor.verifierRunnerSha256 || value.rollbackRequired !== true || value.durableRecoveryRequired !== true) throw Error('FOUNDRY_ACTIVATION_AUTHORIZATION_BINDING_INVALID');
   if (value.authority?.workspaceMutation !== true || value.authority?.rollbackWrite !== true || value.authority?.provenanceLockedCandidateExecution !== true || value.authority?.arbitraryCandidateExecution !== false || value.authority?.network !== false || value.authority?.install !== false || value.authority?.deployment !== false || value.truth?.digestIsSignerOrConsentProof !== false || value.truth?.foundryMaySelfAuthorize !== false) throw Error('FOUNDRY_ACTIVATION_AUTHORIZATION_AUTHORITY_INVALID');
   return value;
 }
@@ -121,16 +114,17 @@ function activate({workspaceRoot = null, journalRoot = null, declaration = null,
   try {
     const resolvedWorkspace = absoluteRoot(workspaceRoot, 'FOUNDRY_ACTIVATION_WORKSPACE_ROOT');
     const resolvedJournal = absoluteRoot(journalRoot, 'FOUNDRY_ACTIVATION_JOURNAL_ROOT');
-    const selected = selection(recipeSelection);
+    const runtime = selection(recipeSelection);
+    const selected = recipeSelection;
     const capsules = validateAssembly(manifest, projectMapObservation, placementPlan, environmentObservation);
-    const context = {workspaceRoot: resolvedWorkspace, journalRoot: resolvedJournal, observation: projectMapObservation, plan: placementPlan, manifest, environment: environmentObservation, recipeSelection: selected, capsules};
+    const context = {workspaceRoot: resolvedWorkspace, journalRoot: resolvedJournal, observation: projectMapObservation, plan: placementPlan, manifest, environment: environmentObservation, recipeSelection: selected, runtime, capsules};
     validateAuthorization(authorization, context);
     explicitHostAuthorizationValidated = true;
-    const authorReceipt = authorHand.author({placementPlan, parameters: selected.parameters});
-    if (authorReceipt.result !== 'PYTHON_AUTHOR_CANDIDATES_READY_NO_APPLICATION_AUTHORITY') throw Error('FOUNDRY_ACTIVATION_AUTHOR_HELD:' + authorReceipt.errorCode);
-    authorHand.validateReceipt(authorReceipt);
+    const authorReceipt = runtime.author({placementPlan, parameters: selected.parameters});
+    if (authorReceipt.result !== runtime.descriptor.authorReadyResult) throw Error('FOUNDRY_ACTIVATION_AUTHOR_HELD:' + authorReceipt.errorCode);
+    runtime.validateAuthorReceipt(authorReceipt);
     candidateGenerated = true;
-    const verifier = verifierFactory.create({authorReceipt, environmentObservation});
+    const verifier = runtime.createVerifier({authorReceipt, environmentObservation});
     const editAuthorization = derivedEditAuthorization(authorization, context, authorReceipt, verifier);
     handsAssembled = true;
     const transactionReceipt = editHand.apply({
@@ -148,11 +142,12 @@ function activate({workspaceRoot = null, journalRoot = null, declaration = null,
     const body = {
       schema: 'axm.code.foundry-activation-receipt.v1', version: '1.0.0', status: 'TEST', result, errorCode: transactionReceipt.errorCode,
       activationId: authorization.activationId, activationAuthorizationSha256: authorization.authorizationSha256,
+      recipeRegistrySha256: pythonRecipeRegistry.REGISTRY.registrySha256, recipeId: selected.recipeId, recipeEntrySha256: runtime.descriptor.entrySha256,
       manifestSha256: manifest.manifestSha256, recipeSelectionSha256: selected.selectionSha256,
       placementPlanSha256: placementPlan.planSha256, projectMapObservationSha256: projectMapObservation.observationSha256,
       authorReceipt, verifierAdapter: {id: verifier.id, adapterSha256: verifier.adapterSha256, providesVerifierId: verifier.providesVerifierId},
       derivedEditAuthorizationSha256: editAuthorization.authorizationSha256, transactionReceipt,
-      truth: {handsAssembled: true, explicitHostAuthorizationValidated: true, explicitHostAuthorizationConsumed: true, foundrySelfAuthorized: false, candidateGenerated: true, candidateExecutedByParser: false, candidateExecutedByProvenanceVerifier: transactionReceipt.verifierReceipts?.some(value => value.observations?.exactDonorCandidateExecuted === true) === true, workspaceMutationAttempted: mutationAttempted, arbitraryCandidateExecution: false, generalPythonAuthoringClaimed: false, recipeApplicabilityProvesGeneralCompetence: false},
+      truth: {handsAssembled: true, explicitHostAuthorizationValidated: true, explicitHostAuthorizationConsumed: true, foundrySelfAuthorized: false, candidateGenerated: true, candidateExecutedByParser: false, candidateExecutedByProvenanceVerifier: transactionReceipt.verifierReceipts?.some(value => value.observations?.exactDonorCandidateExecuted === true || value.observations?.exactRegisteredCandidateExecuted === true) === true, crossRecipeDispatch: false, workspaceMutationAttempted: mutationAttempted, arbitraryCandidateExecution: false, generalPythonAuthoringClaimed: false, recipeApplicabilityProvesGeneralCompetence: false},
       authority: AUTHORITY
     };
     return receipt(body);
