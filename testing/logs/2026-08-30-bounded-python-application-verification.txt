@@ -1,0 +1,115 @@
+AXM 102 GRAMMAR — BOUNDED PYTHON APPLICATION VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: f9dc7c397e0c0c698cb82860d6ce074408698874
+Lane parent tree: 95315a87bbf32843a6861b8c105ba7463ec8bd3d
+Production repositories edited by trials: 0
+
+ENVIRONMENT
+Linux 6.18.35 x86_64 GNU/Linux
+Node v24.19.0
+Python 3.12.13
+prlimit from util-linux 2.39.3
+bubblewrap 0.9.0
+
+The fixed environment observation reported Python 3 and prlimit usable.
+The bubblewrap namespace probe failed with NAMESPACE_PERMISSION_DENIED.
+The bounded verifier therefore records:
+- host namespace sandbox: false
+- host filesystem isolation: false
+- host network isolation: false
+- arbitrary Python candidate execution: false
+
+DONOR BINDING
+Repository: mike-axiom-mir/axm-collaboration-platform
+PR: #51
+Head: 085a4b4e32d626d212babbfa0c5fd1d33e8f7ff4
+Recipe: bounded-python-record-transform
+Recipe digest: 82d04d8b78e44978f4d5a42c8c7fb62b944279c89dd498f1268d3cfa97bc5637
+Builder: bounded-python-record-transform-v1
+Expected builder digest: ad281fa5a1381de86d71e1c4a2ffbad30ee20683cb705b4a09d778464ea5227c
+Reproduced builder digest: ad281fa5a1381de86d71e1c4a2ffbad30ee20683cb705b4a09d778464ea5227c
+
+COMMAND
+node software-directions/placement/selftest-bounded-python-application.js
+
+RESULT
+{
+  "ok": true,
+  "donorImplementationDigestReproduced": true,
+  "pythonApplicationTransactionsCommitted": 1,
+  "provenanceLockedRuntimePasses": 1,
+  "pythonRollbackPasses": 1,
+  "pythonParserReceipts": 8,
+  "adversarialHolds": 11,
+  "exactTargetsPerTransaction": 2,
+  "hostNamespaceSandboxUsable": false,
+  "arbitraryPythonExecutionClaimed": false,
+  "generalPythonAuthoringClaimed": false
+}
+
+SUCCESS PATH
+1. A read-only project-map Hand observed an existing Python application owner at
+   src/application/capability.py and its declared verification seam at
+   testing/application/selftest.py.
+2. The placement plane returned one digest-bound application plan with expected
+   export run and requested verifier unit-test.
+3. The bounded author reproduced the donor implementation digest and emitted exact
+   source/test candidate bytes without reading or mutating the workspace.
+4. The authorization bound both candidate digests, the fresh project observation,
+   placement plan, durable journal root, Foundry Python parser capsule, live toolchain
+   observation, and provenance-locked verifier adapter.
+5. Both candidates passed python3 -I -S ast.parse before mutation and after install.
+6. The provenance-locked verifier independently regenerated both candidates, required
+   exact content/path/digest equality, and executed the source and emitted selftest
+   in memory under prlimit.
+7. The transaction committed exactly two planned targets. An unrelated human note
+   remained byte-identical.
+
+ROLLBACK PATH
+One separately authorized transaction used the same exact donor candidates with an
+intentionally failing registered verifier. Both prior target byte sequences and modes
+were restored, transaction artifacts were removed, and the durable journal recorded
+ROLLBACK_PASS.
+
+ADVERSARIAL HOLDS
+1. missing Python parser context
+2. authorization bound to the wrong parser capsule digest
+3. Python syntax failure before mutation
+4. workspace drift after observation
+5. stale transaction authorization
+6. donor-incompatible target layout
+7. out-of-range donor parameter
+8. tampered placement plan digest
+9. digest-valid forged author receipt with substituted candidate
+10. runtime candidate substitution against a valid verifier
+11. digest-valid environment receipt with substituted Python executable path
+
+COMMAND
+npm test
+
+RESULT
+SUITE_RESULT: passed=29 failed=0 total=29
+Process exit: 0
+Observed completion: 2026-08-30T15:58:06Z
+
+REGRESSION EVIDENCE RETAINED BY THE FULL RUN
+- language organs: 102
+- per-language payloads: 612
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- pair recovery rollbacks: 14
+- pair recovery commits: 4 recovered plus 2 already final
+- graph recovery rollbacks: 20
+- graph recovery commits: 2 recovered plus 1 already committed
+
+TRUTH BOUNDARY
+This evidence proves one reviewed, dependency-free Python recipe can be deterministically
+authored, parsed, applied, behaviorally exercised, committed, rolled back, and refused
+on substitution in disposable production-shaped fixtures. It does not prove general
+Python authorship, arbitrary candidate sandboxing, namespace/filesystem/network isolation,
+production deployment, universal correctness, universal sudden-power-loss safety,
+automatic authority, promotion, or canon change.

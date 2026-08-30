@@ -8,8 +8,9 @@ const placementPlane = require('./placement-plane.js');
 const projectMapHand = require('./project-map-hand.js');
 const registry = require('./placement-registry.js');
 const journal = require('./workspace-edit-journal.js');
+const spawnedParser = require('./spawned-parser-hand.js');
 
-const AUTHORITY = Object.freeze({workspaceRead: true, workspaceMutation: true, exactNamedTargetWrite: true, rollbackWrite: true, externalJournalReadWrite: true, workspaceLease: true, verifierAdapterInvocation: true, childProcessExecution: false, network: false, install: false, deployment: false, userFileDeletion: false, transactionArtifactCleanup: true, promotion: false, canon: false});
+const AUTHORITY = Object.freeze({workspaceRead: true, workspaceMutation: true, exactNamedTargetWrite: true, rollbackWrite: true, externalJournalReadWrite: true, workspaceLease: true, verifierAdapterInvocation: true, childProcessExecution: true, boundedParserProcessExecution: true, candidateExecutionByParser: false, network: false, install: false, deployment: false, userFileDeletion: false, transactionArtifactCleanup: true, promotion: false, canon: false});
 const AUTHORIZATION_TTL_MS = 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 5000;
 const MAX_CANDIDATE_BYTES = 1024 * 1024;
@@ -103,7 +104,7 @@ function validatePlan(plan, observation) {
   if (plan.authority?.workspaceMutation !== false || plan.truth?.authorizedHandsRequiredForApplication !== true) throw Error('EDIT_PLACEMENT_PLAN_AUTHORITY_INVALID');
   if (!['extend-existing', 'create-module'].includes(plan.sourcePlacement?.action) || !['extend-existing-test', 'create-test-module'].includes(plan.verificationPlacement?.action)) throw Error('EDIT_PLACEMENT_ACTION_UNSUPPORTED');
   if (plan.verificationPlacement.verifiesSourcePath !== plan.sourcePlacement.targetPath || plan.sourcePlacement.targetPath === plan.verificationPlacement.targetPath) throw Error('EDIT_PLACEMENT_TARGET_BINDING_INVALID');
-  if (plan.languageBinding?.languageId !== 'javascript') throw Error('EDIT_LANGUAGE_PARSER_UNSUPPORTED');
+  if (!['javascript', 'python'].includes(plan.languageBinding?.languageId)) throw Error('EDIT_LANGUAGE_PARSER_UNSUPPORTED');
   const projectMap = observation.projectMap;
   const protectedTarget = target => projectMap.protectedPaths.some(item => target === item || target.startsWith(`${item}/`));
   const below = (target, root) => root === '.' ? !target.startsWith('/') && !target.startsWith('../') : target === root || target.startsWith(`${root}/`);
@@ -127,7 +128,16 @@ function candidate(value, lane, placement, languageId) {
   const bytes = Buffer.from(value.content, 'utf8');
   if (bytes.length === 0 || bytes.length > MAX_CANDIDATE_BYTES) throw Error(`EDIT_${lane.toUpperCase()}_CANDIDATE_SIZE_INVALID`);
   if (!HEX64.test(value.contentSha256 || '') || sha256(bytes) !== value.contentSha256) throw Error(`EDIT_${lane.toUpperCase()}_CANDIDATE_DIGEST_MISMATCH`);
-  return {lane, targetPath: value.targetPath, languageId: value.languageId, content: value.content, bytes, contentSha256: value.contentSha256};
+  return {schema: value.schema, version: value.version, lane, targetPath: value.targetPath, languageId: value.languageId, content: value.content, bytes, contentSha256: value.contentSha256};
+}
+
+function parserBinding(languageId, parserContext) {
+  if (languageId === 'javascript') return {parserId: 'node-vm-script-syntax-v1', capsuleSha256: null, environmentObservationSha256: null};
+  if (languageId !== 'python') throw Error('EDIT_LANGUAGE_PARSER_UNSUPPORTED');
+  if (!parserContext || typeof parserContext !== 'object') throw Error('EDIT_PYTHON_PARSER_CONTEXT_REQUIRED');
+  spawnedParser.validateExecutionBinding(parserContext.capsule, parserContext.environmentObservation);
+  if (parserContext.capsule.languageId !== languageId || parserContext.capsule.parserId !== 'python-ast-exec-syntax-v1') throw Error('EDIT_PYTHON_PARSER_CONTEXT_BINDING_INVALID');
+  return {parserId: parserContext.capsule.parserId, capsuleSha256: parserContext.capsule.capsuleSha256, environmentObservationSha256: parserContext.environmentObservation.environmentObservationSha256};
 }
 
 function validateAuthorization(authorization, context, adapters) {
@@ -138,7 +148,8 @@ function validateAuthorization(authorization, context, adapters) {
   if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt) || new Date(issuedAt).toISOString() !== authorization.issuedAt || new Date(expiresAt).toISOString() !== authorization.expiresAt || expiresAt <= issuedAt || authorization.ttlMs !== expiresAt - issuedAt || authorization.ttlMs > AUTHORIZATION_TTL_MS) throw Error('EDIT_AUTHORIZATION_TIME_INVALID');
   if (issuedAt > now + MAX_CLOCK_SKEW_MS) throw Error('EDIT_AUTHORIZATION_FUTURE');
   if (now > expiresAt || expiresAt > Date.parse(context.observation.expiresAt)) throw Error('EDIT_AUTHORIZATION_STALE');
-  if (authorization.workspaceRootIdentitySha256 !== registry.hash(context.root) || authorization.journalRootIdentitySha256 !== context.journalRootIdentitySha256 || authorization.projectMapObservationSha256 !== context.observation.observationSha256 || authorization.placementPlanSha256 !== context.plan.planSha256 || authorization.parserId !== 'node-vm-script-syntax-v1' || authorization.rollbackRequired !== true || authorization.durableRecoveryRequired !== true) throw Error('EDIT_AUTHORIZATION_BINDING_INVALID');
+  if (authorization.workspaceRootIdentitySha256 !== registry.hash(context.root) || authorization.journalRootIdentitySha256 !== context.journalRootIdentitySha256 || authorization.projectMapObservationSha256 !== context.observation.observationSha256 || authorization.placementPlanSha256 !== context.plan.planSha256 || authorization.parserId !== context.parserBinding.parserId || authorization.rollbackRequired !== true || authorization.durableRecoveryRequired !== true) throw Error('EDIT_AUTHORIZATION_BINDING_INVALID');
+  if (context.plan.languageBinding.languageId === 'python' && (authorization.parserCapsuleSha256 !== context.parserBinding.capsuleSha256 || authorization.parserEnvironmentObservationSha256 !== context.parserBinding.environmentObservationSha256)) throw Error('EDIT_AUTHORIZATION_PYTHON_PARSER_BINDING_INVALID');
   const expectedTargets = {
     source: {targetPath: context.plan.sourcePlacement.targetPath, action: context.plan.sourcePlacement.action, expectedBeforeSha256: context.plan.sourcePlacement.expectedPreMutationSha256, candidateSha256: context.source.contentSha256},
     verification: {targetPath: context.plan.verificationPlacement.targetPath, action: context.plan.verificationPlacement.action, expectedBeforeSha256: context.plan.verificationPlacement.expectedPreMutationSha256, candidateSha256: context.verification.contentSha256}
@@ -159,20 +170,31 @@ function validateAuthorization(authorization, context, adapters) {
   return authorization.verifierBindings.map(binding => ({binding, adapter: adapterMap.get(binding.id)}));
 }
 
-function parseReceipt(candidateValue, phase) {
+function parseReceipt(candidateValue, phase, parserContext = null) {
   let result = 'LANGUAGE_PARSE_PASS'; let errorCode = null;
-  try {
-    new vm.Script(candidateValue.content, {filename: candidateValue.targetPath, displayErrors: true});
-  } catch (error) {
-    result = 'LANGUAGE_PARSE_FAIL';
-    errorCode = error?.name === 'SyntaxError' ? 'JAVASCRIPT_SYNTAX_ERROR' : 'JAVASCRIPT_PARSE_ERROR';
+  let parserId = 'node-vm-script-syntax-v1'; let spawnedParserReceiptSha256 = null;
+  let observations = {processStatus: null, processSignal: null, astNodeCount: null, syntaxLine: null, syntaxOffset: null, stdoutSha256: null, stderrSha256: null};
+  if (candidateValue.languageId === 'python') {
+    const spawned = spawnedParser.parse({capsule: parserContext?.capsule, environmentObservation: parserContext?.environmentObservation, candidate: candidateValue, phase});
+    parserId = spawned.parserId || parserContext?.capsule?.parserId || 'python-ast-exec-syntax-v1';
+    spawnedParserReceiptSha256 = spawned.receiptSha256;
+    observations = spawned.observations || observations;
+    if (spawned.result !== 'SPAWNED_PARSER_PASS') { result = 'LANGUAGE_PARSE_FAIL'; errorCode = spawned.errorCode || 'PYTHON_PARSE_ERROR'; }
+  } else {
+    try {
+      new vm.Script(candidateValue.content, {filename: candidateValue.targetPath, displayErrors: true});
+    } catch (error) {
+      result = 'LANGUAGE_PARSE_FAIL';
+      errorCode = error?.name === 'SyntaxError' ? 'JAVASCRIPT_SYNTAX_ERROR' : 'JAVASCRIPT_PARSE_ERROR';
+    }
   }
   const body = {
     schema: 'axm.code.language-parse-receipt.v1', version: '1.0.0', status: 'TEST', result, errorCode,
-    parserId: 'node-vm-script-syntax-v1', languageId: candidateValue.languageId, lane: candidateValue.lane, phase,
-    targetPath: candidateValue.targetPath, contentSha256: candidateValue.contentSha256, observedNodeVersion: process.version,
-    truth: {sourceExecuted: false, syntaxPassIsBehaviorProof: false, parserIsJavaScriptCommonjsScriptGoal: true},
-    authority: {workspaceRead: false, workspaceMutation: false, codeExecution: false, network: false}
+    parserId, languageId: candidateValue.languageId, lane: candidateValue.lane, phase,
+    targetPath: candidateValue.targetPath, contentSha256: candidateValue.contentSha256,
+    parserCapsuleSha256: parserContext?.capsule?.capsuleSha256 || null, spawnedParserReceiptSha256, observations,
+    truth: {sourceExecuted: false, syntaxPassIsBehaviorProof: false, parserIsJavaScriptCommonjsScriptGoal: candidateValue.languageId === 'javascript', parserMayUseBoundedChildProcess: candidateValue.languageId === 'python'},
+    authority: {workspaceRead: false, workspaceMutation: false, candidateExecution: false, boundedParserProcessExecution: candidateValue.languageId === 'python', network: false}
   };
   return receipt(body, 'receiptSha256');
 }
@@ -294,7 +316,7 @@ function cleanup(states) {
   return failures;
 }
 
-function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput = null, declaration = null, projectMapObservation = null, placementPlan = null, authorization = null, candidates = null, verifierAdapters = []} = {}) {
+function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput = null, declaration = null, projectMapObservation = null, placementPlan = null, authorization = null, candidates = null, parserContext = null, verifierAdapters = []} = {}) {
   const parserReceipts = []; const verifierReceipts = []; const states = [];
   let mutationStarted = false; let verificationRecorded = false; let authorizationSha256 = null; let journalHandle = null; let durability = null;
   try {
@@ -307,10 +329,11 @@ function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput =
     if (freshObservation.projectMapSha256 !== projectMapObservation.projectMapSha256 || freshObservation.projectMapSha256 !== placementPlan.projectMapSha256) throw Error('EDIT_WORKSPACE_DRIFT_SINCE_PLACEMENT');
     const source = candidate(candidates?.source, 'source', placementPlan.sourcePlacement, placementPlan.languageBinding.languageId);
     const verification = candidate(candidates?.verification, 'verification', placementPlan.verificationPlacement, placementPlan.languageBinding.languageId);
-    const context = {root, journalRootIdentitySha256: durability.journalIdentitySha256, observation: projectMapObservation, plan: placementPlan, source, verification};
+    const boundParser = parserBinding(placementPlan.languageBinding.languageId, parserContext);
+    const context = {root, journalRootIdentitySha256: durability.journalIdentitySha256, observation: projectMapObservation, plan: placementPlan, source, verification, parserBinding: boundParser};
     const adapterBindings = validateAuthorization(authorization, context, verifierAdapters);
     authorizationSha256 = authorization.authorizationSha256;
-    parserReceipts.push(parseReceipt(source, 'pre-mutation'), parseReceipt(verification, 'pre-mutation'));
+    parserReceipts.push(parseReceipt(source, 'pre-mutation', parserContext), parseReceipt(verification, 'pre-mutation', parserContext));
     const failedPreParse = parserReceipts.find(item => item.result !== 'LANGUAGE_PARSE_PASS');
     if (failedPreParse) throw Error(`EDIT_${failedPreParse.lane.toUpperCase()}_PARSE_FAILED`);
     states.push(targetState(root, placementPlan.sourcePlacement, source, authorization.authorizationId));
@@ -320,7 +343,7 @@ function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput =
     mutationStarted = true;
     for (const state of states) install(state, phase => journal.append(journalHandle, phase, {lane: state.lane, targetPath: state.relativePath}));
     const installedSource = installedCandidate(states[0]); const installedVerification = installedCandidate(states[1]);
-    parserReceipts.push(parseReceipt(installedSource, 'post-mutation'), parseReceipt(installedVerification, 'post-mutation'));
+    parserReceipts.push(parseReceipt(installedSource, 'post-mutation', parserContext), parseReceipt(installedVerification, 'post-mutation', parserContext));
     const failedPostParse = parserReceipts.find(item => item.phase === 'post-mutation' && item.result !== 'LANGUAGE_PARSE_PASS');
     if (failedPostParse) throw Error(`EDIT_${failedPostParse.lane.toUpperCase()}_POSTWRITE_PARSE_FAILED`);
     journal.append(journalHandle, 'INSTALLED_PARSED', {parserReceiptSha256: parserReceipts.filter(item => item.phase === 'post-mutation').map(item => item.receiptSha256)});
@@ -387,6 +410,6 @@ function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput =
   }
 }
 
-const INTERNALS = Object.freeze({freeze, sha256, receipt, held, workspaceRoot, validateDigestReceipt, validateObservation, validatePlan, candidate, parseReceipt, targetState, install, installedCandidate, verifierReceipt, rollback, cleanup});
+const INTERNALS = Object.freeze({freeze, sha256, receipt, held, workspaceRoot, validateDigestReceipt, validateObservation, validatePlan, candidate, parserBinding, parseReceipt, targetState, install, installedCandidate, verifierReceipt, rollback, cleanup});
 
 module.exports = {AUTHORITY, AUTHORIZATION_TTL_MS, MAX_CANDIDATE_BYTES, apply, recover: journal.recover, INTERNALS};

@@ -85,19 +85,19 @@ function capsule(base, details) {
 function sourceAuthorDetails(organ) {
   if (organ.execution === 'PR51_SOURCE_REVIEWED_DONOR_BOUND_RUNTIME_UNKNOWN' && organ.donor) {
     return {
-      status: 'SOURCE_BODY_HELD', implementationId: organ.donor.builder, implementationSha256: organ.donor.builderSha256,
+      status: 'RECIPE_INPUT_REQUIRED', implementationId: organ.donor.builder, implementationSha256: organ.donor.builderSha256,
       donorBinding: {pr: organ.donor.pr, head: organ.donor.head, profile: organ.donor.profile, profileSha256: organ.donor.profileSha256, recipe: organ.donor.recipe, recipeSha256: organ.donor.recipeSha256, builder: organ.donor.builder, builderSha256: organ.donor.builderSha256, candidateEntry: organ.donor.candidateEntry, runtimeCorrectness: organ.donor.runtimeCorrectness},
-      errorCode: 'HAND_SOURCE_BODY_NOT_PRESENT',
-      truth: {donorMetadataMeansSourcePresent: false, implementationRuntimeProven: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}
+      errorCode: 'BOUNDED_RECIPE_LAYOUT_AND_PARAMETERS_REQUIRED',
+      truth: {donorMetadataMeansSourcePresent: true, implementationPresent: true, boundedRecipeOnly: true, generalLanguageAuthoringAvailable: false, runtimeCorrectnessRequiresBoundVerifier: true, codeGenerated: false, foundryGrantedExecutionAuthority: false}
     };
   }
   return {status: 'DELEGATED', implementationId: null, implementationSha256: null, errorCode: 'EXACT_CANDIDATE_AUTHOR_REQUIRED', truth: {donorMetadataMeansSourcePresent: false, implementationRuntimeProven: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
 }
 
 function writerDetails(languageId, planCount) {
-  if (languageId === 'javascript') {
+  if (languageId === 'javascript' || (languageId === 'python' && planCount === 1)) {
     const implementationId = planCount === 1 ? 'workspace-edit-hand-v1' : 'workspace-edit-graph-hand-v1';
-    return {status: 'AUTHORIZATION_REQUIRED', implementationId, implementationSha256: registry.hash(implementationId), errorCode: 'EXPLICIT_HOST_AUTHORIZATION_REQUIRED', truth: {implementationPresent: true, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
+    return {status: 'AUTHORIZATION_REQUIRED', implementationId, implementationSha256: registry.hash(implementationId), errorCode: 'EXPLICIT_HOST_AUTHORIZATION_REQUIRED', truth: {implementationPresent: true, supportedLanguagePair: true, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
   }
   return {status: 'IMPLEMENTATION_HELD', implementationId: null, implementationSha256: null, errorCode: 'LANGUAGE_EXACT_BYTE_WRITER_NOT_BOUND', truth: {implementationPresent: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
 }
@@ -118,8 +118,8 @@ function parserDetails(languageId, environmentObservation) {
 function verifierDetails(languageId, environmentObservation) {
   const sandbox = environmentObservation.candidateExecutionIsolation;
   if (languageId === 'python') {
-    if (!sandbox?.usable) return {status: 'ENVIRONMENT_HELD', implementationId: null, implementationSha256: null, errorCode: `HOST_SANDBOX_UNAVAILABLE:${sandbox?.errorCode || 'UNKNOWN'}`, truth: {hostSandboxUsable: false, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
-    return {status: 'IMPLEMENTATION_HELD', implementationId: null, implementationSha256: null, errorCode: 'PYTHON_VERIFICATION_RUNNER_NOT_BOUND', truth: {hostSandboxUsable: true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
+    const implementationId = 'bounded-python-record-transform-verifier-adapter-v1';
+    return {status: 'RECIPE_SELECTION_REQUIRED', implementationId, implementationSha256: registry.hash(implementationId), errorCode: 'BOUNDED_AUTHOR_RECEIPT_OR_HOST_VERIFIER_REQUIRED', truth: {implementationPresent: true, provenanceLockedRecipeOnly: true, arbitraryCandidateExecutionAvailable: false, hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
   }
   if (languageId === 'javascript') return {status: 'HOST_BINDING_REQUIRED', implementationId: 'host-digest-bound-verifier-adapter-v1', implementationSha256: registry.hash('host-digest-bound-verifier-adapter-v1'), errorCode: 'REQUESTED_VERIFIER_ADAPTER_REQUIRED', truth: {hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};
   return {status: 'IMPLEMENTATION_HELD', implementationId: null, implementationSha256: null, errorCode: 'LANGUAGE_VERIFICATION_RUNNER_NOT_BOUND', truth: {hostSandboxUsable: sandbox?.usable === true, candidateExecuted: false, codeGenerated: false, foundryGrantedExecutionAuthority: false}};

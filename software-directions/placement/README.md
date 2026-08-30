@@ -57,6 +57,7 @@ const transactionReceipt = editHand.apply({
   placementPlan,
   authorization,
   candidates: {source, verification},
+  parserContext,
   verifierAdapters
 });
 
@@ -67,7 +68,7 @@ const recoveryReceipt = editHand.recover({
 });
 ```
 
-The capable model or a deterministic renderer supplies the exact UTF-8 candidate bytes. A host must separately issue one `EXPLICIT_SINGLE_TRANSACTION` authorization, valid for no more than 60 seconds, binding the workspace and separate durable-journal root identities, fresh observation, placement plan, both targets and candidate digests, the JavaScript parser, and every verifier adapter. The authorization digest detects changed fields; it is not a signature, identity, or consent proof.
+The capable model or a deterministic renderer supplies the exact UTF-8 candidate bytes. A host must separately issue one `EXPLICIT_SINGLE_TRANSACTION` authorization, valid for no more than 60 seconds, binding the workspace and separate durable-journal root identities, fresh observation, placement plan, both targets and candidate digests, the language parser, and every verifier adapter. Python transactions additionally bind the Foundry parser-capsule digest and live toolchain-observation digest. The authorization digest detects changed fields; it is not a signature, identity, or consent proof.
 
 Before mutation, the Hand re-observes the complete declared project map, refuses drift or protected targets, rechecks existing target digests, and syntax-parses both candidates. It acquires an exclusive O_EXCL workspace lease in the durable root, appends and fsyncs a digest-chained journal, and writes only the two planned source/test targets through same-directory temporary and backup files. It then re-reads and re-parses the installed bytes and invokes only the bound verifier adapters. A failed write, post-write check, parser, or verifier triggers reverse-order restoration of prior bytes or removal of newly created targets.
 
@@ -75,7 +76,7 @@ On Linux, `recover` validates the journal chain, lease binding, and the exact ta
 
 The focused transaction trial proves two successful transactions (replace and create), one intentional post-write verifier failure with both targets restored, 14 language-parse receipts, three registered-verifier receipts, and ten adversarial holds covering replay, parse failure, drift, stale/tampered/unbound authorization, target mismatch, inconsistent nested observation digests, and a forged protected-target plan. A separate recovery trial kills real worker processes at all 11 replace boundaries and all nine create boundaries, then proves 14 rollbacks, four recovered commits, and two already-committed finalizations. Five additional crash setups prove cross-process replay refusal, lease contention, tampered-journal refusal, unknown-byte and mode-drift refusal, and torn-tail recovery. All workspaces are generated test fixtures; no production repository was edited.
 
-This v1.1 Hand supports only Linux durability, JavaScript under Node's CommonJS script parse goal, exactly two files, existing parent directories, candidates up to 1 MiB each, journals up to 1 MiB, and up to eight verifier bindings. It provides process-crash recovery, restart-surviving replay refusal, and mutual exclusion between cooperating Hand transactions. It does not claim universal power-loss recovery, two-file filesystem atomicity, automatic stale-lease recovery, or protection from external writers that bypass the Hand. Verifier adapters are trusted registered code; the Hand limits the context it gives them but cannot prove their purity.
+This v1.2 Hand supports Linux durability, JavaScript under Node's CommonJS script parse goal, and Python under the Foundry's isolated-mode AST parser. It still handles exactly two files, existing parent directories, candidates up to 1 MiB each, journals up to 1 MiB, and up to eight verifier bindings. It provides process-crash recovery, restart-surviving replay refusal, and mutual exclusion between cooperating Hand transactions. It does not claim universal power-loss recovery, two-file filesystem atomicity, automatic stale-lease recovery, or protection from external writers that bypass the Hand. Verifier adapters are trusted registered code; the Hand limits the context it gives them but cannot prove their purity.
 
 This is a placement and application grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
 
@@ -138,7 +139,15 @@ const parseReceipt = parser.parse({
 
 The first foundry trial provides real JavaScript and Python syntax-parser capsules. Every parser invocation revalidates the live environment receipt and exact executable/resource-limit bindings; a self-hashed capsule cannot substitute another process path. Python source is sent through stdin to `python3 -I -S` and `ast.parse`; it is never imported or executed. When available, `prlimit` bounds CPU, address space, file descriptors, and wall time. JavaScript uses Node's in-process script parser and likewise never executes the candidate. Syntax success is not behavioral correctness.
 
-Other capsules truthfully route what exists: the read-only map Hand is available without editing authority; JavaScript exact-byte and rollback Hands require a separate host authorization; JavaScript verifiers require digest-bound host adapters. Python donor metadata remains `SOURCE_BODY_HELD` because the donor implementation body is not present here, Python write/rollback implementations remain held, and Python verifier execution remains held when a usable host sandbox or runner is absent. An installed `bwrap` binary is not called usable when its harmless namespace probe fails. The foundry cannot generate missing code, grant mutation, grant candidate execution, install tools, deploy, promote, or change canon.
+Other capsules truthfully route what exists: the read-only map Hand is available without editing authority; JavaScript and Python pair write/rollback Hands require separate host authorization; JavaScript verifiers require digest-bound host adapters. The reviewed Python donor source is present as one bounded recipe, but the capsule remains `RECIPE_INPUT_REQUIRED` until its exact layout and parameters are supplied. Its provenance-locked verifier likewise requires that author receipt and never becomes a general sandbox. An installed `bwrap` binary is not called usable when its harmless namespace probe fails. The foundry cannot generate missing code, grant mutation, grant candidate execution, install tools, deploy, promote, or change canon.
+
+## Bounded Python application path
+
+`bounded-python-record-transform-author-hand.js` is the first complete non-JavaScript author-to-application route. It retains the six reviewed PR #51 donor functions exactly enough to reproduce builder digest `ad281fa5a1381de86d71e1c4a2ffbad30ee20683cb705b4a09d778464ea5227c`. It accepts only the donor's bounded string/null record-transform parameters and only a Python placement plan targeting `capability.py` plus `selftest.py`.
+
+`bounded-python-record-transform-verifier-adapter.js` validates the author receipt, independently regenerates both candidates, demands exact paths/content/digests, and then executes the source and emitted selftest in memory under isolated Python mode and `prlimit`. The candidate import surface contains only `json` and the in-memory `capability` module. This is safe enough for the exact reviewed recipe because substitution is refused; it is not a security boundary for arbitrary candidate code. Current `bwrap` namespace probing fails, so the adapter truthfully records that host filesystem and network isolation are absent.
+
+The focused trial proves one complete Python application transaction, four pre/post Python parser receipts, one provenance-locked runtime pass, one intentional verifier failure with both files restored, and eleven adversarial holds for missing or mismatched parser bindings, syntax failure, drift, stale authorization, wrong donor layout, invalid parameters, tampered plans, forged author receipts, substituted runtime content, and environment path drift. It does not claim general Python authoring or universal runtime correctness.
 
 The v1.1 project-map convention requires one explicit language-binding kind and signal:
 

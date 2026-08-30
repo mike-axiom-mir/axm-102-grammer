@@ -77,6 +77,8 @@ const editGraphPlaneContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'softw
 const workspaceEditGraphHandContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'workspace-edit-graph-hand.contract.json'), 'utf8'));
 const toolchainEnvironmentHandContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'toolchain-environment-hand.contract.json'), 'utf8'));
 const handFoundryPlaneContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'hand-foundry-plane.contract.json'), 'utf8'));
+const boundedPythonAuthorContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'bounded-python-record-transform-author-hand.contract.json'), 'utf8'));
+const boundedPythonVerifierContract = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'bounded-python-record-transform-verifier-adapter.contract.json'), 'utf8'));
 const placementCatalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'software-directions', 'placement', 'placement-catalog.json'), 'utf8'));
 assert.strictEqual(directionContract.schema, 'axm.code.software-direction-contract.v1');
 assert.strictEqual(directionContract.authority, 'NONE');
@@ -131,7 +133,9 @@ assert.strictEqual(workspaceEditHandContract.authority, 'EXPLICIT_SINGLE_TRANSAC
 assert(workspaceEditHandContract.permissions.includes('explicit-two-target-workspace-write'));
 assert.strictEqual(workspaceEditHandContract.truth.handGeneratesCode, false);
 assert.strictEqual(workspaceEditHandContract.truth.multiFileAtomicityClaimed, false);
-assert.strictEqual(workspaceEditHandContract.version, '1.1.0');
+assert.strictEqual(workspaceEditHandContract.version, '1.2.0');
+assert(workspaceEditHandContract.supportedParserBindings.includes('python:python-ast-exec-syntax-v1'));
+assert.strictEqual(workspaceEditHandContract.truth.pythonParserExecutesCandidate, false);
 assert.strictEqual(workspaceEditHandContract.truth.linuxProcessCrashRecoveryProvided, true);
 assert.strictEqual(workspaceEditHandContract.truth.universalPowerLossRecoveryClaimed, false);
 assert.strictEqual(workspaceEditHandContract.truth.concurrentMutationRaceEliminated, false);
@@ -165,6 +169,15 @@ assert.strictEqual(handFoundryPlaneContract.truth.multiPlanManifestRequiresEditG
 assert.strictEqual(handFoundryPlaneContract.truth.foundryCanInventMissingImplementation, false);
 assert.strictEqual(handFoundryPlaneContract.truth.foundryCanSelfAuthorize, false);
 assert.strictEqual(handFoundryPlaneContract.truth.spawnedParserExecutesCandidate, false);
+assert.strictEqual(handFoundryPlaneContract.version, '1.1.0');
+assert.strictEqual(handFoundryPlaneContract.truth.pythonPairWriterAvailableBehindAuthorization, true);
+assert.strictEqual(handFoundryPlaneContract.truth.boundedRecipeMeansGeneralAuthoring, false);
+assert.strictEqual(boundedPythonAuthorContract.authority, 'BOUNDED_IN_MEMORY_AUTHORING_ONLY');
+assert.strictEqual(boundedPythonAuthorContract.truth.generalPythonAuthoringClaimed, false);
+assert.strictEqual(boundedPythonAuthorContract.donor.builderSha256, 'ad281fa5a1381de86d71e1c4a2ffbad30ee20683cb705b4a09d778464ea5227c');
+assert.strictEqual(boundedPythonVerifierContract.authority, 'PROVENANCE_LOCKED_RUNTIME_VERIFICATION_ONLY');
+assert.strictEqual(boundedPythonVerifierContract.truth.arbitraryCandidateExecution, false);
+assert.strictEqual(boundedPythonVerifierContract.truth.hostNamespaceSandbox, false);
 assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
 assert.strictEqual(placementCatalog.roles.length, 10);
 assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);
@@ -183,6 +196,8 @@ assert(readme.includes('placement/edit-graph-plane.js'));
 assert(readme.includes('placement/workspace-edit-graph-hand.js'));
 assert(readme.includes('placement/hand-foundry-plane.js'));
 assert(readme.includes('placement/spawned-parser-hand.js'));
+assert(readme.includes('placement/bounded-python-record-transform-author-hand.js'));
+assert(readme.includes('placement/bounded-python-record-transform-verifier-adapter.js'));
 assert(readme.includes('node testing/run-all.js'));
 
 console.log(JSON.stringify({

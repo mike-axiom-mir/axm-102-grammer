@@ -1,0 +1,13 @@
+{
+  "schema": "axm.code.bounded-python-record-transform-author-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-record-transform-author-receipt.v1", "axm.code.edit-candidate.v1"],
+  "donor": {"repository": "mike-axiom-mir/axm-collaboration-platform", "pullRequest": 51, "head": "085a4b4e32d626d212babbfa0c5fd1d33e8f7ff4", "builderId": "bounded-python-record-transform-v1", "builderSha256": "ad281fa5a1381de86d71e1c4a2ffbad30ee20683cb705b4a09d778464ea5227c", "recipeId": "bounded-python-record-transform", "recipeSha256": "82d04d8b78e44978f4d5a42c8c7fb62b944279c89dd498f1268d3cfa97bc5637"},
+  "model": {"scope": "Author exactly one donor-defined dependency-free Python record-field transform and its inert selftest for a digest-bound Python placement plan.", "notGeneral": "This bounded recipe is not a general Python coding system and is never preferred over a capable model for work outside the exact recipe.", "application": "The result is candidate bytes only; a separate parser, verifier, exact writer, rollback path, and explicit host authorization remain required."},
+  "limits": {"sourceBasename": "capability.py", "verificationBasename": "selftest.py", "maxInputKeys": 128, "maxInputBytes": 65536, "maxDefaultValueCharacters": 256},
+  "truth": {"donorImplementationDigestReproduced": true, "candidateGenerated": true, "candidateExecuted": false, "workspaceRead": false, "workspaceMutation": false, "generalPythonAuthoringClaimed": false, "runtimeCorrectnessClaimedByAuthor": false},
+  "permissions": ["bounded-in-memory-deterministic-candidate-generation"],
+  "refuses": ["general-python-authoring", "workspace-read", "workspace-mutation", "candidate-execution", "network-use", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "BOUNDED_IN_MEMORY_AUTHORING_ONLY"
+}

@@ -1,6 +1,6 @@
 {
   "schema": "axm.code.workspace-edit-hand-contract.v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "TEST",
   "provides": [
     "axm.code.edit-candidate.v1",
@@ -15,13 +15,14 @@
   "model": {
     "candidate": "A capable model or deterministic renderer supplies exact UTF-8 source and verification bytes. The Hand does not generate or improve code.",
     "authorization": "The host explicitly authorizes one digest-bound source/test transaction for one fresh observation and placement plan, and binds a separate pre-existing durable journal root. The authorization digest is an integrity binding, not identity or consent proof.",
-    "preflight": "Immediately re-observe the declared project, require the same map digest, recheck target state, bind candidates, and parse both candidates before mutation.",
+    "preflight": "Immediately re-observe the declared project, require the same map digest, recheck target state, bind candidates, and parse both candidates before mutation. Python additionally requires the authorization to bind a Foundry parser capsule and a live toolchain observation.",
     "transaction": "Acquire one O_EXCL workspace lease, append and fsync a digest-chained journal, replace or create only the two exact planned targets using same-directory temporary and backup files, then parse and verify the installed bytes.",
     "rollback": "Any ordinary write, post-write digest, parse, or verifier failure restores prior bytes or removes newly created targets before returning when process-local rollback succeeds.",
     "restartRecovery": "On Linux, recovery validates the journal chain, lease binding, and exact target/temp/backup digests and modes. Pre-VERIFIED phases roll back; VERIFIED or CLEANUP_COMPLETE phases finish commit cleanup; ambiguous states hold without guessing."
   },
   "supportedParserBindings": [
-    "javascript:node-vm-script-syntax-v1"
+    "javascript:node-vm-script-syntax-v1",
+    "python:python-ast-exec-syntax-v1"
   ],
   "limits": {
     "authorizationTtlMs": 60000,
@@ -40,6 +41,8 @@
     "digestIsSignerOrConsentProof": false,
     "freshnessIsCorrectness": false,
     "javascriptSyntaxPassIsBehaviorProof": false,
+    "pythonAstPassIsBehaviorProof": false,
+    "pythonParserExecutesCandidate": false,
     "verifierReceiptIsUniversalProof": false,
     "multiFileAtomicityClaimed": false,
     "linuxProcessCrashRecoveryProvided": true,
@@ -62,7 +65,8 @@
     "separate-explicit-journal-root-read-write",
     "exclusive-workspace-lease-create-release",
     "digest-chained-journal-append-and-recovery",
-    "registered-verifier-adapter-invocation"
+    "registered-verifier-adapter-invocation",
+    "bounded-python-parser-process-execution"
   ],
   "refuses": [
     "code-generation",

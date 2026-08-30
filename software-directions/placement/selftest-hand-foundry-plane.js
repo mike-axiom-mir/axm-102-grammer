@@ -24,9 +24,10 @@ try {
   assert.strictEqual(pythonManifest.result, 'HAND_SPAWN_MANIFEST_READY_WITH_HOLDS');
   assert.strictEqual(pythonManifest.languageId, 'python'); assert.strictEqual(pythonManifest.scope, 'pair'); assert.strictEqual(pythonManifest.handCapsuleCount, 6);
   const pythonAuthor = capsule(pythonManifest, 'language-aware-structural-editor');
-  assert.strictEqual(pythonAuthor.status, 'SOURCE_BODY_HELD'); assert.strictEqual(pythonAuthor.errorCode, 'HAND_SOURCE_BODY_NOT_PRESENT'); assert.strictEqual(pythonAuthor.truth.donorMetadataMeansSourcePresent, false); assert.strictEqual(pythonAuthor.donorBinding.runtimeCorrectness, 'UNKNOWN');
-  assert.strictEqual(capsule(pythonManifest, 'exact-byte-writer').status, 'IMPLEMENTATION_HELD');
-  assert.strictEqual(capsule(pythonManifest, 'rollback-writer').status, 'IMPLEMENTATION_HELD');
+  assert.strictEqual(pythonAuthor.status, 'RECIPE_INPUT_REQUIRED'); assert.strictEqual(pythonAuthor.errorCode, 'BOUNDED_RECIPE_LAYOUT_AND_PARAMETERS_REQUIRED'); assert.strictEqual(pythonAuthor.truth.donorMetadataMeansSourcePresent, true); assert.strictEqual(pythonAuthor.truth.generalLanguageAuthoringAvailable, false); assert.strictEqual(pythonAuthor.donorBinding.runtimeCorrectness, 'UNKNOWN');
+  assert.strictEqual(capsule(pythonManifest, 'exact-byte-writer').status, 'AUTHORIZATION_REQUIRED');
+  assert.strictEqual(capsule(pythonManifest, 'exact-byte-writer').implementationId, 'workspace-edit-hand-v1');
+  assert.strictEqual(capsule(pythonManifest, 'rollback-writer').status, 'AUTHORIZATION_REQUIRED');
   const pythonParser = capsule(pythonManifest, 'language-parser'); assert.strictEqual(pythonParser.status, 'SPAWNED_NO_EXECUTION_AUTHORITY');
   const validSource = parser.parse({capsule: pythonParser, environmentObservation: environment, candidate: pythonFixture.candidates.source});
   const validVerification = parser.parse({capsule: pythonParser, environmentObservation: environment, candidate: pythonFixture.candidates.verification});
@@ -35,8 +36,10 @@ try {
   assert.strictEqual(invalidSource.result, 'SPAWNED_PARSER_HOLD'); assert.strictEqual(invalidSource.errorCode, 'PYTHON_SYNTAX_ERROR');
   for (const receipt of [validSource, validVerification, invalidSource]) { assert.strictEqual(receipt.truth.candidateExecuted, false); assert.strictEqual(receipt.truth.workspaceRead, false); assert.strictEqual(receipt.truth.workspaceMutation, false); }
   const pythonVerifier = capsule(pythonManifest, 'verification-runner');
-  if (environment.candidateExecutionIsolation.usable) assert.strictEqual(pythonVerifier.errorCode, 'PYTHON_VERIFICATION_RUNNER_NOT_BOUND');
-  else assert.match(pythonVerifier.errorCode, /^HOST_SANDBOX_UNAVAILABLE:/);
+  assert.strictEqual(pythonVerifier.status, 'RECIPE_SELECTION_REQUIRED');
+  assert.strictEqual(pythonVerifier.implementationId, 'bounded-python-record-transform-verifier-adapter-v1');
+  assert.strictEqual(pythonVerifier.errorCode, 'BOUNDED_AUTHOR_RECEIPT_OR_HOST_VERIFIER_REQUIRED');
+  assert.strictEqual(pythonVerifier.truth.arbitraryCandidateExecutionAvailable, false);
   assert.deepStrictEqual(pythonFixtureFactory.snapshot(pythonFixture.workspaceRoot), pythonBefore);
 
   const graphPlans = graphFixture.graphEntries.map(value => value.placementPlan);
