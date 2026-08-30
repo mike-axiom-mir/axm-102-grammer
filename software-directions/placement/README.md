@@ -113,6 +113,33 @@ The focused graph trial uses three dependency-linked placement entries and six e
 
 This v1 graph layer remains JavaScript/Linux-only, supports exactly two to four placement entries and four to eight files, requires existing parent directories, and trusts registered verifier code. Its all-or-restore behavior is controlled transaction logic, not filesystem atomicity. It does not protect against writers that bypass the Hand, automatically break stale leases, prove sudden-power-loss behavior on arbitrary storage, infer missing dependencies, or turn dependency ordering into coding competence.
 
+## Grammar-driven Hand foundry
+
+`hand-foundry-plane.js` converts the placement plane's existing `requiredHands` list into digest-bound capability capsules. It accepts one to four ready plans from the same fresh project-map observation plus a five-minute `toolchain-environment-hand.js` receipt. A multi-plan request must additionally provide the validated `edit-graph-plane.js` receipt; its digest and installation order are copied into every capsule. Plans are rechecked against their observation, current organ and grammar-profile digests, exact Hand sequence, language, graph membership, and unique targets before any capsule is returned.
+
+```js
+const environment = require('./toolchain-environment-hand.js').inspect();
+const foundry = require('./hand-foundry-plane.js');
+const parser = require('./spawned-parser-hand.js');
+
+const manifest = foundry.spawn({
+  projectMapObservation,
+  placementPlans: [placementPlan],
+  environmentObservation: environment
+});
+
+const parserCapsule = manifest.handCapsules.find(hand => hand.handRole === 'language-parser');
+const parseReceipt = parser.parse({
+  capsule: parserCapsule,
+  environmentObservation: environment,
+  candidate
+});
+```
+
+The first foundry trial provides real JavaScript and Python syntax-parser capsules. Every parser invocation revalidates the live environment receipt and exact executable/resource-limit bindings; a self-hashed capsule cannot substitute another process path. Python source is sent through stdin to `python3 -I -S` and `ast.parse`; it is never imported or executed. When available, `prlimit` bounds CPU, address space, file descriptors, and wall time. JavaScript uses Node's in-process script parser and likewise never executes the candidate. Syntax success is not behavioral correctness.
+
+Other capsules truthfully route what exists: the read-only map Hand is available without editing authority; JavaScript exact-byte and rollback Hands require a separate host authorization; JavaScript verifiers require digest-bound host adapters. Python donor metadata remains `SOURCE_BODY_HELD` because the donor implementation body is not present here, Python write/rollback implementations remain held, and Python verifier execution remains held when a usable host sandbox or runner is absent. An installed `bwrap` binary is not called usable when its harmless namespace probe fails. The foundry cannot generate missing code, grant mutation, grant candidate execution, install tools, deploy, promote, or change canon.
+
 The v1.1 project-map convention requires one explicit language-binding kind and signal:
 
 - `extension` for 97 extension-owned organs;

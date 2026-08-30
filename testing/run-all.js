@@ -40,6 +40,8 @@ const checks = [
   [process.execPath, ['software-directions/selftest-direction-stack.js']],
   [process.execPath, ['software-directions/placement/selftest-placement-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-project-map-hand.js']],
+  [process.execPath, ['software-directions/placement/selftest-toolchain-environment-hand.js']],
+  [process.execPath, ['software-directions/placement/selftest-hand-foundry-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-edit-graph-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-workspace-edit-hand.js']],
   [process.execPath, ['software-directions/placement/selftest-workspace-edit-recovery.js']],
