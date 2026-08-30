@@ -14,6 +14,8 @@ childProcess.spawnSync = function observedSpawnSync(...args) { childProcessCalls
 const placementRegistry = require('./placement-registry.js');
 const recipeRegistry = require('./bounded-python-recipe-registry.js');
 const evidenceObserver = require('./bounded-python-recipe-evidence-observer-hand.js');
+const environmentHand = require('./toolchain-environment-hand.js');
+const replayIsolation = require('./bounded-python-recipe-replay-isolation-hand.js');
 const admissionPlane = require('./bounded-python-recipe-admission-plane.js');
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -80,14 +82,19 @@ function fixture() {
   const declaration = {...declarationBody, declarationSha256: placementRegistry.hash(declarationBody)};
   const evidenceObservation = evidenceObserver.inspect({workspaceRoot: root, proposal: proposed, evidence: suppliedEvidence, declaration});
   evidenceObserver.validateObservation(evidenceObservation);
-  return {root, bytes, proposed, suppliedEvidence, declaration, evidenceObservation};
+  const environmentObservation = environmentHand.inspect();
+  environmentHand.validate(environmentObservation);
+  const replayIsolationReceipt = replayIsolation.assess({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, environmentObservation});
+  replayIsolation.validateReceipt(replayIsolationReceipt);
+  assert.strictEqual(replayIsolation.isQualifiedReceipt(replayIsolationReceipt), true);
+  return {root, bytes, proposed, suppliedEvidence, declaration, evidenceObservation, environmentObservation, replayIsolationReceipt};
 }
 
 const activeSnapshot = placementRegistry.canon(recipeRegistry.REGISTRY);
 let adversarialHolds = 0;
-function hold(proposed, suppliedEvidence, evidenceObservation, activeRegistry, code) {
+function hold(proposed, suppliedEvidence, evidenceObservation, replayIsolationReceipt, activeRegistry, code) {
   const beforeCalls = childProcessCalls;
-  const result = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, activeRegistry});
+  const result = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, replayIsolationReceipt, activeRegistry});
   admissionPlane.validateReceipt(result);
   assert.strictEqual(result.result, 'RECIPE_ADMISSION_HELD'); assert.match(result.errorCode, code);
   assert.strictEqual(result.truth.activeRegistryMutated, false); assert.strictEqual(result.truth.proposedModuleLoaded, false); assert.strictEqual(result.truth.candidateExecuted, false);
@@ -97,24 +104,33 @@ function hold(proposed, suppliedEvidence, evidenceObservation, activeRegistry, c
 
 try {
   const observedFixture = fixture();
-  const {proposed, suppliedEvidence, evidenceObservation} = observedFixture;
-  const first = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, activeRegistry: recipeRegistry.REGISTRY});
-  const second = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, activeRegistry: recipeRegistry.REGISTRY});
+  const {proposed, suppliedEvidence, evidenceObservation, replayIsolationReceipt} = observedFixture;
+  const prerequisiteChildProcessCalls = childProcessCalls;
+  const first = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, replayIsolationReceipt, activeRegistry: recipeRegistry.REGISTRY});
+  const second = admissionPlane.stage({proposal: proposed, evidence: suppliedEvidence, evidenceObservation, replayIsolationReceipt, activeRegistry: recipeRegistry.REGISTRY});
   admissionPlane.validateReceipt(first); admissionPlane.validateReceipt(second);
-  assert.strictEqual(first.result, 'RECIPE_ADMISSION_STAGED_FROM_READ_ONLY_EVIDENCE_OBSERVATION_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY');
+  assert.strictEqual(first.result, 'RECIPE_ADMISSION_STAGED_WITH_REPLAY_ISOLATION_GATE_AWAITING_EXTERNAL_REVIEW_NO_REGISTRY_AUTHORITY');
   assert.strictEqual(first.admissionReceiptSha256, second.admissionReceiptSha256);
   assert.strictEqual(first.evidenceObservationSha256, evidenceObservation.observationSha256);
   assert.strictEqual(first.evidenceDeclarationSha256, observedFixture.declaration.declarationSha256);
   assert.strictEqual(first.evidenceWorkspaceRootIdentitySha256, evidenceObservation.workspaceRootIdentitySha256);
+  assert.strictEqual(first.replayIsolationReceiptSha256, replayIsolationReceipt.replayIsolationReceiptSha256);
+  assert.strictEqual(first.environmentObservationSha256, observedFixture.environmentObservation.environmentObservationSha256);
+  assert.strictEqual(first.replayIsolationPolicySha256, replayIsolation.POLICY_SHA256);
+  assert.strictEqual(first.replayIsolationResult, replayIsolationReceipt.result);
+  assert.deepStrictEqual(first.replayIsolationGaps, replayIsolationReceipt.unresolvedGaps);
   assert.strictEqual(first.activeRegistrySha256, recipeRegistry.REGISTRY.registrySha256);
   assert.strictEqual(first.candidateEntry.recipeId, proposed.recipeId);
   assert.strictEqual(first.candidateEntry.entrySha256, first.registryPreview.proposedEntrySha256);
   assert.strictEqual(first.registryPreview.proposedEntryCount, recipeRegistry.REGISTRY.entries.length + 1);
   assert.notStrictEqual(first.registryPreview.proposedRegistrySha256, recipeRegistry.REGISTRY.registrySha256);
-  assert.deepStrictEqual(first.activationGaps, ['HUMAN_REVIEW_REQUIRED', 'EXPLICIT_REGISTRY_SOURCE_CHANGE_REQUIRED', 'FULL_REGRESSION_REQUIRED', 'FRESH_FOUNDRY_MANIFEST_REQUIRED', 'FRESH_HOST_AUTHORIZATION_REQUIRED']);
+  assert.deepStrictEqual(first.activationGaps, ['ISOLATED_ADVERSARIAL_REPLAY_REQUIRED', 'HUMAN_REVIEW_REQUIRED', 'EXPLICIT_REGISTRY_SOURCE_CHANGE_REQUIRED', 'FULL_REGRESSION_REQUIRED', 'FRESH_FOUNDRY_MANIFEST_REQUIRED', 'FRESH_HOST_AUTHORIZATION_REQUIRED']);
   assert.strictEqual(first.truth.evidenceFilesObservedByReadOnlyHand, true);
   assert.strictEqual(first.truth.currentEvidenceByteDigestsObserved, true);
   assert.strictEqual(first.truth.evidenceFilesParsedWithoutImport, true);
+  assert.strictEqual(first.truth.replayIsolationReceiptBound, true);
+  assert.strictEqual(first.truth.replayIsolationCertified, replayIsolationReceipt.truth.isolationCertified);
+  assert.strictEqual(first.truth.fixedIsolationPolicyProbePassed, replayIsolationReceipt.truth.fixedPolicyProbePassed);
   assert.strictEqual(first.truth.callerTestClaimsReproduced, false);
   assert.strictEqual(first.truth.semanticSafetyIndependentlyVerified, false);
   assert.strictEqual(first.truth.humanReviewCompleted, false);
@@ -127,47 +143,55 @@ try {
   assert.strictEqual(Object.hasOwn(admissionPlane, 'promote'), false);
   assert.strictEqual(recipeRegistry.get(proposed.recipeId), null);
   assert.throws(() => recipeRegistry.createSelection(proposed.recipeId, {}), /RECIPE_UNSUPPORTED/);
-  assert.strictEqual(childProcessCalls, 0); assert.strictEqual(placementRegistry.canon(recipeRegistry.REGISTRY), activeSnapshot);
+  assert.strictEqual(childProcessCalls, prerequisiteChildProcessCalls); assert.strictEqual(placementRegistry.canon(recipeRegistry.REGISTRY), activeSnapshot);
 
-  hold(proposed, suppliedEvidence, evidenceObservation, null, /BOUNDED_RECIPE_REGISTRY_INVALID/);
+  hold(proposed, suppliedEvidence, evidenceObservation, replayIsolationReceipt, null, /BOUNDED_RECIPE_REGISTRY_INVALID/);
   const proposalDigest = clone(proposed); proposalDigest.builderId = 'forged-builder';
-  hold(proposalDigest, suppliedEvidence, evidenceObservation, recipeRegistry.REGISTRY, /PROPOSAL_DIGEST_MISMATCH/);
+  hold(proposalDigest, suppliedEvidence, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /PROPOSAL_DIGEST_MISMATCH/);
   const unsafeId = clone(proposed); unsafeId.recipeId = '../unsafe'; redigest(unsafeId, 'proposalSha256');
-  hold(unsafeId, evidence(unsafeId, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /PROPOSAL_IDENTIFIER_INVALID/);
+  hold(unsafeId, evidence(unsafeId, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /PROPOSAL_IDENTIFIER_INVALID/);
   const generalAuthor = clone(proposed); generalAuthor.generalPythonAuthoring = true; redigest(generalAuthor, 'proposalSha256');
-  hold(generalAuthor, evidence(generalAuthor, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /PROPOSAL_AUTHORITY_INVALID/);
+  hold(generalAuthor, evidence(generalAuthor, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /PROPOSAL_AUTHORITY_INVALID/);
   const dynamicLoad = clone(proposed); dynamicLoad.dynamicModuleLoading = true; redigest(dynamicLoad, 'proposalSha256');
-  hold(dynamicLoad, evidence(dynamicLoad, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /PROPOSAL_AUTHORITY_INVALID/);
+  hold(dynamicLoad, evidence(dynamicLoad, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /PROPOSAL_AUTHORITY_INVALID/);
   const activeDuplicate = clone(proposed); activeDuplicate.recipeId = recipeRegistry.REGISTRY.entries[0].recipeId; redigest(activeDuplicate, 'proposalSha256');
-  hold(activeDuplicate, evidence(activeDuplicate, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /RECIPE_ALREADY_ACTIVE/);
+  hold(activeDuplicate, evidence(activeDuplicate, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /RECIPE_ALREADY_ACTIVE/);
   const idCollision = clone(proposed); idCollision.builderId = recipeRegistry.REGISTRY.entries[0].builderId; redigest(idCollision, 'proposalSha256');
-  hold(idCollision, evidence(idCollision, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /IMPLEMENTATION_ID_COLLISION/);
+  hold(idCollision, evidence(idCollision, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /IMPLEMENTATION_ID_COLLISION/);
   const digestCollision = clone(proposed); digestCollision.verifierRunnerSha256 = recipeRegistry.REGISTRY.entries[0].verifierRunnerSha256; redigest(digestCollision, 'proposalSha256');
-  hold(digestCollision, evidence(digestCollision, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /IMPLEMENTATION_DIGEST_COLLISION/);
+  hold(digestCollision, evidence(digestCollision, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /IMPLEMENTATION_DIGEST_COLLISION/);
   const wrongProposalEvidence = clone(suppliedEvidence); wrongProposalEvidence.proposalSha256 = '0'.repeat(64); redigest(wrongProposalEvidence, 'evidenceSha256');
-  hold(proposed, wrongProposalEvidence, evidenceObservation, recipeRegistry.REGISTRY, /EVIDENCE_HEADER_OR_PROPOSAL_BINDING_INVALID/);
+  hold(proposed, wrongProposalEvidence, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /EVIDENCE_HEADER_OR_PROPOSAL_BINDING_INVALID/);
   const missingEvidence = clone(suppliedEvidence); missingEvidence.evidenceItems.pop(); redigest(missingEvidence, 'evidenceSha256');
-  hold(proposed, missingEvidence, evidenceObservation, recipeRegistry.REGISTRY, /EVIDENCE_ITEM_COUNT_INVALID/);
+  hold(proposed, missingEvidence, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /EVIDENCE_ITEM_COUNT_INVALID/);
   const duplicateEvidence = clone(suppliedEvidence); duplicateEvidence.evidenceItems[1].sha256 = duplicateEvidence.evidenceItems[0].sha256; redigest(duplicateEvidence, 'evidenceSha256');
-  hold(proposed, duplicateEvidence, evidenceObservation, recipeRegistry.REGISTRY, /EVIDENCE_ITEM_INVALID_OR_DUPLICATE/);
+  hold(proposed, duplicateEvidence, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /EVIDENCE_ITEM_INVALID_OR_DUPLICATE/);
   const unsafeClaims = clone(suppliedEvidence); unsafeClaims.testClaims.workspaceMutationObserved = true; redigest(unsafeClaims, 'evidenceSha256');
-  hold(proposed, unsafeClaims, evidenceObservation, recipeRegistry.REGISTRY, /TEST_CLAIMS_UNSAFE_OR_INCOMPLETE/);
+  hold(proposed, unsafeClaims, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /TEST_CLAIMS_UNSAFE_OR_INCOMPLETE/);
   const forgedReview = clone(suppliedEvidence); forgedReview.truth.humanReviewCompleted = true; redigest(forgedReview, 'evidenceSha256');
-  hold(proposed, forgedReview, evidenceObservation, recipeRegistry.REGISTRY, /EVIDENCE_TRUTH_INVALID/);
+  hold(proposed, forgedReview, evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /EVIDENCE_TRUTH_INVALID/);
   const extraProposalKey = clone(proposed); extraProposalKey.modulePath = './untrusted.js'; redigest(extraProposalKey, 'proposalSha256');
-  hold(extraProposalKey, evidence(extraProposalKey, observedFixture.bytes), evidenceObservation, recipeRegistry.REGISTRY, /PROPOSAL_KEYS_INVALID/);
+  hold(extraProposalKey, evidence(extraProposalKey, observedFixture.bytes), evidenceObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /PROPOSAL_KEYS_INVALID/);
   const forgedRegistry = clone(recipeRegistry.REGISTRY); forgedRegistry.entries.push(first.candidateEntry); redigest(forgedRegistry, 'registrySha256');
-  hold(proposed, suppliedEvidence, evidenceObservation, forgedRegistry, /BOUNDED_RECIPE_REGISTRY_BINDING_INVALID/);
+  hold(proposed, suppliedEvidence, evidenceObservation, replayIsolationReceipt, forgedRegistry, /BOUNDED_RECIPE_REGISTRY_BINDING_INVALID/);
 
-  hold(proposed, suppliedEvidence, null, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_INVALID/);
+  hold(proposed, suppliedEvidence, null, replayIsolationReceipt, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_INVALID/);
   const tamperedObservation = clone(evidenceObservation); tamperedObservation.files[0].sha256 = '0'.repeat(64);
-  hold(proposed, suppliedEvidence, tamperedObservation, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_DIGEST_MISMATCH/);
+  hold(proposed, suppliedEvidence, tamperedObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_DIGEST_MISMATCH/);
   const staleObservation = clone(evidenceObservation); staleObservation.observedAt = '2020-01-01T00:00:00.000Z'; staleObservation.expiresAt = '2020-01-01T00:05:00.000Z'; redigest(staleObservation, 'observationSha256');
-  hold(proposed, suppliedEvidence, staleObservation, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_STALE/);
+  hold(proposed, suppliedEvidence, staleObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_STALE/);
   const futureObservation = clone(evidenceObservation); futureObservation.observedAt = '2999-01-01T00:00:00.000Z'; futureObservation.expiresAt = '2999-01-01T00:05:00.000Z'; redigest(futureObservation, 'observationSha256');
-  hold(proposed, suppliedEvidence, futureObservation, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_FUTURE_OR_UNTIMED/);
+  hold(proposed, suppliedEvidence, futureObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /RECIPE_EVIDENCE_OBSERVATION_FUTURE_OR_UNTIMED/);
   const mismatchedObservation = clone(evidenceObservation); mismatchedObservation.evidenceSha256 = 'f'.repeat(64); redigest(mismatchedObservation, 'observationSha256');
-  hold(proposed, suppliedEvidence, mismatchedObservation, recipeRegistry.REGISTRY, /EVIDENCE_OBSERVATION_BINDING_INVALID/);
+  hold(proposed, suppliedEvidence, mismatchedObservation, replayIsolationReceipt, recipeRegistry.REGISTRY, /EVIDENCE_OBSERVATION_BINDING_INVALID/);
+
+  hold(proposed, suppliedEvidence, evidenceObservation, null, recipeRegistry.REGISTRY, /RECIPE_REPLAY_ISOLATION_RECEIPT_INVALID/);
+  const tamperedReplayReceipt = clone(replayIsolationReceipt); tamperedReplayReceipt.policySha256 = '0'.repeat(64);
+  hold(proposed, suppliedEvidence, evidenceObservation, tamperedReplayReceipt, recipeRegistry.REGISTRY, /RECIPE_REPLAY_ISOLATION_RECEIPT_DIGEST_MISMATCH/);
+  const mismatchedReplayReceipt = clone(replayIsolationReceipt); mismatchedReplayReceipt.proposalSha256 = '0'.repeat(64); redigest(mismatchedReplayReceipt, 'replayIsolationReceiptSha256');
+  hold(proposed, suppliedEvidence, evidenceObservation, mismatchedReplayReceipt, recipeRegistry.REGISTRY, /REPLAY_ISOLATION_BINDING_INVALID/);
+  const staleReplayReceipt = clone(replayIsolationReceipt); staleReplayReceipt.validFrom = '2020-01-01T00:00:00.000Z'; staleReplayReceipt.expiresAt = '2020-01-01T00:05:00.000Z'; redigest(staleReplayReceipt, 'replayIsolationReceiptSha256');
+  hold(proposed, suppliedEvidence, evidenceObservation, staleReplayReceipt, recipeRegistry.REGISTRY, /RECIPE_REPLAY_ISOLATION_RECEIPT_STALE/);
 
   console.log(JSON.stringify({
     ok: true,
@@ -179,6 +203,9 @@ try {
     evidenceFilesObservedByReadOnlyHand: evidenceObservation.files.length,
     currentEvidenceByteDigestMatches: evidenceObservation.files.length,
     evidenceFilesParsedWithoutImport: evidenceObservation.files.length,
+    replayIsolationResult: replayIsolationReceipt.result,
+    replayIsolationCertified: replayIsolationReceipt.truth.isolationCertified,
+    replayIsolationReceiptBound: true,
     callerTestClaimsReproduced: false,
     semanticSafetyIndependentlyVerified: false,
     proposedSourceBytesReadByAdmissionPlane: 0,
@@ -188,7 +215,7 @@ try {
     verifiersInvoked: 0,
     candidatesGenerated: 0,
     candidatesExecuted: 0,
-    childProcessesSpawned: childProcessCalls,
+    childProcessesSpawnedByAdmissionPlane: childProcessCalls - prerequisiteChildProcessCalls,
     activeRegistryMutations: 0,
     selectionsIssued: 0,
     activationAuthorizationsIssued: 0,
