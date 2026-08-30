@@ -130,6 +130,22 @@ All measurements below came from the successful recovery verification run before
 - restart commits verified: 4 recovered plus 2 already committed
 - restart-surviving replay, lease contention, tamper, unknown-byte, mode-drift, and torn-tail behavior: verified
 - universal power-loss recovery and two-file atomicity claimed: no
+- bounded edit-graph plane and separately authorized graph Hand: present
+- graph boundary: 2-4 placement entries and 4-8 exact targets
+- focused graph trial: 3 dependency-linked entries and 6 existing targets
+- edit-graph planner adversarial holds verified: 6
+- graph application adversarial holds verified: 5
+- successful isolated six-target graph transactions: 1
+- intentional six-target verifier-failure transactions rolled back: 1/1
+- graph Hand language-parse receipts exercised: 24
+- graph Hand registered-verifier receipts exercised: 6
+- six-target graph journal boundaries crash-tested: 23/23
+- actual graph worker-process `SIGKILL` recovery probes: 28
+- graph restart rollbacks verified: 20
+- graph restart commits verified: 2 recovered plus 1 already committed
+- original pair Hand held by an active graph lease: verified
+- total actual pair-plus-graph `SIGKILL` probes: 53
+- universal power-loss recovery and four-to-eight-file atomicity claimed: no
 - production repositories edited by the focused trial: 0
 
 ## Truth boundaries retained
@@ -162,7 +178,8 @@ This lane adds a bounded composition surface without importing Grammar Glass or 
 - a deterministic code-placement grammar with language binding, unique-owner selection, verification placement, drift preconditions, required Hands, and fail-closed ambiguity/protection/path rules.
 - a bounded read-only project-map Hand with complete matching-file coverage, current-byte digests, five-minute freshness, and fail-closed symlink/traversal/broad-root/stale/tamper rules.
 - a separately authorized exact-byte JavaScript editing Hand with immediate map/digest preflight, parser and verifier receipts, two-target commit, durable Linux crash recovery, restart-surviving replay refusal, and an exclusive cooperating-Hand lease.
+- a separately authorized bounded edit-graph Hand for two to four placement entries and four to eight targets, with deterministic dependency order, all-target rollback, graph journaling/recovery, and the same workspace lease namespace as the pair Hand.
 
-Lane verification result: **23/23 checks passed**.
+Lane verification result: **26/26 checks passed**.
 
-The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The editing Hand test commits replace/create candidates, forces and verifies exact rollback, exercises 14 parser and three verifier receipts, and checks ten authorization/digest/drift/path/protection holds without touching a production repository. Its recovery test performs 25 real `SIGKILL` events, covers all replace/create journal boundaries, and verifies deterministic rollback/commit recovery plus replay, lease, tamper, ambiguity, mode, and torn-tail behavior. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, both Hands, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The pair editing Hand test commits replace/create candidates, forces and verifies exact rollback, exercises 14 parser and three verifier receipts, and checks ten authorization/digest/drift/path/protection holds without touching a production repository; its recovery test performs 25 real `SIGKILL` events. The graph tests deterministically order three dependency-linked entries, commit or restore six targets, exercise 24 parser and six verifier receipts, prove eleven planner/application holds, and perform 28 real `SIGKILL` events across all 23 graph journal boundaries plus replay, cross-API lease, tamper, ambiguity, mode, and torn-tail cases. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, pair and graph Hands, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.

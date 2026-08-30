@@ -1,0 +1,103 @@
+Branch: codex/standalone-capability-verification-v1
+Lane parent commit before this upgrade: dc23cf188c63148c14aa1a82f79df03005feb7e3
+Runtime: Linux 6.18.35 x86_64; Node v24.19.0; Python 3.12.13
+Observed: 2026-08-30T10:09:24Z through 2026-08-30T10:09:38Z (bounded local process stream)
+
+Command: node software-directions/placement/selftest-edit-graph-plane.js
+Result:
+{
+  "ok": true,
+  "focusedEntryCount": 3,
+  "focusedTargetNodeCount": 6,
+  "verifiedBoundaryTargetCounts": [
+    4,
+    6,
+    8
+  ],
+  "deterministicTopologicalOrder": true,
+  "adversarialHoldCount": 6,
+  "authority": {
+    "workspaceRead": false,
+    "workspaceMutation": false,
+    "toolExecution": false,
+    "codeGeneration": false,
+    "graphPlanning": true,
+    "authorization": false
+  }
+}
+
+Command: node software-directions/placement/selftest-workspace-edit-graph-hand.js
+Result:
+{
+  "ok": true,
+  "graphEntryCount": 3,
+  "exactTargetCount": 6,
+  "successfulGraphTransactions": 1,
+  "rollbackGraphTransactions": 1,
+  "parserReceiptCount": 24,
+  "verifierReceiptCount": 6,
+  "adversarialHoldCount": 5,
+  "legacyTwoTargetApiPreserved": true,
+  "productionRepositoryTrialClaimed": false
+}
+
+Command: node software-directions/placement/selftest-workspace-edit-graph-recovery.js
+Result:
+{
+  "ok": true,
+  "graphEntryCount": 3,
+  "exactTargetCount": 6,
+  "journalBoundaryCount": 23,
+  "actualSigkillCrashCount": 28,
+  "rollbackRecoveryCount": 20,
+  "recoveredCommitCount": 2,
+  "alreadyCommittedCount": 1,
+  "durableReplayAcrossProcessRestartHeld": true,
+  "simultaneousGraphWorkspaceLeaseHeld": true,
+  "legacyPairHandHeldByGraphLease": true,
+  "tamperedJournalHeld": true,
+  "ambiguousWorkspaceStateHeld": true,
+  "modeDriftHeld": true,
+  "trailingPartialJournalRecovered": true,
+  "universalPowerLossProofClaimed": false
+}
+
+Command: node testing/run-all.js
+Result: SUITE_RESULT: passed=26 failed=0 total=26
+Process exit: 0
+
+Graph boundary matrix:
+- GRAPH_PREPARED
+- for each of six existing targets in deterministic order: GRAPH_TARGET_TEMP_WRITTEN, GRAPH_TARGET_BACKED_UP, GRAPH_TARGET_INSTALLED
+- GRAPH_INSTALLED_PARSED, GRAPH_VERIFIED, GRAPH_CLEANUP_COMPLETE, GRAPH_COMMITTED
+- five additional killed-process scenarios cover lease/replay, journal tamper, unknown target bytes, target mode drift, and one torn trailing journal record
+
+Recovery and application assertions:
+- one three-entry/six-target transaction installed every exact candidate in dependency order
+- one intentional verifier failure restored all six prior files and modes
+- every pre-GRAPH_VERIFIED known crash state restored exact prior bytes and removed transaction artifacts
+- GRAPH_VERIFIED and GRAPH_CLEANUP_COMPLETE states preserved exact candidates and completed cleanup
+- GRAPH_COMMITTED state was verified and its crash-left lease was released without rewriting targets
+- graph and original pair Hands could not overlap because both use the same workspace lease namespace
+- the graph authorization remained refused after recovery in a fresh process
+- digest-chain tampering, unknown bytes, and mode drift held without recovery mutation or guessing
+- one incomplete trailing JSON record was truncated only under the valid lease, after which exact rollback completed
+
+Combined lane evidence:
+- original pair recovery worker kills: 25
+- graph recovery worker kills: 28
+- total real worker-process SIGKILL probes: 53
+- complete standalone suite: 26/26 passed
+
+Truth boundary:
+- this is Linux process-crash/restart evidence for generated temporary JavaScript workspaces
+- the graph supports two to four placement entries and four to eight exact source/test targets; this focused trial exercised three entries and six existing targets
+- the graph and Hand do not generate code or infer missing dependencies
+- this is not universal sudden-power-loss proof, filesystem atomicity across four to eight targets, automatic stale-lease recovery, protection from writers that bypass the Hands, adapter-purity proof, or a production-repository trial
+
+Stream receipt:
+- claim: the bounded edit-graph planner, graph editing/recovery Hand, shared pair/graph lease, and expanded standalone suite pass
+- stream: stdout/stderr from the named Node commands in this branch
+- expected events: graph JSON results with ok=true; actualSigkillCrashCount=28; legacyPairHandHeldByGraphLease=true; SUITE_RESULT with passed=26 failed=0 total=26; process exit 0
+- matched events: all expected events emitted during the final fourteen-second suite window; no refuting event emitted
+- raw rolling buffer released: yes; this bounded transcript is the retained evidence

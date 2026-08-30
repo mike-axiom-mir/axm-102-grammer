@@ -79,6 +79,40 @@ This v1.1 Hand supports only Linux durability, JavaScript under Node's CommonJS 
 
 This is a placement and application grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
 
+## Bounded multi-entry edit graph
+
+`edit-graph-plane.js` composes two to four already-ready placement plans from the same fresh project-map observation. Each entry keeps its original source/test ownership decision and may explicitly depend on up to three other entries. The plane refuses unknown/self dependencies, cycles, duplicate entry IDs, duplicate target paths, mixed observations, and graphs outside the four-to-eight-target boundary. It sorts entry IDs and derives one stable topological node order without reading or mutating the workspace.
+
+```js
+const graphPlane = require('./edit-graph-plane.js');
+const graphHand = require('./workspace-edit-graph-hand.js');
+
+const editGraph = graphPlane.compose({
+  projectMapObservation,
+  entries: [
+    {entryId: 'core', dependsOnEntryIds: [], placementPlan: corePlan},
+    {entryId: 'api', dependsOnEntryIds: ['core'], placementPlan: apiPlan}
+  ]
+});
+
+const receipt = graphHand.apply({
+  workspaceRoot,
+  journalRoot,
+  declaration,
+  projectMapObservation,
+  editGraph,
+  candidateEntries,
+  authorization,
+  verifierAdapters
+});
+```
+
+The graph Hand requires a separate `EXPLICIT_SINGLE_GRAPH_TRANSACTION` authorization binding the graph, ordered targets, every candidate digest, verifier adapters, workspace, and journal root. It uses the same workspace lease namespace as the two-target Hand, so cooperating pair and graph transactions cannot overlap. One graph-specific digest-chained journal records every target's temp, backup, and install boundary followed by graph-wide parse, verify, cleanup, and commit gates.
+
+The focused graph trial uses three dependency-linked placement entries and six existing files. One transaction commits all six exact candidates in topological order; one intentional verifier failure restores all six prior files and modes. Six planner holds cover cycles, unknown dependencies, duplicate targets, the eight-target limit, digest tampering, and a digest-valid forged order. The recovery matrix performs 28 real worker `SIGKILL` events: all 23 six-target journal boundaries plus lease/replay, tamper, unknown-byte, mode-drift, and torn-tail scenarios. It verifies 20 restart rollbacks, two recovered commits, and one already-committed finalization.
+
+This v1 graph layer remains JavaScript/Linux-only, supports exactly two to four placement entries and four to eight files, requires existing parent directories, and trusts registered verifier code. Its all-or-restore behavior is controlled transaction logic, not filesystem atomicity. It does not protect against writers that bypass the Hand, automatically break stale leases, prove sudden-power-loss behavior on arbitrary storage, infer missing dependencies, or turn dependency ordering into coding competence.
+
 The v1.1 project-map convention requires one explicit language-binding kind and signal:
 
 - `extension` for 97 extension-owned organs;

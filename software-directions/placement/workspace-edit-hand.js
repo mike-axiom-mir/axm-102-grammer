@@ -387,4 +387,6 @@ function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput =
   }
 }
 
-module.exports = {AUTHORITY, AUTHORIZATION_TTL_MS, MAX_CANDIDATE_BYTES, apply, recover: journal.recover};
+const INTERNALS = Object.freeze({freeze, sha256, receipt, held, workspaceRoot, validateDigestReceipt, validateObservation, validatePlan, candidate, parseReceipt, targetState, install, installedCandidate, verifierReceipt, rollback, cleanup});
+
+module.exports = {AUTHORITY, AUTHORIZATION_TTL_MS, MAX_CANDIDATE_BYTES, apply, recover: journal.recover, INTERNALS};
