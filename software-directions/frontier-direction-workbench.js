@@ -230,7 +230,7 @@ function runAll() {
       ],
       needsTuning: [
         'The first adapter plane covers bounded local Node verification; framework, platform, toolchain, browser, infrastructure, and hardware bindings remain incomplete.',
-        'The focused editing Hand now proves exact-byte application and process-local rollback for isolated JavaScript fixtures, but these 58 frontier maps remain references and no production repository application is claimed.',
+        'The focused editing Hand now proves exact-byte application plus Linux process-crash recovery and cooperating-process exclusion for isolated JavaScript fixtures, but these 58 frontier maps remain references and no production repository application is claimed.',
         'Capability IDs need richer acceptance schemas so evidence can be stronger than a declared name plus bounded reference check.',
         'High-risk directions need domain-expert, hardware, infrastructure, or independent-review gates that a frontier model cannot self-award.',
         'A future local trial should compare multiple frontier/local models and record disagreements instead of treating this single-model pass as universal.'

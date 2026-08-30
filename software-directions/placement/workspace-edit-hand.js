@@ -7,8 +7,9 @@ const vm = require('vm');
 const placementPlane = require('./placement-plane.js');
 const projectMapHand = require('./project-map-hand.js');
 const registry = require('./placement-registry.js');
+const journal = require('./workspace-edit-journal.js');
 
-const AUTHORITY = Object.freeze({workspaceRead: true, workspaceMutation: true, exactNamedTargetWrite: true, rollbackWrite: true, verifierAdapterInvocation: true, childProcessExecution: false, network: false, install: false, deployment: false, userFileDeletion: false, transactionArtifactCleanup: true, promotion: false, canon: false});
+const AUTHORITY = Object.freeze({workspaceRead: true, workspaceMutation: true, exactNamedTargetWrite: true, rollbackWrite: true, externalJournalReadWrite: true, workspaceLease: true, verifierAdapterInvocation: true, childProcessExecution: false, network: false, install: false, deployment: false, userFileDeletion: false, transactionArtifactCleanup: true, promotion: false, canon: false});
 const AUTHORIZATION_TTL_MS = 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 5000;
 const MAX_CANDIDATE_BYTES = 1024 * 1024;
@@ -137,7 +138,7 @@ function validateAuthorization(authorization, context, adapters) {
   if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt) || new Date(issuedAt).toISOString() !== authorization.issuedAt || new Date(expiresAt).toISOString() !== authorization.expiresAt || expiresAt <= issuedAt || authorization.ttlMs !== expiresAt - issuedAt || authorization.ttlMs > AUTHORIZATION_TTL_MS) throw Error('EDIT_AUTHORIZATION_TIME_INVALID');
   if (issuedAt > now + MAX_CLOCK_SKEW_MS) throw Error('EDIT_AUTHORIZATION_FUTURE');
   if (now > expiresAt || expiresAt > Date.parse(context.observation.expiresAt)) throw Error('EDIT_AUTHORIZATION_STALE');
-  if (authorization.workspaceRootIdentitySha256 !== registry.hash(context.root) || authorization.projectMapObservationSha256 !== context.observation.observationSha256 || authorization.placementPlanSha256 !== context.plan.planSha256 || authorization.parserId !== 'node-vm-script-syntax-v1' || authorization.rollbackRequired !== true) throw Error('EDIT_AUTHORIZATION_BINDING_INVALID');
+  if (authorization.workspaceRootIdentitySha256 !== registry.hash(context.root) || authorization.journalRootIdentitySha256 !== context.journalRootIdentitySha256 || authorization.projectMapObservationSha256 !== context.observation.observationSha256 || authorization.placementPlanSha256 !== context.plan.planSha256 || authorization.parserId !== 'node-vm-script-syntax-v1' || authorization.rollbackRequired !== true || authorization.durableRecoveryRequired !== true) throw Error('EDIT_AUTHORIZATION_BINDING_INVALID');
   const expectedTargets = {
     source: {targetPath: context.plan.sourcePlacement.targetPath, action: context.plan.sourcePlacement.action, expectedBeforeSha256: context.plan.sourcePlacement.expectedPreMutationSha256, candidateSha256: context.source.contentSha256},
     verification: {targetPath: context.plan.verificationPlacement.targetPath, action: context.plan.verificationPlacement.action, expectedBeforeSha256: context.plan.verificationPlacement.expectedPreMutationSha256, candidateSha256: context.verification.contentSha256}
@@ -194,20 +195,27 @@ function targetState(root, placement, candidateValue, authorizationId) {
   return {lane: candidateValue.lane, targetPath: target, relativePath: placement.targetPath, tempPath, backupPath, beforeBytes, beforeSha256: beforeBytes ? sha256(beforeBytes) : null, candidate: candidateValue, mode, tempPresent: false, backupPresent: false, targetInstalled: false};
 }
 
-function install(state) {
+function install(state, onPhase) {
   let fd = null;
   try {
     fd = fs.openSync(state.tempPath, fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY, state.mode);
     state.tempPresent = true;
     fs.writeFileSync(fd, state.candidate.bytes);
+    fs.fchmodSync(fd, state.mode);
     fs.fsyncSync(fd);
     fs.closeSync(fd); fd = null;
+    journal.syncDirectory(path.dirname(state.tempPath));
+    onPhase(`${state.lane.toUpperCase()}_TEMP_WRITTEN`);
     if (state.beforeBytes) {
       fs.renameSync(state.targetPath, state.backupPath);
       state.backupPresent = true;
+      journal.syncDirectory(path.dirname(state.targetPath));
+      onPhase(`${state.lane.toUpperCase()}_BACKED_UP`);
     }
     fs.renameSync(state.tempPath, state.targetPath);
     state.tempPresent = false; state.targetInstalled = true;
+    journal.syncDirectory(path.dirname(state.targetPath));
+    onPhase(`${state.lane.toUpperCase()}_INSTALLED`);
   } finally {
     if (fd !== null) fs.closeSync(fd);
   }
@@ -254,13 +262,13 @@ function rollback(states) {
   for (const state of [...states].reverse()) {
     let restored = false; let errorCode = null;
     try {
-      if (state.targetInstalled && fs.existsSync(state.targetPath)) fs.unlinkSync(state.targetPath);
+      if (state.targetInstalled && fs.existsSync(state.targetPath)) { fs.unlinkSync(state.targetPath); journal.syncDirectory(path.dirname(state.targetPath)); }
       state.targetInstalled = false;
       if (state.backupPresent && fs.existsSync(state.backupPath)) {
-        fs.renameSync(state.backupPath, state.targetPath); state.backupPresent = false;
+        fs.renameSync(state.backupPath, state.targetPath); state.backupPresent = false; journal.syncDirectory(path.dirname(state.targetPath));
       }
-      if (state.tempPresent && fs.existsSync(state.tempPath)) { fs.unlinkSync(state.tempPath); state.tempPresent = false; }
-      if (state.beforeBytes) restored = fs.existsSync(state.targetPath) && sha256(fs.readFileSync(state.targetPath)) === state.beforeSha256;
+      if (state.tempPresent && fs.existsSync(state.tempPath)) { fs.unlinkSync(state.tempPath); state.tempPresent = false; journal.syncDirectory(path.dirname(state.tempPath)); }
+      if (state.beforeBytes) restored = fs.existsSync(state.targetPath) && sha256(fs.readFileSync(state.targetPath)) === state.beforeSha256 && (fs.statSync(state.targetPath).mode & 0o777) === state.mode;
       else restored = !fs.existsSync(state.targetPath);
       if (!restored) errorCode = 'ROLLBACK_STATE_MISMATCH';
     } catch (error) {
@@ -269,7 +277,7 @@ function rollback(states) {
     outcomes.push({lane: state.lane, targetPath: state.relativePath, expectedRestoredSha256: state.beforeSha256, restored, errorCode});
   }
   const allRestored = outcomes.length > 0 && outcomes.every(item => item.restored);
-  const body = {schema: 'axm.code.workspace-edit-rollback-receipt.v1', version: '1.0.0', status: 'TEST', result: allRestored ? 'ROLLBACK_PASS' : 'ROLLBACK_FAIL', outcomes, truth: {processLocalRollbackOnly: true, crashRecoveryClaimed: false}, authority: AUTHORITY};
+  const body = {schema: 'axm.code.workspace-edit-rollback-receipt.v1', version: '1.0.0', status: 'TEST', result: allRestored ? 'ROLLBACK_PASS' : 'ROLLBACK_FAIL', outcomes, truth: {receiptDescribesProcessLocalRollbackAttemptOnly: true, durableRestartRecoveryDescribedByJournal: true, universalPowerLossRecoveryClaimed: false}, authority: AUTHORITY};
   return receipt(body, 'receiptSha256');
 }
 
@@ -277,8 +285,8 @@ function cleanup(states) {
   const failures = [];
   for (const state of states) {
     try {
-      if (state.backupPresent && fs.existsSync(state.backupPath)) { fs.unlinkSync(state.backupPath); state.backupPresent = false; }
-      if (state.tempPresent && fs.existsSync(state.tempPath)) { fs.unlinkSync(state.tempPath); state.tempPresent = false; }
+      if (state.backupPresent && fs.existsSync(state.backupPath)) { fs.unlinkSync(state.backupPath); state.backupPresent = false; journal.syncDirectory(path.dirname(state.backupPath)); }
+      if (state.tempPresent && fs.existsSync(state.tempPath)) { fs.unlinkSync(state.tempPath); state.tempPresent = false; journal.syncDirectory(path.dirname(state.tempPath)); }
     } catch (error) {
       failures.push({lane: state.lane, errorCode: 'TRANSACTION_ARTIFACT_CLEANUP_FAILED'});
     }
@@ -286,11 +294,12 @@ function cleanup(states) {
   return failures;
 }
 
-function apply({workspaceRoot: rootInput = null, declaration = null, projectMapObservation = null, placementPlan = null, authorization = null, candidates = null, verifierAdapters = []} = {}) {
+function apply({workspaceRoot: rootInput = null, journalRoot: journalRootInput = null, declaration = null, projectMapObservation = null, placementPlan = null, authorization = null, candidates = null, verifierAdapters = []} = {}) {
   const parserReceipts = []; const verifierReceipts = []; const states = [];
-  let mutationStarted = false; let authorizationSha256 = null;
+  let mutationStarted = false; let verificationRecorded = false; let authorizationSha256 = null; let journalHandle = null; let durability = null;
   try {
     const root = workspaceRoot(rootInput);
+    durability = journal.roots(root, journalRootInput);
     validateObservation(projectMapObservation, root, declaration);
     validatePlan(placementPlan, projectMapObservation);
     const freshObservation = projectMapHand.inspect({workspaceRoot: root, declaration});
@@ -298,7 +307,7 @@ function apply({workspaceRoot: rootInput = null, declaration = null, projectMapO
     if (freshObservation.projectMapSha256 !== projectMapObservation.projectMapSha256 || freshObservation.projectMapSha256 !== placementPlan.projectMapSha256) throw Error('EDIT_WORKSPACE_DRIFT_SINCE_PLACEMENT');
     const source = candidate(candidates?.source, 'source', placementPlan.sourcePlacement, placementPlan.languageBinding.languageId);
     const verification = candidate(candidates?.verification, 'verification', placementPlan.verificationPlacement, placementPlan.languageBinding.languageId);
-    const context = {root, observation: projectMapObservation, plan: placementPlan, source, verification};
+    const context = {root, journalRootIdentitySha256: durability.journalIdentitySha256, observation: projectMapObservation, plan: placementPlan, source, verification};
     const adapterBindings = validateAuthorization(authorization, context, verifierAdapters);
     authorizationSha256 = authorization.authorizationSha256;
     parserReceipts.push(parseReceipt(source, 'pre-mutation'), parseReceipt(verification, 'pre-mutation'));
@@ -306,17 +315,26 @@ function apply({workspaceRoot: rootInput = null, declaration = null, projectMapO
     if (failedPreParse) throw Error(`EDIT_${failedPreParse.lane.toUpperCase()}_PARSE_FAILED`);
     states.push(targetState(root, placementPlan.sourcePlacement, source, authorization.authorizationId));
     states.push(targetState(root, placementPlan.verificationPlacement, verification, authorization.authorizationId));
+    journalHandle = journal.prepare({workspaceRoot: root, journalRoot: durability.journal, authorization, placementPlanSha256: placementPlan.planSha256, states});
     USED_AUTHORIZATIONS.add(authorizationSha256);
     mutationStarted = true;
-    for (const state of states) install(state);
+    for (const state of states) install(state, phase => journal.append(journalHandle, phase, {lane: state.lane, targetPath: state.relativePath}));
     const installedSource = installedCandidate(states[0]); const installedVerification = installedCandidate(states[1]);
     parserReceipts.push(parseReceipt(installedSource, 'post-mutation'), parseReceipt(installedVerification, 'post-mutation'));
     const failedPostParse = parserReceipts.find(item => item.phase === 'post-mutation' && item.result !== 'LANGUAGE_PARSE_PASS');
     if (failedPostParse) throw Error(`EDIT_${failedPostParse.lane.toUpperCase()}_POSTWRITE_PARSE_FAILED`);
+    journal.append(journalHandle, 'INSTALLED_PARSED', {parserReceiptSha256: parserReceipts.filter(item => item.phase === 'post-mutation').map(item => item.receiptSha256)});
     for (const {binding, adapter} of adapterBindings) verifierReceipts.push(verifierReceipt(binding, adapter, {source: installedSource, verification: installedVerification, planSha256: placementPlan.planSha256}));
     const failedVerifier = verifierReceipts.find(item => item.result !== 'WORKSPACE_VERIFIER_PASS');
     if (failedVerifier) throw Error(`EDIT_VERIFIER_FAILED:${failedVerifier.adapterId}`);
+    journal.append(journalHandle, 'VERIFIED', {verifierReceiptSha256: verifierReceipts.map(item => item.receiptSha256)});
+    verificationRecorded = true;
     const cleanupFailures = cleanup(states);
+    if (!cleanupFailures.length) {
+      journal.append(journalHandle, 'CLEANUP_COMPLETE', {targetCount: states.length});
+      journal.append(journalHandle, 'COMMITTED', {targetCount: states.length});
+      journal.releaseLease(journalHandle);
+    }
     const body = {
       schema: 'axm.code.workspace-edit-transaction-receipt.v1', version: '1.0.0', status: 'TEST',
       result: cleanupFailures.length ? 'EDIT_TRANSACTION_COMMITTED_WITH_CLEANUP_HOLD' : 'EDIT_TRANSACTION_COMMITTED',
@@ -325,7 +343,8 @@ function apply({workspaceRoot: rootInput = null, declaration = null, projectMapO
       freshPreflightObservationSha256: freshObservation.observationSha256, placementPlanSha256: placementPlan.planSha256,
       targets: states.map(state => ({lane: state.lane, targetPath: state.relativePath, action: state.beforeBytes ? 'replace' : 'create', beforeSha256: state.beforeSha256, afterSha256: state.candidate.contentSha256})),
       parserReceipts, verifierReceipts, rollbackReceipt: null, cleanupFailures,
-      truth: {workspaceMutationAttempted: true, workspaceChangedAtReturn: true, exactCandidateBytesInstalled: true, codeGeneratedByHand: false, requestedVerifiersPassed: true, multiFileAtomicityClaimed: false, crashRecoveryClaimed: false, concurrentMutationRaceEliminated: false, declarationUpdateRequired: states.some(state => !state.beforeBytes)},
+      durableJournal: {authorizationId: authorization.authorizationId, journalRootIdentitySha256: durability.journalIdentitySha256, latestPhase: cleanupFailures.length ? 'VERIFIED' : 'COMMITTED', recoveryRequired: cleanupFailures.length > 0},
+      truth: {workspaceMutationAttempted: true, workspaceChangedAtReturn: true, exactCandidateBytesInstalled: true, codeGeneratedByHand: false, requestedVerifiersPassed: true, multiFileAtomicityClaimed: false, processCrashRecoveryProvided: true, replayProtectionSurvivesRestart: true, powerLossDurabilityUniversallyClaimed: false, concurrentMutationRaceEliminated: false, simultaneousHandMutationPreventedByLease: true, declarationUpdateRequired: states.some(state => !state.beforeBytes)},
       authority: AUTHORITY
     };
     return receipt(body, 'transactionSha256');
@@ -333,18 +352,39 @@ function apply({workspaceRoot: rootInput = null, declaration = null, projectMapO
     const message = String(error?.message || 'EDIT_TRANSACTION_FAILED');
     const errorCode = message.startsWith('EDIT_') ? message : (typeof error?.code === 'string' ? `EDIT_FILESYSTEM_${error.code}` : 'EDIT_TRANSACTION_FAILED');
     if (!mutationStarted) return held(errorCode, {authorizationSha256, parserReceipts, verifierReceipts});
+    if (verificationRecorded) {
+      const body = {
+        schema: 'axm.code.workspace-edit-transaction-receipt.v1', version: '1.0.0', status: 'TEST', result: 'EDIT_TRANSACTION_COMMITTED_WITH_RECOVERY_HOLD', errorCode,
+        authorizationSha256, placementPlanSha256: placementPlan?.planSha256 || null,
+        targets: states.map(state => ({lane: state.lane, targetPath: state.relativePath, beforeSha256: state.beforeSha256, candidateSha256: state.candidate.contentSha256})),
+        parserReceipts, verifierReceipts, rollbackReceipt: null,
+        durableJournal: {authorizationId: authorization?.authorizationId || null, journalRootIdentitySha256: durability?.journalIdentitySha256 || null, latestPhase: journalHandle?.records?.at(-1)?.phase || null, recoveryRequired: true},
+        truth: {workspaceMutationAttempted: true, workspaceChangedAtReturn: true, verifiedCandidatePreservedForRecovery: true, codeGeneratedByHand: false, multiFileAtomicityClaimed: false, processCrashRecoveryProvided: true, leaseRetainedForRecovery: true}, authority: AUTHORITY
+      };
+      return receipt(body, 'transactionSha256');
+    }
     const rollbackReceipt = rollback(states);
+    let journalErrorCode = null;
+    if (rollbackReceipt.result === 'ROLLBACK_PASS' && journalHandle) {
+      try {
+        journal.append(journalHandle, 'ROLLED_BACK', {rollbackReceiptSha256: rollbackReceipt.receiptSha256});
+        journal.releaseLease(journalHandle);
+      } catch (journalError) {
+        journalErrorCode = String(journalError?.message || 'EDIT_JOURNAL_ROLLBACK_RECORD_FAILED');
+      }
+    }
     const body = {
       schema: 'axm.code.workspace-edit-transaction-receipt.v1', version: '1.0.0', status: 'TEST',
-      result: rollbackReceipt.result === 'ROLLBACK_PASS' ? 'EDIT_TRANSACTION_ROLLED_BACK' : 'EDIT_TRANSACTION_ROLLBACK_FAILED',
-      errorCode, authorizationSha256, placementPlanSha256: placementPlan?.planSha256 || null,
+      result: rollbackReceipt.result === 'ROLLBACK_PASS' ? (journalErrorCode ? 'EDIT_TRANSACTION_ROLLED_BACK_WITH_JOURNAL_HOLD' : 'EDIT_TRANSACTION_ROLLED_BACK') : 'EDIT_TRANSACTION_ROLLBACK_FAILED',
+      errorCode, journalErrorCode, authorizationSha256, placementPlanSha256: placementPlan?.planSha256 || null,
       targets: states.map(state => ({lane: state.lane, targetPath: state.relativePath, beforeSha256: state.beforeSha256, candidateSha256: state.candidate.contentSha256})),
       parserReceipts, verifierReceipts, rollbackReceipt,
-      truth: {workspaceMutationAttempted: true, workspaceChangedAtReturn: rollbackReceipt.result !== 'ROLLBACK_PASS', finalWorkspaceRestored: rollbackReceipt.result === 'ROLLBACK_PASS', codeGeneratedByHand: false, failedVerificationWasNotAccepted: true, crashRecoveryClaimed: false, concurrentMutationRaceEliminated: false},
+      durableJournal: {authorizationId: authorization?.authorizationId || null, journalRootIdentitySha256: durability?.journalIdentitySha256 || null, latestPhase: journalHandle?.records?.at(-1)?.phase || null, recoveryRequired: rollbackReceipt.result !== 'ROLLBACK_PASS' || journalErrorCode !== null},
+      truth: {workspaceMutationAttempted: true, workspaceChangedAtReturn: rollbackReceipt.result !== 'ROLLBACK_PASS', finalWorkspaceRestored: rollbackReceipt.result === 'ROLLBACK_PASS', codeGeneratedByHand: false, failedVerificationWasNotAccepted: true, processCrashRecoveryProvided: true, replayProtectionSurvivesRestart: true, concurrentMutationRaceEliminated: false, simultaneousHandMutationPreventedByLease: true},
       authority: AUTHORITY
     };
     return receipt(body, 'transactionSha256');
   }
 }
 
-module.exports = {AUTHORITY, AUTHORIZATION_TTL_MS, MAX_CANDIDATE_BYTES, apply};
+module.exports = {AUTHORITY, AUTHORIZATION_TTL_MS, MAX_CANDIDATE_BYTES, apply, recover: journal.recover};

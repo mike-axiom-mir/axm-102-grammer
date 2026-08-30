@@ -1,6 +1,6 @@
 # AXM 102 Grammar Status
 
-Verified standalone recovery state: **2026-08-29**
+Verified standalone recovery state: **2026-08-30**
 
 Source checkpoint used for recovery:
 
@@ -122,6 +122,14 @@ All measurements below came from the successful recovery verification run before
 - editing Hand language-parse receipts exercised: 14
 - editing Hand registered-verifier receipts exercised: 3
 - editing Hand adversarial holds verified: 10
+- durable workspace-edit journal and exclusive cooperating-Hand lease: present
+- actual worker-process `SIGKILL` recovery probes: 25
+- replace journal boundaries crash-tested: 11/11
+- create journal boundaries crash-tested: 9/9
+- restart rollbacks verified: 14
+- restart commits verified: 4 recovered plus 2 already committed
+- restart-surviving replay, lease contention, tamper, unknown-byte, mode-drift, and torn-tail behavior: verified
+- universal power-loss recovery and two-file atomicity claimed: no
 - production repositories edited by the focused trial: 0
 
 ## Truth boundaries retained
@@ -153,8 +161,8 @@ This lane adds a bounded composition surface without importing Grammar Glass or 
 - a concrete local adapter plane with runtime/verifier receipts and explicit unsupported targets.
 - a deterministic code-placement grammar with language binding, unique-owner selection, verification placement, drift preconditions, required Hands, and fail-closed ambiguity/protection/path rules.
 - a bounded read-only project-map Hand with complete matching-file coverage, current-byte digests, five-minute freshness, and fail-closed symlink/traversal/broad-root/stale/tamper rules.
-- a separately authorized exact-byte JavaScript editing Hand with immediate map/digest preflight, parser and verifier receipts, two-target commit, and process-local rollback.
+- a separately authorized exact-byte JavaScript editing Hand with immediate map/digest preflight, parser and verifier receipts, two-target commit, durable Linux crash recovery, restart-surviving replay refusal, and an exclusive cooperating-Hand lease.
 
-Lane verification result: **22/22 checks passed**.
+Lane verification result: **23/23 checks passed**.
 
-The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The editing Hand test commits replace/create candidates, forces and verifies exact rollback, exercises 14 parser and three verifier receipts, and checks ten authorization/digest/drift/path/protection holds without touching a production repository. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, both Hands, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The editing Hand test commits replace/create candidates, forces and verifies exact rollback, exercises 14 parser and three verifier receipts, and checks ten authorization/digest/drift/path/protection holds without touching a production repository. Its recovery test performs 25 real `SIGKILL` events, covers all replace/create journal boundaries, and verifies deterministic rollback/commit recovery plus replay, lease, tamper, ambiguity, mode, and torn-tail behavior. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, both Hands, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.

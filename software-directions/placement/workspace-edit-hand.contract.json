@@ -1,20 +1,24 @@
 {
   "schema": "axm.code.workspace-edit-hand-contract.v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "TEST",
   "provides": [
     "axm.code.edit-candidate.v1",
     "axm.code.edit-authorization.v1",
     "axm.code.language-parse-receipt.v1",
     "axm.code.workspace-verifier-receipt.v1",
-    "axm.code.workspace-edit-transaction-receipt.v1"
+    "axm.code.workspace-edit-transaction-receipt.v1",
+    "axm.code.workspace-edit-lease.v1",
+    "axm.code.workspace-edit-journal-record.v1",
+    "axm.code.workspace-edit-recovery-receipt.v1"
   ],
   "model": {
     "candidate": "A capable model or deterministic renderer supplies exact UTF-8 source and verification bytes. The Hand does not generate or improve code.",
-    "authorization": "The host explicitly authorizes one digest-bound source/test transaction for one fresh observation and placement plan. The authorization digest is an integrity binding, not identity or consent proof.",
+    "authorization": "The host explicitly authorizes one digest-bound source/test transaction for one fresh observation and placement plan, and binds a separate pre-existing durable journal root. The authorization digest is an integrity binding, not identity or consent proof.",
     "preflight": "Immediately re-observe the declared project, require the same map digest, recheck target state, bind candidates, and parse both candidates before mutation.",
-    "transaction": "Replace or create only the two exact planned targets using same-directory temporary and backup files, then parse and verify the installed bytes.",
-    "rollback": "Any write, post-write digest, parse, or verifier failure restores prior bytes or removes newly created targets before returning when process-local rollback succeeds."
+    "transaction": "Acquire one O_EXCL workspace lease, append and fsync a digest-chained journal, replace or create only the two exact planned targets using same-directory temporary and backup files, then parse and verify the installed bytes.",
+    "rollback": "Any ordinary write, post-write digest, parse, or verifier failure restores prior bytes or removes newly created targets before returning when process-local rollback succeeds.",
+    "restartRecovery": "On Linux, recovery validates the journal chain, lease binding, and exact target/temp/backup digests and modes. Pre-VERIFIED phases roll back; VERIFIED or CLEANUP_COMPLETE phases finish commit cleanup; ambiguous states hold without guessing."
   },
   "supportedParserBindings": [
     "javascript:node-vm-script-syntax-v1"
@@ -24,7 +28,11 @@
     "maxTargets": 2,
     "maxCandidateBytesPerTarget": 1048576,
     "maxVerifierBindings": 8,
-    "parentDirectoriesMustAlreadyExist": true
+    "maxJournalBytes": 1048576,
+    "parentDirectoriesMustAlreadyExist": true,
+    "journalRootMustAlreadyExist": true,
+    "journalRootMustBeAbsoluteSeparateAndNonNested": true,
+    "durableRecoveryPlatform": "linux"
   },
   "truth": {
     "handGeneratesCode": false,
@@ -34,11 +42,14 @@
     "javascriptSyntaxPassIsBehaviorProof": false,
     "verifierReceiptIsUniversalProof": false,
     "multiFileAtomicityClaimed": false,
-    "processCrashRecoveryClaimed": false,
+    "linuxProcessCrashRecoveryProvided": true,
+    "universalPowerLossRecoveryClaimed": false,
     "concurrentMutationRaceEliminated": false,
+    "simultaneousHandMutationPreventedByLease": true,
+    "externalNonHandMutationPrevented": false,
     "processLocalRollbackProvided": true,
     "processLocalReplayProtectionProvided": true,
-    "replayProtectionSurvivesRestart": false,
+    "replayProtectionSurvivesRestart": true,
     "adapterPurityCanBeProvenByHand": false,
     "productionRepositoryTrialClaimed": false
   },
@@ -48,6 +59,9 @@
     "same-directory-transaction-artifact-create",
     "transaction-artifact-cleanup",
     "rollback-restore",
+    "separate-explicit-journal-root-read-write",
+    "exclusive-workspace-lease-create-release",
+    "digest-chained-journal-append-and-recovery",
     "registered-verifier-adapter-invocation"
   ],
   "refuses": [
@@ -63,7 +77,12 @@
     "candidate-over-one-mebibyte",
     "unsupported-language-parser",
     "failed-parser-or-verifier-as-success",
-    "authorization-replay-in-process",
+    "authorization-replay-across-process-restart",
+    "simultaneous-hand-mutation-while-lease-held",
+    "automatic-stale-lease-breaking",
+    "ambiguous-recovery-state",
+    "tampered-or-invalid-journal-chain",
+    "journal-root-inside-workspace-or-workspace-inside-journal-root",
     "parent-directory-creation",
     "user-file-deletion",
     "network-access",

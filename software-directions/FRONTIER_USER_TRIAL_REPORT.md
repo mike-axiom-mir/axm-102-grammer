@@ -2,7 +2,7 @@
 
 Status: **29/29 beginner reference ready; 58/58 bounded builds passed; 0 production ready**
 
-Date: 2026-08-29
+Date: 2026-08-30
 
 Perspective: one frontier model using the software-direction profiles as a user-side build guide
 
@@ -84,17 +84,20 @@ This is real filesystem observation, but only inside generated test workspaces. 
 
 The next gap is now exercised for the first JavaScript boundary. The editing Hand does not attempt to out-code the model: a capable model or deterministic renderer supplies exact source and test bytes, while the Hand binds those bytes to the previously observed architectural destination and applies only a separately authorized transaction.
 
-The focused test used generated workspaces and produced:
+The focused transaction and recovery tests used generated workspaces and produced:
 
 - two successful two-target transactions, one replacing an existing source/test pair and one creating a convention-bound pair;
 - 14 pre/post JavaScript parse receipts and three registered-verifier receipts;
 - one intentionally failed post-write verifier transaction, followed by byte-and-mode restoration of both targets;
 - ten fail-closed cases covering authorization replay, syntax rejection before mutation, workspace drift, stale authorization, authorization tampering, missing verifier binding, candidate-target mismatch, an internally inconsistent observation receipt, and a digest-valid forged plan aimed at a protected target;
+- 25 real worker-process `SIGKILL` events: all 11 replace boundaries, all nine create boundaries, and five additional adversarial crash setups;
+- 14 restart rollbacks before verification, four recovered commits after verification, and two already-committed finalizations;
+- restart-surviving replay refusal, exclusive cooperating-Hand lease contention, tampered-journal refusal, unknown-byte and mode-drift refusal, and repair of one torn trailing journal record;
 - no leftover transaction artifacts, no changed unrelated fixture file, and no production-repository edit.
 
-The authorization is valid for at most 60 seconds and binds the workspace identity, observation, placement plan, two target/action/pre-digest/candidate tuples, parser, and verifier adapters. The Hand immediately re-observes the project, rechecks target bytes, parses before mutation, writes through same-directory temporary/backup paths, re-reads and parses installed bytes, and accepts the transaction only after every requested bound verifier passes.
+The authorization is valid for at most 60 seconds and binds the workspace and separate durable-root identities, observation, placement plan, two target/action/pre-digest/candidate tuples, parser, and verifier adapters. The Hand immediately re-observes the project, rechecks target bytes, parses before mutation, acquires an exclusive workspace lease, appends and fsyncs a digest-chained journal, writes through same-directory temporary/backup paths, re-reads and parses installed bytes, and accepts the transaction only after every requested bound verifier passes.
 
-This is still a narrow TEST capability. It supports JavaScript under Node's CommonJS script parse goal, existing parent directories, two targets, and process-local rollback/replay memory. It has no durable crash journal, multi-file atomicity, inter-process lock, proof of adapter purity, or guarantee against a concurrent mutation race. It is guidance and controlled application for code supplied elsewhere, not a claim of deterministic perfect code generation.
+This is still a narrow TEST capability. It supports Linux restart durability, JavaScript under Node's CommonJS script parse goal, existing parent directories, and exactly two targets. It now has a durable journal, restart-surviving replay refusal, and an inter-process lease for cooperating Hand transactions. It does not claim universal power-loss safety, filesystem atomicity across both files, automatic stale-lease breaking, proof of adapter purity, or protection from an external writer that bypasses the Hand. It is guidance and controlled application for code supplied elsewhere, not a claim of deterministic perfect code generation.
 
 ## Per-direction frontier-user observations
 
@@ -136,7 +139,7 @@ The layer is already useful to a frontier model as a **pre-build directional che
 
 The first local adapter plane closes part of the earlier adapter gap, but depth remains the main weakness. It does not yet bind a concrete framework, browser, mobile/desktop package, compiler, device, cloud target, external verifier, or human/domain authority. Capability evidence is also still coarse: future versions should give important capability IDs richer acceptance schemas instead of relying on a name plus a bounded reference check.
 
-The first separately authorized editing Hand trial now closes the process-local application loop for JavaScript fixtures. The next placement maturation gaps are a durable recovery journal plus inter-process coordination, followed by real sandboxed language/parser/verifier adapters beyond Node's script goal. A later production-like but disposable repository trial should compare frontier and local models and measure whether the placement grammar actually reduces destination drift, repair work, and unrelated edits.
+The separately authorized editing Hand now closes the tested Linux process-crash/restart loop for JavaScript fixtures. The next placement maturation gap is a bounded edit graph that can express more than one source/test pair while preserving explicit ownership and recovery invariants, alongside real sandboxed language/parser/verifier adapters beyond Node's script goal. A later production-like but disposable repository trial should compare frontier and local models and measure whether the placement grammar actually reduces destination drift, repair work, and unrelated edits.
 
 ## Evidence entrypoints
 
@@ -146,7 +149,7 @@ The first separately authorized editing Hand trial now closes the process-local 
 - concrete adapter registry, resolver, implementations, and receipts: `adapters/`
 - deterministic role catalog, placement planner, fixtures, and adversarial holds: `placement/`
 - bounded read-only workspace observer, freshness receipt, and no-mutation/adversarial tests: `placement/project-map-hand.js`, `placement/selftest-project-map-hand.js`
-- separately authorized exact-byte editor, transaction contract, rollback logic, and focused adversarial test: `placement/workspace-edit-hand.js`, `placement/workspace-edit-hand.contract.json`, `placement/selftest-workspace-edit-hand.js`
+- separately authorized exact-byte editor, durable journal/recovery, transaction contract, and focused adversarial/crash tests: `placement/workspace-edit-hand.js`, `placement/workspace-edit-journal.js`, `placement/workspace-edit-hand.contract.json`, `placement/selftest-workspace-edit-hand.js`, `placement/selftest-workspace-edit-recovery.js`
 - deterministic 58-build verification: `selftest-frontier-direction-workbench.js`
 
 Aggregate adapter-and-placement-bound frontier report digest: `8cf10067834ec10da62b92794ca28fc23af553b9743a75ea2e7d946e9452395a`

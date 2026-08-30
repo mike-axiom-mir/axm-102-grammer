@@ -51,6 +51,7 @@ const editHand = require('./workspace-edit-hand.js');
 
 const transactionReceipt = editHand.apply({
   workspaceRoot,
+  journalRoot,
   declaration,
   projectMapObservation,
   placementPlan,
@@ -58,15 +59,23 @@ const transactionReceipt = editHand.apply({
   candidates: {source, verification},
   verifierAdapters
 });
+
+const recoveryReceipt = editHand.recover({
+  workspaceRoot,
+  journalRoot,
+  authorizationId
+});
 ```
 
-The capable model or a deterministic renderer supplies the exact UTF-8 candidate bytes. A host must separately issue one `EXPLICIT_SINGLE_TRANSACTION` authorization, valid for no more than 60 seconds, binding the root identity, fresh observation, placement plan, both targets and candidate digests, the JavaScript parser, and every verifier adapter. The authorization digest detects changed fields; it is not a signature, identity, or consent proof.
+The capable model or a deterministic renderer supplies the exact UTF-8 candidate bytes. A host must separately issue one `EXPLICIT_SINGLE_TRANSACTION` authorization, valid for no more than 60 seconds, binding the workspace and separate durable-journal root identities, fresh observation, placement plan, both targets and candidate digests, the JavaScript parser, and every verifier adapter. The authorization digest detects changed fields; it is not a signature, identity, or consent proof.
 
-Before mutation, the Hand re-observes the complete declared project map, refuses drift or protected targets, rechecks existing target digests, and syntax-parses both candidates. It writes only the two planned source/test targets through same-directory temporary and backup files. It then re-reads and re-parses the installed bytes and invokes only the bound verifier adapters. A failed write, post-write check, parser, or verifier triggers reverse-order restoration of prior bytes or removal of newly created targets.
+Before mutation, the Hand re-observes the complete declared project map, refuses drift or protected targets, rechecks existing target digests, and syntax-parses both candidates. It acquires an exclusive O_EXCL workspace lease in the durable root, appends and fsyncs a digest-chained journal, and writes only the two planned source/test targets through same-directory temporary and backup files. It then re-reads and re-parses the installed bytes and invokes only the bound verifier adapters. A failed write, post-write check, parser, or verifier triggers reverse-order restoration of prior bytes or removal of newly created targets.
 
-The focused trial proves two successful transactions (replace and create), one intentional post-write verifier failure with both targets restored, 14 language-parse receipts, three registered-verifier receipts, and ten adversarial holds covering replay, parse failure, drift, stale/tampered/unbound authorization, target mismatch, inconsistent nested observation digests, and a forged protected-target plan. All workspaces are generated test fixtures; no production repository was edited.
+On Linux, `recover` validates the journal chain, lease binding, and the exact target/temp/backup digests and modes. A last complete phase before `VERIFIED` rolls back; `VERIFIED` or `CLEANUP_COMPLETE` finishes commit cleanup; a final phase is verified and any crash-left lease is released. One torn trailing record may be removed under the valid lease. Unknown bytes, changed modes, a tampered chain, a missing/mismatched lease, or any other ambiguous state holds without guessing. Leases are never automatically declared stale or broken.
 
-This v1 Hand supports only JavaScript under Node's CommonJS script parse goal, exactly two files, existing parent directories, candidates up to 1 MiB each, and up to eight verifier bindings. Its rollback and replay memory are process-local. It does not provide a durable crash journal, multi-file atomicity, inter-process locking, or elimination of concurrent mutation races. Verifier adapters are trusted registered code; the Hand limits the context it gives them but cannot prove their purity.
+The focused transaction trial proves two successful transactions (replace and create), one intentional post-write verifier failure with both targets restored, 14 language-parse receipts, three registered-verifier receipts, and ten adversarial holds covering replay, parse failure, drift, stale/tampered/unbound authorization, target mismatch, inconsistent nested observation digests, and a forged protected-target plan. A separate recovery trial kills real worker processes at all 11 replace boundaries and all nine create boundaries, then proves 14 rollbacks, four recovered commits, and two already-committed finalizations. Five additional crash setups prove cross-process replay refusal, lease contention, tampered-journal refusal, unknown-byte and mode-drift refusal, and torn-tail recovery. All workspaces are generated test fixtures; no production repository was edited.
+
+This v1.1 Hand supports only Linux durability, JavaScript under Node's CommonJS script parse goal, exactly two files, existing parent directories, candidates up to 1 MiB each, journals up to 1 MiB, and up to eight verifier bindings. It provides process-crash recovery, restart-surviving replay refusal, and mutual exclusion between cooperating Hand transactions. It does not claim universal power-loss recovery, two-file filesystem atomicity, automatic stale-lease recovery, or protection from external writers that bypass the Hand. Verifier adapters are trusted registered code; the Hand limits the context it gives them but cannot prove their purity.
 
 This is a placement and application grammar, not a substitute for coding competence and not yet a source generator. Its purpose is to keep capable deterministic or model-based code creation attached to the correct architectural owner and verification seam.
 

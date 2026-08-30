@@ -127,9 +127,14 @@ assert.strictEqual(workspaceEditHandContract.authority, 'EXPLICIT_SINGLE_TRANSAC
 assert(workspaceEditHandContract.permissions.includes('explicit-two-target-workspace-write'));
 assert.strictEqual(workspaceEditHandContract.truth.handGeneratesCode, false);
 assert.strictEqual(workspaceEditHandContract.truth.multiFileAtomicityClaimed, false);
-assert.strictEqual(workspaceEditHandContract.truth.processCrashRecoveryClaimed, false);
+assert.strictEqual(workspaceEditHandContract.version, '1.1.0');
+assert.strictEqual(workspaceEditHandContract.truth.linuxProcessCrashRecoveryProvided, true);
+assert.strictEqual(workspaceEditHandContract.truth.universalPowerLossRecoveryClaimed, false);
 assert.strictEqual(workspaceEditHandContract.truth.concurrentMutationRaceEliminated, false);
+assert.strictEqual(workspaceEditHandContract.truth.simultaneousHandMutationPreventedByLease, true);
+assert.strictEqual(workspaceEditHandContract.truth.externalNonHandMutationPrevented, false);
 assert.strictEqual(workspaceEditHandContract.truth.processLocalRollbackProvided, true);
+assert.strictEqual(workspaceEditHandContract.truth.replayProtectionSurvivesRestart, true);
 assert.strictEqual(placementCatalog.schema, 'axm.code.placement-role-catalog.v1');
 assert.strictEqual(placementCatalog.roles.length, 10);
 assert.strictEqual(new Set(placementCatalog.roles.flatMap(role => role.changeKinds)).size, 40);

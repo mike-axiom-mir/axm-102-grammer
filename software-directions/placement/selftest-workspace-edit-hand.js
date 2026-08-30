@@ -108,10 +108,12 @@ function authorization({root, observation, plan, candidates, adapter, times = nu
     expiresAt: new Date(expiresMs).toISOString(),
     ttlMs: expiresMs - issuedMs,
     workspaceRootIdentitySha256: registry.hash(path.resolve(root)),
+    journalRootIdentitySha256: registry.hash(journalRoots.get(path.resolve(root))),
     projectMapObservationSha256: observation.observationSha256,
     placementPlanSha256: plan.planSha256,
     parserId: 'node-vm-script-syntax-v1',
     rollbackRequired: true,
+    durableRecoveryRequired: true,
     targets: {
       source: {targetPath: plan.sourcePlacement.targetPath, action: plan.sourcePlacement.action, expectedBeforeSha256: plan.sourcePlacement.expectedPreMutationSha256, candidateSha256: candidates.source.contentSha256},
       verification: {targetPath: plan.verificationPlacement.targetPath, action: plan.verificationPlacement.action, expectedBeforeSha256: plan.verificationPlacement.expectedPreMutationSha256, candidateSha256: candidates.verification.contentSha256}
@@ -124,7 +126,7 @@ function authorization({root, observation, plan, candidates, adapter, times = nu
 }
 
 function apply(root, declared, observation, plan, candidates, authorized, adapter) {
-  return editHand.apply({workspaceRoot: root, declaration: declared, projectMapObservation: observation, placementPlan: plan, authorization: authorized, candidates, verifierAdapters: [adapter]});
+  return editHand.apply({workspaceRoot: root, journalRoot: journalRoots.get(path.resolve(root)), declaration: declared, projectMapObservation: observation, placementPlan: plan, authorization: authorized, candidates, verifierAdapters: [adapter]});
 }
 
 function existingFixture(prefix) {
@@ -140,10 +142,23 @@ function existingFixture(prefix) {
 }
 
 const roots = [];
+const journalRoots = new Map();
+function trackJournalRoot(root, prefix) {
+  const journalRoot = fs.mkdtempSync(path.join(os.tmpdir(), `${prefix}-journal-`));
+  roots.push(root, journalRoot);
+  journalRoots.set(path.resolve(root), journalRoot);
+  return journalRoot;
+}
+
 function trackedExistingFixture(prefix) {
   const fixture = existingFixture(prefix);
-  roots.push(fixture.root);
+  fixture.journalRoot = trackJournalRoot(fixture.root, prefix);
   return fixture;
+}
+
+function journalFiles(root) {
+  const journalRoot = journalRoots.get(path.resolve(root));
+  return fs.readdirSync(journalRoot).sort();
 }
 
 function replacementCandidates(plan, value) {
@@ -169,10 +184,15 @@ try {
   assert.strictEqual(commitReceipt.truth.codeGeneratedByHand, false);
   assert.strictEqual(commitReceipt.truth.multiFileAtomicityClaimed, false);
   assert.strictEqual(commitReceipt.truth.concurrentMutationRaceEliminated, false);
+  assert.strictEqual(commitReceipt.truth.processCrashRecoveryProvided, true);
+  assert.strictEqual(commitReceipt.truth.replayProtectionSurvivesRestart, true);
+  assert.strictEqual(commitReceipt.truth.simultaneousHandMutationPreventedByLease, true);
+  assert.strictEqual(commitReceipt.durableJournal.latestPhase, 'COMMITTED');
   assert.strictEqual(fs.readFileSync(path.join(commitFixture.root, 'src/domain/game.js'), 'utf8'), commitCandidates.source.content);
   assert.strictEqual(fs.readFileSync(path.join(commitFixture.root, 'testing/domain/game.test.js'), 'utf8'), commitCandidates.verification.content);
   assert.strictEqual(fs.readFileSync(path.join(commitFixture.root, 'notes/untouched.txt'), 'utf8'), 'must remain unchanged\n');
   assert.deepStrictEqual(transactionArtifacts(commitFixture.root), []);
+  assert.deepStrictEqual(journalFiles(commitFixture.root), [`${commitAuthorization.authorizationId}.journal.jsonl`]);
 
   const rollbackFixture = trackedExistingFixture('axm-workspace-edit-rollback-');
   const rollbackBinding = observeAndPlan(rollbackFixture.root, rollbackFixture.declared, rollbackFixture.requestedChange);
@@ -188,6 +208,7 @@ try {
   assert(rollbackReceipt.rollbackReceipt.outcomes.every(item => item.restored));
   assert.deepStrictEqual(snapshot(rollbackFixture.root), rollbackBefore, 'failed verification must restore both target bytes and modes');
   assert.deepStrictEqual(transactionArtifacts(rollbackFixture.root), []);
+  assert.deepStrictEqual(journalFiles(rollbackFixture.root), [`${rollbackAuthorization.authorizationId}.journal.jsonl`]);
   adversarialHoldCount += 1;
 
   const replayReceipt = apply(rollbackFixture.root, rollbackFixture.declared, rollbackBinding.observation, rollbackBinding.plan, rollbackCandidates, rollbackAuthorization, failingAdapter);
@@ -265,7 +286,7 @@ try {
   adversarialHoldCount += 1;
 
   const createRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'axm-workspace-edit-create-'));
-  roots.push(createRoot);
+  trackJournalRoot(createRoot, 'axm-workspace-edit-create');
   fs.mkdirSync(path.join(createRoot, 'src', 'domain'), {recursive: true});
   fs.mkdirSync(path.join(createRoot, 'testing', 'domain'), {recursive: true});
   put(createRoot, 'notes/untouched.txt', 'create marker\n');
@@ -298,6 +319,8 @@ try {
     maxCandidateBytes: editHand.MAX_CANDIDATE_BYTES,
     codeGeneratedByHand: false,
     productionRepositoryTrialClaimed: false,
+    durableJournalProvided: true,
+    workspaceLeaseProvided: true,
     authority: 'EXPLICIT_SINGLE_TRANSACTION_WORKSPACE_EDIT'
   }, null, 2));
 } finally {

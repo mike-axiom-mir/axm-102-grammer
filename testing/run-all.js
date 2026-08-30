@@ -41,6 +41,7 @@ const checks = [
   [process.execPath, ['software-directions/placement/selftest-placement-plane.js']],
   [process.execPath, ['software-directions/placement/selftest-project-map-hand.js']],
   [process.execPath, ['software-directions/placement/selftest-workspace-edit-hand.js']],
+  [process.execPath, ['software-directions/placement/selftest-workspace-edit-recovery.js']],
   [process.execPath, ['software-directions/adapters/selftest-adapter-plane.js']],
   [process.execPath, ['software-directions/selftest-frontier-direction-workbench.js']],
   [process.execPath, ['language-organs/selftest-standalone-capability-router.js']],
