@@ -47,7 +47,10 @@ function digest(value) {
 
 function normalizeLanguageIds(languageIds) {
   const items = Array.isArray(languageIds) ? languageIds : [languageIds];
-  const sequence = items.map((value) => cleanText(value)).filter(Boolean);
+  const sequence = items.map((value) => cleanText(value));
+  if (sequence.some((slug) => !slug)) {
+    throw new Error('Polyglot grammar composition does not accept blank language ids.');
+  }
   if (sequence.length < 2 || new Set(sequence).size < 2) {
     throw new Error('Polyglot grammar composition requires at least two distinct language ids.');
   }
