@@ -46,14 +46,23 @@ function digest(value) {
 }
 
 function normalizeLanguageIds(languageIds) {
-  const ids = cleanTextList(languageIds);
-  if (ids.length < 2) {
+  const items = Array.isArray(languageIds) ? languageIds : [languageIds];
+  const sequence = items.map((value) => cleanText(value)).filter(Boolean);
+  if (sequence.length < 2 || new Set(sequence).size < 2) {
     throw new Error('Polyglot grammar composition requires at least two distinct language ids.');
   }
-  return ids;
+  return sequence;
 }
 
-function normalizeHandoff(source, members) {
+function findBoundaryIndexes(sequence, from, to) {
+  const indexes = [];
+  for (let index = 0; index < sequence.length - 1; index += 1) {
+    if (sequence[index] === from && sequence[index + 1] === to) indexes.push(index);
+  }
+  return indexes;
+}
+
+function normalizeHandoff(source, members, sequence) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) {
     throw new TypeError('Each handoff must be an object.');
   }
@@ -63,11 +72,32 @@ function normalizeHandoff(source, members) {
   if (!from || !to) {
     throw new Error('Each handoff must declare both from and to language ids.');
   }
-  if (from === to) {
-    throw new Error(`Handoff ${from} -> ${to} cannot target the same language organ.`);
-  }
   if (!members.has(from) || !members.has(to)) {
     throw new Error(`Handoff ${from} -> ${to} references a language outside this composition.`);
+  }
+
+  const matchingBoundaryIndexes = findBoundaryIndexes(sequence, from, to);
+  if (!matchingBoundaryIndexes.length) {
+    throw new Error(`Handoff ${from} -> ${to} does not match an adjacent sequence boundary.`);
+  }
+
+  let boundaryIndex = null;
+  if (source.boundaryIndex != null) {
+    if (!Number.isInteger(source.boundaryIndex)) {
+      throw new TypeError('handoff.boundaryIndex must be an integer when supplied.');
+    }
+    boundaryIndex = source.boundaryIndex;
+    if (!matchingBoundaryIndexes.includes(boundaryIndex)) {
+      throw new Error(
+        `Handoff ${from} -> ${to} does not match sequence boundary ${boundaryIndex}.`,
+      );
+    }
+  } else if (matchingBoundaryIndexes.length === 1) {
+    [boundaryIndex] = matchingBoundaryIndexes;
+  } else {
+    throw new Error(
+      `Handoff ${from} -> ${to} occurs at multiple sequence boundaries; boundaryIndex is required.`,
+    );
   }
 
   const kind = cleanText(source.kind) || null;
@@ -76,6 +106,7 @@ function normalizeHandoff(source, members) {
   return {
     from,
     to,
+    boundaryIndex,
     kind,
     artifact,
     producerGuarantees: cleanTextList(source.producerGuarantees),
@@ -117,10 +148,11 @@ function resolveLanguageLayer({ registry, grammarProfiles, slug, index }) {
   };
 }
 
-function describeBoundary(from, to, handoffs) {
-  const matching = handoffs.filter((handoff) => handoff.from === from && handoff.to === to);
+function describeBoundary(boundaryIndex, from, to, handoffs) {
+  const matching = handoffs.filter((handoff) => handoff.boundaryIndex === boundaryIndex);
   if (!matching.length) {
     return {
+      boundaryIndex,
       from,
       to,
       status: 'missing',
@@ -132,6 +164,7 @@ function describeBoundary(from, to, handoffs) {
   const handoffIndexes = matching.map((handoff) => handoffs.indexOf(handoff));
   if (matching.some((handoff) => handoff.status === 'defined')) {
     return {
+      boundaryIndex,
       from,
       to,
       status: 'defined',
@@ -141,6 +174,7 @@ function describeBoundary(from, to, handoffs) {
   }
 
   return {
+    boundaryIndex,
     from,
     to,
     status: 'partial',
@@ -166,11 +200,15 @@ function createPolyglotGrammarComposer(options = {}) {
       resolveLanguageLayer({ registry, grammarProfiles, slug, index }),
     );
     const suppliedHandoffs = Array.isArray(composeOptions.handoffs) ? composeOptions.handoffs : [];
-    const handoffs = suppliedHandoffs.map((handoff) => normalizeHandoff(handoff, members));
+    const handoffs = suppliedHandoffs.map((handoff) =>
+      normalizeHandoff(handoff, members, sequence),
+    );
 
     const boundaries = [];
     for (let index = 0; index < sequence.length - 1; index += 1) {
-      boundaries.push(describeBoundary(sequence[index], sequence[index + 1], handoffs));
+      boundaries.push(
+        describeBoundary(index, sequence[index], sequence[index + 1], handoffs),
+      );
     }
 
     const unresolvedHandoffs = boundaries.filter((boundary) => boundary.status !== 'defined');
@@ -215,6 +253,7 @@ module.exports = {
   cleanTextList,
   createPolyglotGrammarComposer,
   digest,
+  findBoundaryIndexes,
   normalizeHandoff,
   normalizeLanguageIds,
   stableJson,
