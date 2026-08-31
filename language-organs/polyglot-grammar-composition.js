@@ -1,18 +1,19 @@
 'use strict';
 
 const crypto = require('crypto');
-const path = require('path');
-
-const DATASET_PATH = path.resolve(__dirname, '..', 'languages.json');
-const { GrammarProfileRegistry } = require('./grammar-profile-registry');
-const { LanguageOrganRegistry } = require('./registry');
+const defaultRegistry = require('./registry.js');
+const defaultGrammarProfiles = require('./grammar-profile-registry.js');
 
 const POLICY = Object.freeze({
   languageIdentity: 'distinct-organs',
   familyMerge: false,
   implicitInterfaceInference: false,
   sequenceMeaning: 'caller-defined',
+  repeatedStagesPreserved: true,
   unresolvedBoundariesStayVisible: true,
+  semanticCompatibilityClaimed: false,
+  verificationExecution: false,
+  capabilityIsNotAuthority: true,
 });
 
 function cleanText(value) {
@@ -48,7 +49,7 @@ function digest(value) {
 function normalizeLanguageIds(languageIds) {
   const items = Array.isArray(languageIds) ? languageIds : [languageIds];
   const sequence = items.map((value) => cleanText(value));
-  if (sequence.some((slug) => !slug)) {
+  if (sequence.some((languageId) => !languageId)) {
     throw new Error('Polyglot grammar composition does not accept blank language ids.');
   }
   if (sequence.length < 2 || new Set(sequence).size < 2) {
@@ -91,9 +92,7 @@ function normalizeHandoff(source, members, sequence) {
     }
     boundaryIndex = source.boundaryIndex;
     if (!matchingBoundaryIndexes.includes(boundaryIndex)) {
-      throw new Error(
-        `Handoff ${from} -> ${to} does not match sequence boundary ${boundaryIndex}.`,
-      );
+      throw new Error(`Handoff ${from} -> ${to} does not match sequence boundary ${boundaryIndex}.`);
     }
   } else if (matchingBoundaryIndexes.length === 1) {
     [boundaryIndex] = matchingBoundaryIndexes;
@@ -120,39 +119,87 @@ function normalizeHandoff(source, members, sequence) {
   };
 }
 
-function resolveLanguageLayer({ registry, grammarProfiles, slug, index }) {
-  const organ = registry.bySlug(slug);
-  const profile = grammarProfiles.byLanguage(slug);
-  const native = profile.native && typeof profile.native === 'object' ? profile.native : {};
+function assertRegistrySurface(registry, grammarProfiles) {
+  for (const name of ['all', 'getByLanguageId', 'snapshot']) {
+    if (!registry || typeof registry[name] !== 'function') {
+      throw new Error(`POLYGLOT_ORGAN_REGISTRY_SURFACE_MISSING:${name}`);
+    }
+  }
+  for (const name of ['all', 'getByLanguageId', 'snapshot']) {
+    if (!grammarProfiles || typeof grammarProfiles[name] !== 'function') {
+      throw new Error(`POLYGLOT_GRAMMAR_REGISTRY_SURFACE_MISSING:${name}`);
+    }
+  }
+}
+
+function resolveLanguageLayer({ registry, grammarProfiles, languageId, index }) {
+  const organ = registry.getByLanguageId(languageId);
+  if (!organ) throw new Error(`UNKNOWN_LANGUAGE_ORGAN:${languageId}`);
+
+  const profile = grammarProfiles.getByLanguageId(languageId);
+  if (!profile) throw new Error(`GRAMMAR_PROFILE_MISSING:${languageId}`);
+  if (profile.organId !== organ.organId || profile.organDigest !== organ.sha256) {
+    throw new Error(`POLYGLOT_GRAMMAR_ORGAN_BINDING_MISMATCH:${languageId}`);
+  }
 
   return {
     index,
     language: {
-      slug: organ.slug,
-      label: organ.label,
-      family: profile.family || organ.family,
-      paradigms: Array.isArray(organ.paradigms) ? organ.paradigms.slice() : [],
+      languageId: organ.languageId,
+      displayName: organ.displayName,
+      organId: organ.organId,
+      priority: organ.priority,
+      family: organ.family,
+      kind: organ.kind,
+      execution: organ.execution,
     },
+    digests: {
+      organSha256: organ.sha256,
+      grammarProfileSha256: profile.profileSha256,
+    },
+    toolchainCandidates: [...organ.toolchainCandidates],
     grammar: cloneJson(profile.grammar),
-    native: {
-      discoveryStance: cleanText(native.discoveryStance) || null,
-      questionsBeforeTools: cleanTextList(native.questionsBeforeTools),
-      defaultOutputProfile: cleanText(native.defaultOutputProfile) || null,
-      stopRule: cleanText(native.stopRule) || null,
+    analysis: cloneJson(profile.analysis),
+    rewritePolicy: cloneJson(profile.rewritePolicy),
+    verification: cloneJson(profile.verification),
+    authority: {
+      workspaceRead: false,
+      workspaceMutation: false,
+      toolExecution: false,
+      network: false,
+      install: false,
+      promotion: false,
+      canon: false,
     },
-    keyboardKind: cleanText(profile.keyboardKind) || null,
-    keysetIds: cleanTextList(profile.keysetIds),
-    quickRefTemplateIds: cleanTextList(profile.quickRefTemplateIds),
-    creationTemplateIds: cleanTextList(profile.creationTemplateIds),
-    specialistEyes: cleanTextList(profile.specialistEyes),
-    specialistEyeRefs: cloneJson(profile.specialistEyeRefs || []),
-    deepEyeIds: cleanTextList(profile.deepEyeIds),
-    scanOrder: cleanTextList(profile.scanOrder),
   };
 }
 
-function describeBoundary(boundaryIndex, from, to, handoffs) {
+function boundaryReview(producerLayer, consumerLayer) {
+  return {
+    schema: 'axm.polyglot-grammar-boundary-review/v1',
+    producerLanguageId: producerLayer.language.languageId,
+    consumerLanguageId: consumerLayer.language.languageId,
+    producerSemanticHazards: cleanTextList(producerLayer.analysis.semanticHazards),
+    consumerSemanticHazards: cleanTextList(consumerLayer.analysis.semanticHazards),
+    producerVerificationFocus: cleanTextList(producerLayer.verification.focus),
+    consumerVerificationFocus: cleanTextList(consumerLayer.verification.focus),
+    questionsBeforeChange: cleanTextList([
+      ...(producerLayer.analysis.requiredQuestionsBeforeRewrite || []),
+      ...(consumerLayer.analysis.requiredQuestionsBeforeRewrite || []),
+    ]),
+    semanticCompatibilityClaimed: false,
+    interfaceSemanticsInferred: false,
+    verificationExecuted: false,
+    authority: 'NONE',
+  };
+}
+
+function describeBoundary(boundaryIndex, producerLayer, consumerLayer, handoffs) {
+  const from = producerLayer.language.languageId;
+  const to = consumerLayer.language.languageId;
   const matching = handoffs.filter((handoff) => handoff.boundaryIndex === boundaryIndex);
+  const review = boundaryReview(producerLayer, consumerLayer);
+
   if (!matching.length) {
     return {
       boundaryIndex,
@@ -161,11 +208,14 @@ function describeBoundary(boundaryIndex, from, to, handoffs) {
       status: 'missing',
       reason: 'No explicit handoff contract was supplied for this sequence boundary.',
       handoffIndexes: [],
+      evidenceState: 'HANDOFF_CONTRACT_MISSING',
+      review,
     };
   }
 
   const handoffIndexes = matching.map((handoff) => handoffs.indexOf(handoff));
   if (matching.some((handoff) => handoff.status === 'defined')) {
+    const hasDeclaredValidation = matching.some((handoff) => handoff.validation.length > 0);
     return {
       boundaryIndex,
       from,
@@ -173,6 +223,10 @@ function describeBoundary(boundaryIndex, from, to, handoffs) {
       status: 'defined',
       reason: null,
       handoffIndexes,
+      evidenceState: hasDeclaredValidation
+        ? 'DECLARED_VALIDATION_PRESENT_NOT_EXECUTED'
+        : 'DECLARED_CONTRACT_UNVERIFIED',
+      review,
     };
   }
 
@@ -183,24 +237,21 @@ function describeBoundary(boundaryIndex, from, to, handoffs) {
     status: 'partial',
     reason: 'A handoff exists, but kind and artifact are not both explicit.',
     handoffIndexes,
+    evidenceState: 'HANDOFF_CONTRACT_PARTIAL',
+    review,
   };
 }
 
 function createPolyglotGrammarComposer(options = {}) {
-  const datasetPath = options.datasetPath || DATASET_PATH;
-  const registry = options.registry || new LanguageOrganRegistry({ datasetPath });
-  const grammarProfiles =
-    options.grammarProfiles ||
-    new GrammarProfileRegistry({
-      registry,
-      specialistEyes: registry.specialistEyes,
-    });
+  const registry = options.registry || defaultRegistry;
+  const grammarProfiles = options.grammarProfiles || defaultGrammarProfiles;
+  assertRegistrySurface(registry, grammarProfiles);
 
   function compose(languageIds, composeOptions = {}) {
     const sequence = normalizeLanguageIds(languageIds);
     const members = new Set(sequence);
-    const layers = sequence.map((slug, index) =>
-      resolveLanguageLayer({ registry, grammarProfiles, slug, index }),
+    const layers = sequence.map((languageId, index) =>
+      resolveLanguageLayer({ registry, grammarProfiles, languageId, index }),
     );
     const suppliedHandoffs = Array.isArray(composeOptions.handoffs) ? composeOptions.handoffs : [];
     const handoffs = suppliedHandoffs.map((handoff) =>
@@ -209,12 +260,15 @@ function createPolyglotGrammarComposer(options = {}) {
 
     const boundaries = [];
     for (let index = 0; index < sequence.length - 1; index += 1) {
-      boundaries.push(
-        describeBoundary(index, sequence[index], sequence[index + 1], handoffs),
-      );
+      boundaries.push(describeBoundary(index, layers[index], layers[index + 1], handoffs));
     }
 
+    const organSnapshot = registry.snapshot();
+    const grammarSnapshot = grammarProfiles.snapshot();
     const unresolvedHandoffs = boundaries.filter((boundary) => boundary.status !== 'defined');
+    const unverifiedBoundaries = boundaries.filter(
+      (boundary) => boundary.evidenceState !== 'DECLARED_VALIDATION_PRESENT_NOT_EXECUTED',
+    );
     const core = {
       schema: 'axm.polyglot-grammar-composition/v1',
       sequence,
@@ -222,6 +276,17 @@ function createPolyglotGrammarComposer(options = {}) {
       handoffs,
       boundaries,
       unresolvedHandoffs,
+      unverifiedBoundaries,
+      sourceSnapshots: {
+        organRegistry: {
+          organCount: organSnapshot.organCount,
+          snapshotSha256: organSnapshot.snapshotSha256,
+        },
+        grammarProfiles: {
+          profileCount: grammarSnapshot.profileCount,
+          snapshotSha256: grammarSnapshot.snapshotSha256,
+        },
+      },
       policy: cloneJson(POLICY),
     };
 
@@ -232,16 +297,19 @@ function createPolyglotGrammarComposer(options = {}) {
   }
 
   function listLanguages() {
-    return registry.listLanguageSummaries().map((summary) => ({
-      slug: summary.slug,
-      label: summary.label,
-      family: summary.family,
-      paradigms: Array.isArray(summary.paradigms) ? summary.paradigms.slice() : [],
+    return registry.all().map((organ) => ({
+      languageId: organ.languageId,
+      displayName: organ.displayName,
+      organId: organ.organId,
+      priority: organ.priority,
+      family: organ.family,
+      kind: organ.kind,
+      execution: organ.execution,
+      organSha256: organ.sha256,
     }));
   }
 
   return {
-    datasetPath,
     registry,
     grammarProfiles,
     policy: cloneJson(POLICY),
@@ -251,8 +319,9 @@ function createPolyglotGrammarComposer(options = {}) {
 }
 
 module.exports = {
-  DATASET_PATH,
   POLICY,
+  assertRegistrySurface,
+  boundaryReview,
   cleanTextList,
   createPolyglotGrammarComposer,
   digest,
