@@ -240,6 +240,18 @@ function run() {
   assert.strictEqual(sqlChanged.counts.verifierRuns, 2);
   assert.strictEqual(sqlChanged.counts.receiptReissueReviews, 0);
 
+  const sqlChangedWithConflict = sqlBuilder.create(composition, [pass0, fail0, pass1]);
+  assert.deepStrictEqual(
+    sqlChangedWithConflict.workItems.map((item) => [item.handoffIndex, item.taskType]),
+    [
+      [0, 'RESOLVE_EVIDENCE_REVIEW'],
+      [0, 'RUN_VERIFIER_AND_ISSUE_RECEIPT'],
+      [1, 'RUN_VERIFIER_AND_ISSUE_RECEIPT'],
+    ],
+  );
+  assert.strictEqual(sqlChangedWithConflict.counts.evidenceReviews, 1);
+  assert.strictEqual(sqlChangedWithConflict.counts.verifierRuns, 2);
+
   const budgetHeld = sqlBuilder.create(composition, [pass0, pass1], {
     countBudget: { maxVerifierRuns: 0 },
   });
@@ -350,6 +362,25 @@ function run() {
   assert.throws(
     () => validateVerificationWorkpack(hiddenKey),
     /MULTI_LANGUAGE_WORK_ITEM_SHAPE_INVALID_KEYS/,
+  );
+
+  const authorityEscalation = cloneJson(missingOne);
+  authorityEscalation.workItems[0].authority.dispatch = true;
+  delete authorityEscalation.workItems[0].workItemId;
+  authorityEscalation.workItems[0].workItemId = digest(authorityEscalation.workItems[0]);
+  authorityEscalation.phases = authorityEscalation.phases.map((phase) => ({
+    ...phase,
+    workItemIds: phase.workItemIds.map((id) =>
+      id === missingOne.workItems[0].workItemId
+        ? authorityEscalation.workItems[0].workItemId
+        : id,
+    ),
+  }));
+  delete authorityEscalation.workpackId;
+  authorityEscalation.workpackId = digest(authorityEscalation);
+  assert.throws(
+    () => validateVerificationWorkpack(authorityEscalation),
+    /MULTI_LANGUAGE_WORK_ITEM_AUTHORITY_MISMATCH/,
   );
 
   assert.strictEqual(JSON.stringify(composition), originalCompositionJson);
