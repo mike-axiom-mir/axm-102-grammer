@@ -1,0 +1,13 @@
+'use strict';
+
+const crypto=require('crypto');
+const registry=require('./registry.js');
+
+const AUTHORITY=Object.freeze({workspaceRead:false,workspaceMutation:false,toolExecution:false,network:false,install:false,promotion:false,canon:false});
+const RELATIONS=Object.freeze(['ANALOGOUS_CONCEPT','CONTRACT_BOUNDARY','DATA_SHAPE','DEPENDENCY_EDGE','STATE_RELATION','CONTROL_RELATION','VERIFICATION_RELATION']);
+function canon(v){if(v===null||typeof v!=='object')return JSON.stringify(v);if(Array.isArray(v))return`[${v.map(canon).join(',')}]`;return`{${Object.keys(v).sort().map(k=>`${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}`;}
+function hash(v){return crypto.createHash('sha256').update(canon(v)).digest('hex');}
+function normalizeBridge(x,i){if(!x||typeof x!=='object'||Array.isArray(x))throw Error(`BRIDGE_INVALID:${i}`);const fromLanguage=String(x.fromLanguage||''),toLanguage=String(x.toLanguage||''),relation=String(x.relation||'');if(!registry.getByLanguageId(fromLanguage)||!registry.getByLanguageId(toLanguage))throw Error(`BRIDGE_LANGUAGE_UNKNOWN:${i}`);if(!RELATIONS.includes(relation))throw Error(`BRIDGE_RELATION_INVALID:${i}`);const base={fromLanguage,toLanguage,relation,fromConcept:String(x.fromConcept||''),toConcept:String(x.toConcept||''),evidenceKind:String(x.evidenceKind||'CALLER_SUPPLIED'),evidenceRef:x.evidenceRef==null?null:String(x.evidenceRef),notes:x.notes==null?null:String(x.notes)};if(!base.fromConcept||!base.toConcept)throw Error(`BRIDGE_CONCEPT_MISSING:${i}`);const bridgeId=String(x.bridgeId||`bridge.${hash({...base,i}).slice(0,24)}`);return Object.freeze({bridgeId,...base,bridgeSha256:hash({bridgeId,...base})});}
+function build({bridges=[]}={}){if(!Array.isArray(bridges))throw Error('BRIDGES_NOT_ARRAY');const entries=bridges.map(normalizeBridge);if(new Set(entries.map(x=>x.bridgeId)).size!==entries.length)throw Error('BRIDGE_ID_DUPLICATE');const core={schema:'axm.code.grammar-bridge-atlas.v1',version:'1.0.0',result:'BRIDGE_ATLAS_READY',bridgeCount:entries.length,bridges:entries,truth:{bridgeIsComparisonNotMigrationAuthority:true,nativeConceptsRetained:true,automaticLanguageSwitch:false,aiRequired:false,networkRequired:false},authority:AUTHORITY};return Object.freeze({...core,atlasSha256:hash(core)});}
+function query(atlas,{languageId=null,relation=null}={}){if(!atlas||atlas.schema!=='axm.code.grammar-bridge-atlas.v1')throw Error('BRIDGE_ATLAS_REQUIRED');return atlas.bridges.filter(x=>(!languageId||x.fromLanguage===languageId||x.toLanguage===languageId)&&(!relation||x.relation===relation));}
+module.exports={AUTHORITY,RELATIONS,build,query};
