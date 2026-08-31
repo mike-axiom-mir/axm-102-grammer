@@ -12,6 +12,7 @@ const POLICY = Object.freeze({
   repeatedStagesPreserved: true,
   unresolvedBoundariesStayVisible: true,
   semanticCompatibilityClaimed: false,
+  semanticImpactClaimed: false,
   verificationExecution: false,
   capabilityIsNotAuthority: true,
 });
@@ -242,6 +243,83 @@ function describeBoundary(boundaryIndex, producerLayer, consumerLayer, handoffs)
   };
 }
 
+function verifyCompositionDigest(composition) {
+  if (!composition || typeof composition !== 'object' || Array.isArray(composition)) {
+    throw new TypeError('Polyglot impact tracing requires a composition object.');
+  }
+  if (composition.schema !== 'axm.polyglot-grammar-composition/v1') {
+    throw new Error('POLYGLOT_COMPOSITION_SCHEMA_INVALID');
+  }
+  if (typeof composition.compositionId !== 'string' || composition.compositionId.length !== 64) {
+    throw new Error('POLYGLOT_COMPOSITION_ID_INVALID');
+  }
+  const { compositionId, ...core } = composition;
+  if (digest(core) !== compositionId) {
+    throw new Error('POLYGLOT_COMPOSITION_DIGEST_MISMATCH');
+  }
+  return true;
+}
+
+function normalizeStageIndexes(changedStageIndexes, stageCount) {
+  const items = Array.isArray(changedStageIndexes) ? changedStageIndexes : [changedStageIndexes];
+  if (!items.length || items.some((value) => value == null)) {
+    throw new Error('Polyglot impact tracing requires at least one changed stage index.');
+  }
+  if (items.some((value) => !Number.isInteger(value))) {
+    throw new TypeError('Changed stage indexes must be integers.');
+  }
+  const indexes = [...new Set(items)].sort((a, b) => a - b);
+  if (indexes.some((index) => index < 0 || index >= stageCount)) {
+    throw new Error('POLYGLOT_CHANGED_STAGE_INDEX_OUT_OF_RANGE');
+  }
+  return indexes;
+}
+
+function analyzeImpact(composition, input = {}) {
+  verifyCompositionDigest(composition);
+  const changedStageIndexes = normalizeStageIndexes(
+    input.changedStageIndexes,
+    composition.sequence.length,
+  );
+
+  const impactedBoundarySet = new Set();
+  for (const stageIndex of changedStageIndexes) {
+    if (stageIndex > 0) impactedBoundarySet.add(stageIndex - 1);
+    if (stageIndex < composition.sequence.length - 1) impactedBoundarySet.add(stageIndex);
+  }
+  const impactedBoundaryIndexes = [...impactedBoundarySet].sort((a, b) => a - b);
+
+  const impactedStageSet = new Set(changedStageIndexes);
+  for (const boundaryIndex of impactedBoundaryIndexes) {
+    impactedStageSet.add(boundaryIndex);
+    impactedStageSet.add(boundaryIndex + 1);
+  }
+  const impactedStageIndexes = [...impactedStageSet].sort((a, b) => a - b);
+  const impactedLanguageIds = impactedStageIndexes.map((index) => composition.sequence[index]);
+  const impactedBoundaries = impactedBoundaryIndexes.map((index) =>
+    cloneJson(composition.boundaries[index]),
+  );
+
+  const body = {
+    schema: 'axm.polyglot-grammar-impact-report/v1',
+    compositionId: composition.compositionId,
+    changedStageIndexes,
+    impactedStageIndexes,
+    impactedBoundaryIndexes,
+    impactedLanguageIds,
+    impactedBoundaries,
+    verificationPendingBoundaryIndexes: [...impactedBoundaryIndexes],
+    semanticImpactClaimed: false,
+    workspaceInspected: false,
+    toolExecution: false,
+    authority: 'NONE',
+  };
+  return {
+    ...body,
+    impactId: digest(body),
+  };
+}
+
 function createPolyglotGrammarComposer(options = {}) {
   const registry = options.registry || defaultRegistry;
   const grammarProfiles = options.grammarProfiles || defaultGrammarProfiles;
@@ -311,12 +389,14 @@ function createPolyglotGrammarComposer(options = {}) {
     grammarProfiles,
     policy: cloneJson(POLICY),
     compose,
+    analyzeImpact,
     listLanguages,
   };
 }
 
 module.exports = {
   POLICY,
+  analyzeImpact,
   assertRegistrySurface,
   boundaryReview,
   cleanTextList,
@@ -325,5 +405,7 @@ module.exports = {
   findBoundaryIndexes,
   normalizeHandoff,
   normalizeLanguageIds,
+  normalizeStageIndexes,
   stableJson,
+  verifyCompositionDigest,
 };
