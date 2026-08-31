@@ -67,6 +67,8 @@ The external verifier or governance policy must decide whether it can issue a ne
 
 Accepted evidence contains a FAIL, conflict, binding problem, or PASS plus INCONCLUSIVE mixture requiring explicit review.
 
+When selected source drift also creates a refreshed candidate, the historical evidence problem remains a separate visible work item alongside the new candidate's verification work. Refresh cannot make an old conflict disappear.
+
 ### `REVIEW_REJECTED_RECEIPTS`
 
 One or more submitted receipts failed shape, digest, composition, contract, or truth-boundary validation.
@@ -122,17 +124,22 @@ The grouping makes packets readable and deterministic. It does not infer depende
 
 `validateVerificationWorkpack(workpack)` verifies:
 
-- exact top-level and work-item shapes;
+- exact top-level, work-item, binding, evidence, outcome, budget, constraint, and authority shapes;
 - workpack and work-item digests;
 - unique work-item IDs;
-- target-composition binding;
+- task-type-to-phase consistency;
+- fixed no-authority and no-execution values inside each work item;
+- normalized and internally consistent evidence references;
+- recomputed target boundary, handoff, and contract bindings;
+- current-versus-refresh target identity rules;
 - recomputed counts;
 - recomputed count-budget results;
 - recomputed phase membership;
 - internal composition structure;
-- state and dispatch-eligibility consistency.
+- state and dispatch-eligibility consistency;
+- the complete workpack truth boundary.
 
-This rejects hidden extra authority fields even when someone recomputes the outer digest.
+This rejects hidden extra fields and also rejects a caller who changes `authority.dispatch` to `true` and recalculates every visible digest. Self-consistency cannot manufacture authority.
 
 ## Truth boundary
 
@@ -165,10 +172,12 @@ The real-body test covers:
 - rejected-receipt review;
 - repository-only drift producing reissue-policy work instead of verifier replay;
 - SQL grammar drift producing two verifier tasks;
+- refresh-time preservation of an old PASS/FAIL conflict beside the new verifier work;
 - Rust grammar drift producing one verifier task and one reissue review;
 - declared count-budget holds;
 - source-identity rebound holds;
 - partial and missing contract work;
 - invalid budget input;
 - hidden-key rejection after digest recomputation;
+- re-hashed authority-escalation rejection;
 - deterministic IDs and input preservation.
