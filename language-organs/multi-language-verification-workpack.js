@@ -33,6 +33,15 @@ const TASK_PHASE_RANK = Object.freeze({
   RECEIPT_REISSUE_REVIEW: 3,
 });
 
+const TASK_PHASE_FOR_TYPE = Object.freeze({
+  DECLARE_HANDOFF_CONTRACT: 'CONTRACT',
+  COMPLETE_HANDOFF_CONTRACT: 'CONTRACT',
+  RESOLVE_EVIDENCE_REVIEW: 'EVIDENCE_REVIEW',
+  REVIEW_REJECTED_RECEIPTS: 'EVIDENCE_REVIEW',
+  RUN_VERIFIER_AND_ISSUE_RECEIPT: 'VERIFY',
+  REISSUE_OR_REPLAY_POLICY_REVIEW: 'RECEIPT_REISSUE_REVIEW',
+});
+
 const WORK_ITEM_KEYS = Object.freeze([
   'schema',
   'taskType',
@@ -91,6 +100,76 @@ function assertExactKeys(value, expectedKeys, errorCode) {
   if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
     throw new Error(`${errorCode}_KEYS`);
   }
+}
+
+function isSortedUniqueStrings(values) {
+  return (
+    Array.isArray(values) &&
+    values.every((value) => typeof value === 'string') &&
+    values.every((value, index) => index === 0 || values[index - 1] < value)
+  );
+}
+
+function isSortedUniqueIntegers(values) {
+  return (
+    Array.isArray(values) &&
+    values.every((value) => Number.isSafeInteger(value) && value >= 0) &&
+    values.every((value, index) => index === 0 || values[index - 1] < value)
+  );
+}
+
+function isEvidenceReviewStatus(status) {
+  return (
+    status === 'CONFLICTING_CALLER_RESULTS' ||
+    status === 'HANDOFF_CONTRACT_BINDING_INVALID' ||
+    status.startsWith('CALLER_FAIL') ||
+    status === 'CALLER_PASS_AND_INCONCLUSIVE_RECEIPTS_PRESENT_NOT_REPLAYED'
+  );
+}
+
+function expectedExecutionConstraints() {
+  return {
+    commandInferred: false,
+    toolInferred: false,
+    verifierSelected: false,
+    concurrencyInferred: false,
+    executionOrderInferred: false,
+    workspaceInspected: false,
+    networkUsed: false,
+  };
+}
+
+function expectedWorkItemAuthority() {
+  return {
+    dispatch: false,
+    toolExecution: false,
+    workspaceMutation: false,
+    receiptPromotion: false,
+    refreshAcceptance: false,
+    canon: false,
+  };
+}
+
+function expectedWorkpackTruthBoundary(workItemCount) {
+  return {
+    workItemsAreDeterministicInstructionsNotExecution: true,
+    commandsInferred: false,
+    toolsSelected: false,
+    concurrencyInferred: false,
+    executionOrderInferred: false,
+    verifierReplayExecuted: false,
+    receiptReissued: false,
+    externalVerifierPolicyChecked: false,
+    computeCostEstimated: false,
+    memoryCostEstimated: false,
+    callerDispatchRequired: workItemCount > 0,
+    automaticDispatchAllowed: false,
+    automaticRefreshAcceptanceAllowed: false,
+    automaticReceiptCarryForwardAllowed: false,
+    semanticCompatibilityProven: false,
+    executionReadinessClaimed: false,
+    authority: 'NONE',
+  };
 }
 
 function normalizeOptionalCount(value, fieldName) {
@@ -240,23 +319,8 @@ function createWorkItem({
     requestedOutcome: expectedOutcomeForTask(taskType, targetBinding.contractId),
     budgetUnits: budgetUnitsForTask(taskType),
     dependsOnWorkItemIds: [],
-    executionConstraints: {
-      commandInferred: false,
-      toolInferred: false,
-      verifierSelected: false,
-      concurrencyInferred: false,
-      executionOrderInferred: false,
-      workspaceInspected: false,
-      networkUsed: false,
-    },
-    authority: {
-      dispatch: false,
-      toolExecution: false,
-      workspaceMutation: false,
-      receiptPromotion: false,
-      refreshAcceptance: false,
-      canon: false,
-    },
+    executionConstraints: expectedExecutionConstraints(),
+    authority: expectedWorkItemAuthority(),
   };
   return { ...body, workItemId: digest(body) };
 }
@@ -361,12 +425,7 @@ function buildCurrentCompositionWorkItems(composition, evidence) {
       phase = 'CONTRACT';
     } else if (assessment.status === 'CALLER_PASS_RECEIPT_PRESENT_NOT_REPLAYED') {
       continue;
-    } else if (
-      assessment.status === 'CONFLICTING_CALLER_RESULTS' ||
-      assessment.status === 'HANDOFF_CONTRACT_BINDING_INVALID' ||
-      assessment.status.startsWith('CALLER_FAIL') ||
-      assessment.status === 'CALLER_PASS_AND_INCONCLUSIVE_RECEIPTS_PRESENT_NOT_REPLAYED'
-    ) {
+    } else if (isEvidenceReviewStatus(assessment.status)) {
       taskType = 'RESOLVE_EVIDENCE_REVIEW';
       phase = 'EVIDENCE_REVIEW';
     } else {
@@ -435,6 +494,30 @@ function buildRefreshCandidateWorkItems(previousComposition, candidateCompositio
       evidence,
       handoffPlan.handoffIndex,
     );
+    const assessment = evidence.handoffAssessments[handoffPlan.handoffIndex];
+
+    if (
+      handoffPlan.status !== 'CONTRACT_COMPLETION_REQUIRED' &&
+      isEvidenceReviewStatus(assessment.status)
+    ) {
+      items.push(
+        createWorkItem({
+          taskType: 'RESOLVE_EVIDENCE_REVIEW',
+          phase: 'EVIDENCE_REVIEW',
+          previousCompositionId: previousComposition.compositionId,
+          targetComposition: candidateComposition,
+          targetIsRefreshCandidate: true,
+          boundaryIndex: handoffPlan.boundaryIndex,
+          handoffIndex: handoffPlan.handoffIndex,
+          from: handoffPlan.from,
+          to: handoffPlan.to,
+          acceptedReceiptIds,
+          acceptedPassReceiptIds,
+          notes: [assessment.status, 'Historical evidence review remains visible during refresh.'],
+        }),
+      );
+    }
+
     let taskType;
     let phase;
     if (handoffPlan.status === 'CONTRACT_COMPLETION_REQUIRED') {
@@ -564,6 +647,13 @@ function validateVerificationWorkpack(workpack) {
   if (!Array.isArray(workpack.workItems) || !Array.isArray(workpack.phases)) {
     throw new Error('MULTI_LANGUAGE_WORKPACK_COLLECTION_INVALID');
   }
+  if (typeof workpack.previousCompositionId !== 'string' || workpack.previousCompositionId.length !== 64) {
+    throw new Error('MULTI_LANGUAGE_WORKPACK_PREVIOUS_COMPOSITION_ID_INVALID');
+  }
+  if (typeof workpack.targetIsRefreshCandidate !== 'boolean') {
+    throw new Error('MULTI_LANGUAGE_WORKPACK_REFRESH_FLAG_INVALID');
+  }
+
   const seen = new Set();
   for (const item of workpack.workItems) {
     assertExactKeys(item, WORK_ITEM_KEYS, 'MULTI_LANGUAGE_WORK_ITEM_SHAPE_INVALID');
@@ -573,15 +663,158 @@ function validateVerificationWorkpack(workpack) {
     verifyDigestObject(item, 'workItemId', 'MULTI_LANGUAGE_WORK_ITEM_INVALID');
     if (seen.has(item.workItemId)) throw new Error('MULTI_LANGUAGE_WORK_ITEM_DUPLICATE_ID');
     seen.add(item.workItemId);
+    if (!Object.prototype.hasOwnProperty.call(TASK_PHASE_FOR_TYPE, item.taskType)) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_TASK_TYPE_INVALID');
+    }
+    if (item.phase !== TASK_PHASE_FOR_TYPE[item.taskType]) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_PHASE_MISMATCH');
+    }
+    if (item.previousCompositionId !== workpack.previousCompositionId) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_PREVIOUS_COMPOSITION_MISMATCH');
+    }
     if (item.targetCompositionId !== workpack.targetCompositionId) {
       throw new Error('MULTI_LANGUAGE_WORK_ITEM_TARGET_MISMATCH');
     }
+    if (item.targetIsRefreshCandidate !== workpack.targetIsRefreshCandidate) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_REFRESH_FLAG_MISMATCH');
+    }
+    assertExactKeys(
+      item.targetBinding,
+      ['compositionId', 'boundaryIndex', 'handoffIndex', 'contractId', 'boundaryDigest', 'handoffDigest'],
+      'MULTI_LANGUAGE_WORK_ITEM_TARGET_BINDING_INVALID',
+    );
+    assertExactKeys(
+      item.sourceEvidence,
+      ['acceptedReceiptIds', 'acceptedPassReceiptIds', 'rejectedReceiptIndexes', 'notes'],
+      'MULTI_LANGUAGE_WORK_ITEM_SOURCE_EVIDENCE_INVALID',
+    );
+    if (
+      !isSortedUniqueStrings(item.sourceEvidence.acceptedReceiptIds) ||
+      !isSortedUniqueStrings(item.sourceEvidence.acceptedPassReceiptIds) ||
+      !isSortedUniqueIntegers(item.sourceEvidence.rejectedReceiptIndexes) ||
+      !isSortedUniqueStrings(item.sourceEvidence.notes)
+    ) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_SOURCE_EVIDENCE_NORMALIZATION_INVALID');
+    }
+    if (
+      item.sourceEvidence.acceptedPassReceiptIds.some(
+        (id) => !item.sourceEvidence.acceptedReceiptIds.includes(id),
+      )
+    ) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_PASS_RECEIPT_NOT_ACCEPTED');
+    }
+    assertExactKeys(
+      item.requestedOutcome,
+      [
+        'outcomeKind',
+        'requiredSchema',
+        'targetContractId',
+        'acceptedClaimedResults',
+        'verifierReplayMayBeRequired',
+        'externalPolicyDecisionRequired',
+      ],
+      'MULTI_LANGUAGE_WORK_ITEM_REQUESTED_OUTCOME_INVALID',
+    );
+    const expectedOutcome = expectedOutcomeForTask(item.taskType, item.targetBinding.contractId);
+    if (digest(item.requestedOutcome) !== digest(expectedOutcome)) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_REQUESTED_OUTCOME_MISMATCH');
+    }
+    assertExactKeys(
+      item.budgetUnits,
+      ['verifierRuns', 'receiptReissueReviews', 'contractCompletions', 'evidenceReviews'],
+      'MULTI_LANGUAGE_WORK_ITEM_BUDGET_UNITS_INVALID',
+    );
+    if (digest(item.budgetUnits) !== digest(budgetUnitsForTask(item.taskType))) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_BUDGET_UNITS_MISMATCH');
+    }
+    if (!Array.isArray(item.dependsOnWorkItemIds) || item.dependsOnWorkItemIds.length !== 0) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_DEPENDENCY_INFERENCE_FORBIDDEN');
+    }
+    assertExactKeys(
+      item.executionConstraints,
+      Object.keys(expectedExecutionConstraints()),
+      'MULTI_LANGUAGE_WORK_ITEM_EXECUTION_CONSTRAINTS_INVALID',
+    );
+    if (digest(item.executionConstraints) !== digest(expectedExecutionConstraints())) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_EXECUTION_CONSTRAINTS_MISMATCH');
+    }
+    assertExactKeys(
+      item.authority,
+      Object.keys(expectedWorkItemAuthority()),
+      'MULTI_LANGUAGE_WORK_ITEM_AUTHORITY_INVALID',
+    );
+    if (digest(item.authority) !== digest(expectedWorkItemAuthority())) {
+      throw new Error('MULTI_LANGUAGE_WORK_ITEM_AUTHORITY_MISMATCH');
+    }
   }
+
+  if (workpack.targetComposition) {
+    validateCompositionForEvidence(workpack.targetComposition);
+    if (workpack.targetComposition.compositionId !== workpack.targetCompositionId) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_TARGET_COMPOSITION_MISMATCH');
+    }
+    if (
+      workpack.targetIsRefreshCandidate &&
+      workpack.targetCompositionId === workpack.previousCompositionId
+    ) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_REFRESH_CANDIDATE_ID_NOT_CHANGED');
+    }
+    if (
+      !workpack.targetIsRefreshCandidate &&
+      workpack.targetCompositionId !== workpack.previousCompositionId
+    ) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_CURRENT_TARGET_ID_MISMATCH');
+    }
+    for (const item of workpack.workItems) {
+      const expectedBinding = targetBindingFor(
+        workpack.targetComposition,
+        item.boundaryIndex,
+        item.handoffIndex,
+      );
+      if (digest(item.targetBinding) !== digest(expectedBinding)) {
+        throw new Error('MULTI_LANGUAGE_WORK_ITEM_TARGET_BINDING_MISMATCH');
+      }
+      const boundary = Number.isInteger(item.boundaryIndex)
+        ? workpack.targetComposition.boundaries[item.boundaryIndex]
+        : null;
+      const handoff = Number.isInteger(item.handoffIndex)
+        ? workpack.targetComposition.handoffs[item.handoffIndex]
+        : null;
+      if (boundary && (item.from !== boundary.from || item.to !== boundary.to)) {
+        throw new Error('MULTI_LANGUAGE_WORK_ITEM_BOUNDARY_ENDPOINT_MISMATCH');
+      }
+      if (
+        handoff &&
+        (item.boundaryIndex !== handoff.boundaryIndex ||
+          item.from !== handoff.from ||
+          item.to !== handoff.to)
+      ) {
+        throw new Error('MULTI_LANGUAGE_WORK_ITEM_HANDOFF_ENDPOINT_MISMATCH');
+      }
+      if (!boundary && !handoff && (item.from !== null || item.to !== null)) {
+        throw new Error('MULTI_LANGUAGE_WORK_ITEM_GLOBAL_ENDPOINT_MISMATCH');
+      }
+    }
+  } else {
+    if (workpack.targetCompositionId !== null) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_TARGET_COMPOSITION_MISSING');
+    }
+    if (workpack.targetIsRefreshCandidate) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_HELD_REFRESH_FLAG_INVALID');
+    }
+    if (workpack.workItems.length !== 0) {
+      throw new Error('MULTI_LANGUAGE_WORKPACK_HELD_WORK_ITEMS_FORBIDDEN');
+    }
+  }
+
   const recalculatedCounts = countWorkItems(workpack.workItems);
   if (digest(recalculatedCounts) !== digest(workpack.counts)) {
     throw new Error('MULTI_LANGUAGE_WORKPACK_COUNTS_MISMATCH');
   }
   const normalizedBudget = normalizeCountBudget(workpack.countBudget);
+  if (digest(normalizedBudget) !== digest(workpack.countBudget)) {
+    throw new Error('MULTI_LANGUAGE_WORKPACK_COUNT_BUDGET_NORMALIZATION_MISMATCH');
+  }
   const budgetAssessment = assessCountBudget(recalculatedCounts, normalizedBudget);
   if (digest(budgetAssessment) !== digest(workpack.budgetAssessment)) {
     throw new Error('MULTI_LANGUAGE_WORKPACK_BUDGET_ASSESSMENT_MISMATCH');
@@ -589,14 +822,6 @@ function validateVerificationWorkpack(workpack) {
   const expectedPhases = buildPhases(workpack.workItems);
   if (digest(expectedPhases) !== digest(workpack.phases)) {
     throw new Error('MULTI_LANGUAGE_WORKPACK_PHASES_MISMATCH');
-  }
-  if (workpack.targetComposition) {
-    validateCompositionForEvidence(workpack.targetComposition);
-    if (workpack.targetComposition.compositionId !== workpack.targetCompositionId) {
-      throw new Error('MULTI_LANGUAGE_WORKPACK_TARGET_COMPOSITION_MISMATCH');
-    }
-  } else if (workpack.targetCompositionId !== null) {
-    throw new Error('MULTI_LANGUAGE_WORKPACK_TARGET_COMPOSITION_MISSING');
   }
   const expectedState = !workpack.targetComposition
     ? 'SOURCE_HOLD_CALLER_DECISION_REQUIRED'
@@ -611,6 +836,15 @@ function validateVerificationWorkpack(workpack) {
   const expectedEligible = expectedState === 'WORK_ITEMS_READY_CALLER_DISPATCH_REQUIRED';
   if (workpack.callerDispatchEligible !== expectedEligible) {
     throw new Error('MULTI_LANGUAGE_WORKPACK_DISPATCH_ELIGIBILITY_MISMATCH');
+  }
+  const expectedTruth = expectedWorkpackTruthBoundary(workpack.workItems.length);
+  assertExactKeys(
+    workpack.truthBoundary,
+    Object.keys(expectedTruth),
+    'MULTI_LANGUAGE_WORKPACK_TRUTH_BOUNDARY_INVALID',
+  );
+  if (digest(workpack.truthBoundary) !== digest(expectedTruth)) {
+    throw new Error('MULTI_LANGUAGE_WORKPACK_TRUTH_BOUNDARY_MISMATCH');
   }
   return true;
 }
@@ -687,25 +921,7 @@ function createMultiLanguageVerificationWorkpack(options = {}) {
       counts,
       countBudget,
       budgetAssessment,
-      truthBoundary: {
-        workItemsAreDeterministicInstructionsNotExecution: true,
-        commandsInferred: false,
-        toolsSelected: false,
-        concurrencyInferred: false,
-        executionOrderInferred: false,
-        verifierReplayExecuted: false,
-        receiptReissued: false,
-        externalVerifierPolicyChecked: false,
-        computeCostEstimated: false,
-        memoryCostEstimated: false,
-        callerDispatchRequired: workItems.length > 0,
-        automaticDispatchAllowed: false,
-        automaticRefreshAcceptanceAllowed: false,
-        automaticReceiptCarryForwardAllowed: false,
-        semanticCompatibilityProven: false,
-        executionReadinessClaimed: false,
-        authority: 'NONE',
-      },
+      truthBoundary: expectedWorkpackTruthBoundary(workItems.length),
     };
     const workpack = { ...body, workpackId: digest(body) };
     validateVerificationWorkpack(workpack);
@@ -724,6 +940,7 @@ function createMultiLanguageVerificationWorkpack(options = {}) {
 
 module.exports = {
   COUNT_BUDGET_FIELDS,
+  TASK_PHASE_FOR_TYPE,
   TASK_PHASE_RANK,
   assessCountBudget,
   buildCurrentCompositionWorkItems,
@@ -732,6 +949,9 @@ module.exports = {
   countWorkItems,
   createMultiLanguageVerificationWorkpack,
   createWorkItem,
+  expectedWorkItemAuthority,
+  expectedWorkpackTruthBoundary,
+  isEvidenceReviewStatus,
   normalizeCountBudget,
   sortWorkItems,
   validateVerificationWorkpack,
