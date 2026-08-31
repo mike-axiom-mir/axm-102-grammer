@@ -2,11 +2,22 @@
 
 `polyglot-grammar-composition.js` is an additive core helper for composing two or more existing language organs without merging their identities.
 
-It is **not** a universal-language layer, a hidden planner, an automatic tool router, or part of the recipe-only standalone browser surface.
+It is **not** a universal-language layer, a hidden planner, an automatic tool router, or an execution engine.
+
+## Real repository binding
+
+The composer uses the repository's existing CommonJS registries directly:
+
+- `registry.js` via `all()`, `getByLanguageId()`, and `snapshot()`
+- `grammar-profile-registry.js` via `all()`, `getByLanguageId()`, and `snapshot()`
+
+It does not invent a second registry model or depend on a separate language dataset. Each selected stage is bound to the real organ SHA-256 and grammar-profile SHA-256 already validated by those registries.
 
 ## Why it exists
 
-Real software often crosses language boundaries: a JavaScript frontend may call a Python service, Python may emit a database query, or Rust may consume a schema produced elsewhere. The 102-language census already preserves the grammar, templates, specialist eyes, keysets, and native discovery stance of each language. This helper lets a caller place several of those organs into one explicit sequence while keeping the seams visible.
+Real software often crosses language boundaries: a JavaScript frontend may call a Python service, Python may emit a database query, or Rust may consume a schema produced elsewhere. The 102-language body already keeps each language's grammar, hazards, verification focus, execution state, toolchain candidates, and source identity distinct.
+
+This helper lets a caller put several of those organs into one explicit sequence while keeping every seam visible.
 
 ## Core policy
 
@@ -16,12 +27,15 @@ Real software often crosses language boundaries: a JavaScript frontend may call 
 - Blank language stages are rejected instead of silently removed.
 - Interface type and artifact are never guessed.
 - Missing or incomplete sequence boundaries remain visible.
+- A declared validation step is not treated as executed evidence.
+- Semantic compatibility is never claimed by the composer.
+- Capability remains separate from authority.
 - The returned composition receives a deterministic SHA-256 `compositionId`.
 
 ## Example
 
 ```js
-const { createPolyglotGrammarComposer } = require('./polyglot-grammar-composition');
+const { createPolyglotGrammarComposer } = require('./polyglot-grammar-composition.js');
 
 const composer = createPolyglotGrammarComposer();
 const composition = composer.compose(['javascript', 'python', 'sql'], {
@@ -47,16 +61,50 @@ const composition = composer.compose(['javascript', 'python', 'sql'], {
 The returned object contains:
 
 - `sequence`: normalized caller order with repeated language stages preserved.
-- `layers`: one grammar-facing snapshot per sequence stage.
+- `layers`: one real organ/profile-bound grammar snapshot per sequence stage.
 - `handoffs`: caller-declared interface contracts.
-- `boundaries`: adjacent sequence boundaries, their `boundaryIndex`, and status.
+- `boundaries`: adjacent sequence seams, their `boundaryIndex`, contract status, evidence state, and review capsule.
 - `unresolvedHandoffs`: every `missing` or `partial` adjacent boundary.
-- `policy`: the non-merge/non-inference rules applied to the composition.
+- `verificationPendingBoundaryIndexes`: every seam, because this module executes no verifier.
+- `sourceSnapshots`: current 102-organ and 102-grammar registry snapshot identities.
+- `policy`: the non-merge/non-inference/no-authority rules applied to the composition.
 - `compositionId`: deterministic SHA-256 digest of the normalized composition.
+
+## Boundary states
 
 A handoff becomes `defined` only when both `kind` and `artifact` are explicit. Supplying only one keeps that boundary `partial`.
 
-### Repeated language pairs
+Evidence is deliberately separate from contract completeness:
+
+- `HANDOFF_CONTRACT_MISSING`
+- `HANDOFF_CONTRACT_PARTIAL`
+- `DECLARED_CONTRACT_UNVERIFIED`
+- `DECLARED_VALIDATION_PRESENT_NOT_EXECUTED`
+
+Even the last state is still verification-pending. It means only that the caller named a validation step, not that AXM ran it or that the handoff is correct.
+
+## Grammar-native seam review
+
+Every boundary also gets a deterministic read-only review capsule assembled from the two real grammar profiles:
+
+- producer semantic hazards
+- consumer semantic hazards
+- producer verification focus
+- consumer verification focus
+- combined native questions that should be answered before a rewrite
+
+The review explicitly reports:
+
+```text
+semanticCompatibilityClaimed: false
+interfaceSemanticsInferred: false
+verificationExecuted: false
+authority: NONE
+```
+
+So the composer can expose where two language grammars meet without pretending it understands an unstated protocol or proving that the interface works.
+
+## Repeated language pairs
 
 A language organ may appear more than once in the sequence. For example:
 
@@ -84,4 +132,17 @@ When a directed pair occurs at only one boundary, the helper resolves its bounda
 node language-organs/selftest-polyglot-grammar-composition.js
 ```
 
-The focused selftest covers distinct-language preservation, explicit and unresolved handoffs, partial contracts, deterministic composition IDs, repeated stage preservation, repeated-pair disambiguation, blank-stage rejection, endpoint validation, and language listing.
+The selftest now uses the real repository body rather than a mock registry. It requires:
+
+- exactly 102 real language organs
+- exactly 102 real grammar profiles
+- valid organ/profile digest bindings
+- real Python, SQL, and Rust stages
+- explicit, partial, and missing handoff states
+- verification-pending truth boundaries
+- grammar-native seam reviews
+- deterministic composition IDs
+- repeated stage preservation and repeated-pair disambiguation
+- blank/unknown stage rejection
+
+The dedicated GitHub Actions workflow also runs the existing organ/profile/specialist/template/cheatcode checks plus this real-body composition test.
