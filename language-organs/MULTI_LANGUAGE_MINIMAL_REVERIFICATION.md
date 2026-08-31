@@ -23,12 +23,7 @@ For each defined handoff the planner derives a deterministic local fingerprint f
 - consumer organ ID and digest;
 - consumer grammar-profile digest.
 
-The fingerprint deliberately excludes:
-
-- repository-wide snapshot digests;
-- `compositionId`.
-
-This means an unrelated change elsewhere in the 102-language body does not make an unchanged Python → SQL seam look locally different.
+The fingerprint deliberately excludes repository-wide snapshot digests and `compositionId`. This means an unrelated change elsewhere in the 102-language body does not make an unchanged Python → SQL seam look locally different.
 
 The fingerprint is only a deterministic locality comparison. It is not semantic equivalence proof.
 
@@ -51,107 +46,49 @@ For each candidate handoff it reports either:
 
 ## Example: unrelated repository drift
 
-Saved composition:
-
-```text
-Python -> SQL -> Rust
-```
-
-Suppose another language elsewhere in the 102-language registry changes while Python, SQL, Rust, their grammar profiles, and both handoff declarations remain identical.
+For `Python → SQL → Rust`, suppose another language elsewhere in the 102-language registry changes while Python, SQL, Rust, their grammar profiles, and both handoff declarations remain identical.
 
 The global composition identity changes because the repository snapshot changed. Existing receipts cannot be reused as-is because they reference the old composition ID.
 
-The planner nevertheless reports:
-
-```text
-localReplayRecommendedCount: 0
-localReplayNotIndicatedCount: 2
-```
-
-If both old handoffs had accepted PASS receipt references, both appear in `potentialReplaySavingsHandoffIndexes`.
+The planner nevertheless reports zero local replay recommendations. If both old handoffs had accepted PASS receipt references, both appear in `potentialReplaySavingsHandoffIndexes`.
 
 This does **not** authorize automatic receipt carry-forward. It means only that no local organ/grammar/contract delta was found that would independently justify replaying those verifiers.
 
 ## Example: SQL grammar changed
 
-For:
+For `Python → SQL → Rust`, if the selected SQL grammar profile changes, both adjacent handoffs change their local fingerprints:
 
-```text
-Python -> SQL -> Rust
-```
-
-if the selected SQL grammar profile changes, both adjacent handoffs change their local fingerprints:
-
-```text
-Python -> SQL
-SQL -> Rust
-```
+- `Python → SQL`
+- `SQL → Rust`
 
 Both are reported in `replayRecommendedHandoffIndexes`.
 
 ## Example: Rust grammar changed
 
-If only the selected Rust grammar changes:
-
-- `Python -> SQL` stays locally equivalent;
-- `SQL -> Rust` changes.
-
-The plan becomes partial:
-
-```text
-rebindOnlyCandidateHandoffIndexes: [0]
-replayRecommendedHandoffIndexes: [1]
-potentialReplaySavingsHandoffIndexes: [0]
-```
+If only the selected Rust grammar changes, `Python → SQL` stays locally equivalent while `SQL → Rust` changes. The plan therefore recommends replay only for the Rust-adjacent handoff and marks the unchanged seam as a receipt-rebind review candidate.
 
 ## Existing evidence remains historical
 
 The planner first assesses the old receipt set against the old composition. Accepted old PASS receipts are useful only for identifying where prior verification evidence existed.
 
-It never rewrites those receipts for the refreshed composition.
-
-When `compositionId` changes, every old accepted receipt binding is invalid on the candidate by design. The planner reports that count in:
-
-`acceptedOldReceiptBindingsInvalidOnCandidate`
+It never rewrites those receipts for the refreshed composition. When `compositionId` changes, every old accepted receipt binding is invalid on the candidate by design.
 
 A new candidate-bound receipt must be explicitly produced. Whether an external verifier can reissue a receipt from unchanged execution evidence without replaying the verifier is outside this module and remains policy-dependent.
 
 ## Cost signal
 
-The planner exposes counts rather than invented resource estimates:
+The planner exposes structural counts rather than invented resource estimates:
 
 - local handoffs where replay is recommended;
 - local handoffs where replay is not indicated by grammar/contract delta;
 - handoffs with prior PASS evidence where replay may potentially be avoided;
 - receipt bindings that need a new candidate binding.
 
-It explicitly sets:
-
-```text
-computeCostEstimated: false
-memoryCostEstimated: false
-```
-
-No fake milliseconds, token counts, RAM values, or money estimates are manufactured without measured execution data.
+It explicitly keeps `computeCostEstimated` and `memoryCostEstimated` false until measured execution data exists.
 
 ## Truth boundary
 
-Every candidate plan states:
-
-```text
-localEquivalenceIsSemanticProof: false
-externalVerifierPolicyChecked: false
-verifierReplayExecuted: false
-externalExecutionReceiptContentInspected: false
-receiptReissued: false
-automaticReceiptCarryForwardAllowed: false
-semanticCompatibilityProven: false
-executionReadinessClaimed: false
-workspaceInspected: false
-toolExecution: false
-network: false
-authority: NONE
-```
+Every candidate plan states that local equivalence is not semantic proof, external verifier policy was not checked, verifier replay was not executed, external receipt content was not inspected, receipts were not reissued, automatic carry-forward is forbidden, semantic compatibility was not proven, execution readiness is not claimed, and this module has no workspace, tool, network, promotion, or CANON authority.
 
 ## Verification
 
@@ -161,15 +98,4 @@ Run:
 node language-organs/selftest-multi-language-minimal-reverification.js
 ```
 
-The real-body test covers:
-
-- no-refresh behavior;
-- repository-only drift with zero local replay recommendations;
-- replay-savings signals only where prior PASS evidence exists;
-- SQL grammar drift affecting both adjacent seams;
-- Rust grammar drift affecting only the Rust-adjacent seam;
-- held refresh after language identity rebound;
-- deterministic local handoff fingerprints;
-- handoff declaration changes invalidating local equivalence;
-- repeated language pairs retaining distinct local fingerprints;
-- preservation of the original composition.
+The real-body test covers no-refresh behavior, repository-only drift with zero local replay recommendations, replay-savings signals only where prior PASS evidence exists, SQL grammar drift affecting both adjacent seams, Rust grammar drift affecting only the Rust seam, held refresh after language identity rebound, deterministic local handoff fingerprints, handoff declaration changes invalidating local equivalence, repeated language pairs retaining distinct local fingerprints, and preservation of the original composition.
