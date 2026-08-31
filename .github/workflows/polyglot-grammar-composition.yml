@@ -1,4 +1,4 @@
-name: Verify polyglot grammar composition
+name: Verify multi-language grammar composition
 
 on:
   pull_request:
@@ -68,11 +68,14 @@ jobs:
       - name: Run cheatcode influence selftest
         run: node language-organs/selftest-machine-cheatcode-influence.js
 
-      - name: Run real-body polyglot composition selftest
+      - name: Run real-body multi-language composition selftest
         run: node language-organs/selftest-polyglot-grammar-composition.js
 
-      - name: Run polyglot currentness and refresh selftest
+      - name: Run multi-language currentness and refresh selftest
         run: node language-organs/selftest-polyglot-composition-currentness.js
 
-      - name: Run polyglot handoff evidence selftest
+      - name: Run multi-language handoff evidence selftest
         run: node language-organs/selftest-polyglot-handoff-evidence.js
+
+      - name: Run multi-language decision gate selftest
+        run: node language-organs/selftest-multi-language-decision-gate.js
