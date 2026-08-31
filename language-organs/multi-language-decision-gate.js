@@ -75,7 +75,7 @@ function buildAdvisories(currentness, evidence, refresh) {
       code: 'REFRESH_WOULD_INVALIDATE_COMPOSITION_BOUND_RECEIPTS',
       acceptedReceiptCount: evidence.acceptedReceiptCount,
       meaning:
-        'Accepted evidence receipts are bound to the current compositionId. Accepting this refresh candidate would require explicit receipt reissue or a separately justified carry-forward mechanism.',
+        'Accepted evidence receipts are bound to the current compositionId. Accepting this refresh candidate would require explicit receipt reissue or a separately justified carry-forward mechanism. Use the minimal re-verification planner to distinguish local replay work from receipt rebinding work.',
     });
   }
 
@@ -100,6 +100,8 @@ function summarizeRefresh(refresh, evidence) {
     previousCompositionPreserved: refresh.previousCompositionPreserved,
     acceptedReceiptBindingsWouldNeedReissue:
       compositionIdChanged ? evidence.acceptedReceiptCount : 0,
+    minimalReverificationPlannerAvailable:
+      refresh.status === 'REFRESH_CANDIDATE_READY_CALLER_ACCEPTANCE_REQUIRED',
     candidateExecuted: false,
     verificationExecuted: false,
     automaticReplacement: false,
