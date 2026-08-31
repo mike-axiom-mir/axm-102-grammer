@@ -1,0 +1,72 @@
+name: Verify polyglot grammar composition
+
+on:
+  pull_request:
+    paths:
+      - 'language-organs/**'
+      - '.github/workflows/polyglot-grammar-composition.yml'
+  push:
+    branches:
+      - 'chatgpt/polyglot-grammar-composition-v1'
+    paths:
+      - 'language-organs/**'
+      - '.github/workflows/polyglot-grammar-composition.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify generated grammar profiles
+        run: python3 language-organs/build-grammar-profiles.py --check
+
+      - name: Verify generated specialist eyes
+        run: python3 language-organs/build-specialist-eyes.py --check
+
+      - name: Verify generated machine templates
+        run: node language-organs/build-machine-templates.js --check
+
+      - name: Verify generated machine keyboards
+        run: node language-organs/build-machine-keyboards.js --check
+
+      - name: Verify generated machine cheatcodes
+        run: node language-organs/build-machine-cheatcodes.js --check
+
+      - name: Run organ registry selftest
+        run: node language-organs/selftest.js
+
+      - name: Run adversarial registry selftest
+        run: node language-organs/selftest-adversarial.js
+
+      - name: Run grammar profile selftest
+        run: node language-organs/selftest-grammar-profiles.js
+
+      - name: Run specialist eye selftest
+        run: node language-organs/selftest-specialist-eyes.js
+
+      - name: Run machine template selftest
+        run: node language-organs/selftest-machine-templates.js
+
+      - name: Run machine cheatcode selftest
+        run: node language-organs/selftest-machine-cheatcodes.js
+
+      - name: Run cheatcode influence selftest
+        run: node language-organs/selftest-machine-cheatcode-influence.js
+
+      - name: Run real-body polyglot composition selftest
+        run: node language-organs/selftest-polyglot-grammar-composition.js
