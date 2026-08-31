@@ -79,3 +79,6 @@ jobs:
 
       - name: Run multi-language decision gate selftest
         run: node language-organs/selftest-multi-language-decision-gate.js
+
+      - name: Run minimal multi-language re-verification selftest
+        run: node language-organs/selftest-multi-language-minimal-reverification.js
