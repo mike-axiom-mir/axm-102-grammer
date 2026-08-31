@@ -82,3 +82,12 @@ jobs:
 
       - name: Run minimal multi-language re-verification selftest
         run: node language-organs/selftest-multi-language-minimal-reverification.js
+
+      - name: Run multi-language verification workpack selftest
+        run: node language-organs/selftest-multi-language-verification-workpack.js
+
+      - name: Run multi-language verification telemetry selftest
+        run: node language-organs/selftest-multi-language-verification-telemetry.js
+
+      - name: Run multi-language front door selftest
+        run: node language-organs/selftest-multi-language-front-door.js
