@@ -73,3 +73,6 @@ jobs:
 
       - name: Run polyglot currentness and refresh selftest
         run: node language-organs/selftest-polyglot-composition-currentness.js
+
+      - name: Run polyglot handoff evidence selftest
+        run: node language-organs/selftest-polyglot-handoff-evidence.js
