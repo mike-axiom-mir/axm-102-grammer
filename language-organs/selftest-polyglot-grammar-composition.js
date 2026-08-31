@@ -178,6 +178,11 @@ function run() {
     /at least two distinct language ids/,
   );
 
+  assert.throws(
+    () => composer.compose(['python', '', 'sql']),
+    /does not accept blank language ids/,
+  );
+
   assert.deepStrictEqual(
     composer.listLanguages().map((item) => item.slug),
     ['python', 'sql', 'rust'],
