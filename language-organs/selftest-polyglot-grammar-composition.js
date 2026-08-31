@@ -150,6 +150,56 @@ function run() {
     [0, 1, 2],
   );
 
+  const threeStage = composer.compose(['python', 'sql', 'rust'], {
+    handoffs: [
+      { from: 'python', to: 'sql', kind: 'query', artifact: 'statement' },
+      { from: 'sql', to: 'rust', kind: 'rows', artifact: 'result set' },
+    ],
+  });
+  const middleImpact = composer.analyzeImpact(threeStage, { changedStageIndexes: [1] });
+  assert.deepStrictEqual(middleImpact.changedStageIndexes, [1]);
+  assert.deepStrictEqual(middleImpact.impactedBoundaryIndexes, [0, 1]);
+  assert.deepStrictEqual(middleImpact.impactedStageIndexes, [0, 1, 2]);
+  assert.deepStrictEqual(middleImpact.impactedLanguageIds, ['python', 'sql', 'rust']);
+  assert.deepStrictEqual(middleImpact.verificationPendingBoundaryIndexes, [0, 1]);
+  assert.strictEqual(middleImpact.impactedBoundaries.length, 2);
+  assert.strictEqual(middleImpact.semanticImpactClaimed, false);
+  assert.strictEqual(middleImpact.workspaceInspected, false);
+  assert.strictEqual(middleImpact.toolExecution, false);
+  assert.strictEqual(middleImpact.impactId.length, 64);
+
+  const firstImpact = composer.analyzeImpact(threeStage, { changedStageIndexes: [0] });
+  assert.deepStrictEqual(firstImpact.impactedBoundaryIndexes, [0]);
+  assert.deepStrictEqual(firstImpact.impactedStageIndexes, [0, 1]);
+  assert.deepStrictEqual(firstImpact.impactedLanguageIds, ['python', 'sql']);
+
+  const repeatedImpact = composer.analyzeImpact(stageSpecific, { changedStageIndexes: [1, 1] });
+  assert.deepStrictEqual(repeatedImpact.changedStageIndexes, [1]);
+  assert.deepStrictEqual(repeatedImpact.impactedBoundaryIndexes, [0, 1]);
+  assert.deepStrictEqual(repeatedImpact.impactedLanguageIds, ['python', 'sql', 'python']);
+
+  const middleImpactAgain = composer.analyzeImpact(threeStage, { changedStageIndexes: [1] });
+  assert.strictEqual(middleImpact.impactId, middleImpactAgain.impactId);
+
+  const tampered = JSON.parse(JSON.stringify(threeStage));
+  tampered.sequence[1] = 'python';
+  assert.throws(
+    () => composer.analyzeImpact(tampered, { changedStageIndexes: [1] }),
+    /POLYGLOT_COMPOSITION_DIGEST_MISMATCH/,
+  );
+  assert.throws(
+    () => composer.analyzeImpact(threeStage, { changedStageIndexes: [] }),
+    /requires at least one changed stage index/,
+  );
+  assert.throws(
+    () => composer.analyzeImpact(threeStage, { changedStageIndexes: [3] }),
+    /POLYGLOT_CHANGED_STAGE_INDEX_OUT_OF_RANGE/,
+  );
+  assert.throws(
+    () => composer.analyzeImpact(threeStage, { changedStageIndexes: ['1'] }),
+    /must be integers/,
+  );
+
   console.log('polyglot grammar composition real-body selftest: ok');
 }
 
