@@ -107,9 +107,11 @@ function run() {
   assert.strictEqual(partial.unresolvedHandoffs.length, 1);
   assert.strictEqual(partial.handoffs[0].kind, null);
 
-  const deduped = composer.compose(['python', 'sql', 'python', 'rust']);
-  assert.deepStrictEqual(deduped.sequence, ['python', 'sql', 'rust']);
-  assert.strictEqual(deduped.boundaries.length, 2);
+  const repeated = composer.compose(['python', 'sql', 'python', 'rust']);
+  assert.deepStrictEqual(repeated.sequence, ['python', 'sql', 'python', 'rust']);
+  assert.strictEqual(repeated.layers.length, 4);
+  assert.strictEqual(repeated.boundaries.length, 3);
+  assert.strictEqual(repeated.layers[2].language.slug, 'python');
 
   const first = composer.compose(['python', 'sql'], {
     handoffs: [{ from: 'python', to: 'sql', kind: 'file', artifact: 'rows.json' }],
@@ -132,10 +134,48 @@ function run() {
   );
   assert.throws(
     () =>
-      composer.compose(['python', 'sql'], {
-        handoffs: [{ from: 'python', to: 'python', kind: 'file', artifact: 'rows.json' }],
+      composer.compose(['python', 'sql', 'python', 'sql'], {
+        handoffs: [{ from: 'python', to: 'sql', kind: 'file', artifact: 'rows.json' }],
       }),
-    /same language organ/,
+    /boundaryIndex is required/,
+  );
+
+  const stageSpecific = composer.compose(['python', 'sql', 'python', 'sql'], {
+    handoffs: [
+      {
+        from: 'python',
+        to: 'sql',
+        boundaryIndex: 0,
+        kind: 'database-query',
+        artifact: 'first query contract',
+      },
+      {
+        from: 'sql',
+        to: 'python',
+        kind: 'result-set',
+        artifact: 'rows',
+      },
+      {
+        from: 'python',
+        to: 'sql',
+        boundaryIndex: 2,
+        kind: 'database-query',
+        artifact: 'second query contract',
+      },
+    ],
+  });
+  assert.deepStrictEqual(
+    stageSpecific.boundaries.map((boundary) => boundary.status),
+    ['defined', 'defined', 'defined'],
+  );
+  assert.deepStrictEqual(
+    stageSpecific.handoffs.map((handoff) => handoff.boundaryIndex),
+    [0, 1, 2],
+  );
+
+  assert.throws(
+    () => composer.compose(['python', 'python']),
+    /at least two distinct language ids/,
   );
 
   assert.deepStrictEqual(
