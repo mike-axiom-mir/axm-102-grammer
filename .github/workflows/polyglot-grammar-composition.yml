@@ -70,3 +70,6 @@ jobs:
 
       - name: Run real-body polyglot composition selftest
         run: node language-organs/selftest-polyglot-grammar-composition.js
+
+      - name: Run polyglot currentness and refresh selftest
+        run: node language-organs/selftest-polyglot-composition-currentness.js
