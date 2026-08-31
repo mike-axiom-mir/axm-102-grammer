@@ -29,6 +29,7 @@ This helper lets a caller put several of those organs into one explicit sequence
 - Missing or incomplete sequence boundaries remain visible.
 - A declared validation step is not treated as executed evidence.
 - Semantic compatibility is never claimed by the composer.
+- Impact tracing never claims semantic blast radius.
 - Capability remains separate from authority.
 - The returned composition receives a deterministic SHA-256 `compositionId`.
 
@@ -104,6 +105,47 @@ authority: NONE
 
 So the composer can expose where two language grammars meet without pretending it understands an unstated protocol or proving that the interface works.
 
+## Digest-bound impact tracing
+
+A composition can also be passed to:
+
+```js
+const impact = composer.analyzeImpact(composition, {
+  changedStageIndexes: [1],
+});
+```
+
+Impact tracing first recomputes the composition digest. A stale or modified composition is rejected with `POLYGLOT_COMPOSITION_DIGEST_MISMATCH` instead of being analyzed as though it were the original plan.
+
+For each caller-declared changed stage it deterministically reports:
+
+- `changedStageIndexes`
+- neighboring `impactedBoundaryIndexes`
+- stages touching those boundaries
+- the corresponding language IDs
+- the existing boundary review capsules that should be revisited
+- verification-pending boundary indexes
+- a deterministic SHA-256 `impactId`
+
+For a three-stage chain:
+
+```text
+python -> sql -> rust
+```
+
+changing stage `1` marks both boundaries `0` and `1` for re-review. Changing stage `0` marks only boundary `0`.
+
+This is **structural adjacency impact only**. It does not inspect code, discover hidden dependencies, infer semantic blast radius, execute tools, or claim that non-adjacent stages are unaffected.
+
+Every impact report therefore states:
+
+```text
+semanticImpactClaimed: false
+workspaceInspected: false
+toolExecution: false
+authority: NONE
+```
+
 ## Repeated language pairs
 
 A language organ may appear more than once in the sequence. For example:
@@ -141,8 +183,10 @@ The selftest now uses the real repository body rather than a mock registry. It r
 - explicit, partial, and missing handoff states
 - verification-pending truth boundaries
 - grammar-native seam reviews
-- deterministic composition IDs
+- deterministic composition and impact IDs
+- digest rejection after composition tampering
+- structural impact tracing for first, middle, and repeated stages
 - repeated stage preservation and repeated-pair disambiguation
 - blank/unknown stage rejection
 
-The dedicated GitHub Actions workflow also runs the existing organ/profile/specialist/template/cheatcode checks plus this real-body composition test.
+The dedicated GitHub Actions workflow also runs the existing organ/profile/specialist/template/keyboard/cheatcode checks plus this real-body composition test.
