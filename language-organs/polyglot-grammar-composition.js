@@ -266,9 +266,6 @@ function createPolyglotGrammarComposer(options = {}) {
     const organSnapshot = registry.snapshot();
     const grammarSnapshot = grammarProfiles.snapshot();
     const unresolvedHandoffs = boundaries.filter((boundary) => boundary.status !== 'defined');
-    const unverifiedBoundaries = boundaries.filter(
-      (boundary) => boundary.evidenceState !== 'DECLARED_VALIDATION_PRESENT_NOT_EXECUTED',
-    );
     const core = {
       schema: 'axm.polyglot-grammar-composition/v1',
       sequence,
@@ -276,7 +273,7 @@ function createPolyglotGrammarComposer(options = {}) {
       handoffs,
       boundaries,
       unresolvedHandoffs,
-      unverifiedBoundaries,
+      verificationPendingBoundaryIndexes: boundaries.map((boundary) => boundary.boundaryIndex),
       sourceSnapshots: {
         organRegistry: {
           organCount: organSnapshot.organCount,
