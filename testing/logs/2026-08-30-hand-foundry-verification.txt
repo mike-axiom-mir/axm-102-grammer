@@ -1,0 +1,160 @@
+AXM 102 GRAMMAR — HAND FOUNDRY VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Base commit: 6adefd0bde12ff439df0466281c452d0e3769e5d
+Base tree: 980e71173774fb24e10591b912cbfa044ebe9858
+Production repositories edited by trials: 0
+
+ENVIRONMENT
+Linux 6.18.35 x86_64 GNU/Linux
+Node v24.19.0
+Python 3.12.13
+prlimit from util-linux 2.39.3
+bubblewrap 0.9.0
+
+The fixed environment Hand observed Node, Python 3, prlimit, and bubblewrap as installed.
+Node, Python 3, and prlimit were usable. The harmless bubblewrap namespace probe failed
+with NAMESPACE_PERMISSION_DENIED, so the receipt retained:
+HOST_SANDBOX_UNAVAILABLE:NAMESPACE_PERMISSION_DENIED
+
+COMMAND
+node software-directions/placement/selftest-toolchain-environment-hand.js
+
+RESULT
+{
+  "ok": true,
+  "installedToolCount": 4,
+  "usableToolCount": 3,
+  "fixedProbeCount": 4,
+  "liveToolPathBindings": 4,
+  "candidateExecutions": 0,
+  "workspaceReads": 0,
+  "workspaceMutations": 0,
+  "sandboxProvider": "bubblewrap",
+  "sandboxUsable": false,
+  "sandboxErrorCode": "NAMESPACE_PERMISSION_DENIED",
+  "adversarialHolds": 3
+}
+
+The three environment holds covered digest tampering, a digest-valid stale receipt,
+and a digest-valid substituted executable path.
+
+COMMAND
+node software-directions/placement/selftest-hand-foundry-plane.js
+
+RESULT
+{
+  "ok": true,
+  "manifests": 2,
+  "pythonPlacementPlans": 1,
+  "javascriptPlacementPlans": 3,
+  "graphDigestBound": true,
+  "graphInstallationOrderBound": true,
+  "graphInputOrderCanonicalized": true,
+  "spawnedCapsules": 12,
+  "spawnedParserPasses": 3,
+  "spawnedParserSyntaxHolds": 1,
+  "spawnedParserBindingHolds": 2,
+  "candidateExecutions": 0,
+  "workspaceMutations": 0,
+  "environmentSandboxUsable": false,
+  "explicitCapabilityHolds": 8,
+  "adversarialManifestHolds": 9
+}
+
+PYTHON TRIAL
+- Disposable production-shaped backend: six mapped Python files across domain,
+  application, boundary, and their verification modules.
+- One pricing rule placement plan produced six unique scoped Hand capsules.
+- Valid source candidate: SPAWNED_PARSER_PASS.
+- Valid verification candidate: SPAWNED_PARSER_PASS.
+- Invalid source candidate: SPAWNED_PARSER_HOLD / PYTHON_SYNTAX_ERROR.
+- Parser used python3 -I -S with ast.parse and stdin; candidate source was not imported
+  or executed.
+- Exact before/after workspace snapshots matched.
+- Donor authoring metadata remained SOURCE_BODY_HELD / HAND_SOURCE_BODY_NOT_PRESENT.
+- Python exact-byte writer and rollback writer remained IMPLEMENTATION_HELD.
+- Python verifier remained ENVIRONMENT_HELD because the host sandbox probe failed.
+
+JAVASCRIPT GRAPH TRIAL
+- Three dependency-linked placement plans and six exact targets produced six unique
+  scoped Hand capsules.
+- The validated edit-graph digest and exact installation order were present in the
+  manifest and every capsule.
+- Reversing the caller's placement-plan input order produced the same manifest digest.
+- JavaScript candidate: SPAWNED_PARSER_PASS without execution.
+- Exact-byte and rollback implementations routed to workspace-edit-graph-hand-v1 and
+  remained AUTHORIZATION_REQUIRED.
+- Verification remained HOST_BINDING_REQUIRED.
+- Exact before/after workspace snapshots matched.
+
+ADVERSARIAL FOUNDRY HOLDS
+1. tampered environment receipt
+2. duplicate placement plan
+3. tampered placement plan
+4. digest-valid forged requiredHands list
+5. tampered project-map observation
+6. digest-valid duplicate target
+7. digest-valid stale environment receipt
+8. missing edit graph for a multi-plan request
+9. tampered edit-graph installation order
+
+ADVERSARIAL PARSER BINDING HOLDS
+1. digest-valid substituted parser executable path
+2. missing live environment receipt
+
+COMMAND
+node testing/run-all.js
+
+PASS LIST
+01 build-grammar-profiles.py --check
+02 selftest-grammar-profiles.js
+03 build-specialist-eyes.py --check
+04 selftest-specialist-eyes.js
+05 build-machine-templates.js --check
+06 selftest-machine-templates.js
+07 build-machine-cheatcodes.js --check
+08 selftest-machine-cheatcodes.js
+09 selftest-machine-cheatcode-influence.js
+10 build-machine-keyboards.js --check
+11 selftest-machine-keyboards.js
+12 language-organs/selftest.js
+13 language-organs/selftest-adversarial.js
+14 selftest-direction-registry.js
+15 selftest-direction-stack.js
+16 selftest-placement-plane.js
+17 selftest-project-map-hand.js
+18 selftest-toolchain-environment-hand.js
+19 selftest-hand-foundry-plane.js
+20 selftest-edit-graph-plane.js
+21 selftest-workspace-edit-hand.js
+22 selftest-workspace-edit-recovery.js
+23 selftest-workspace-edit-graph-hand.js
+24 selftest-workspace-edit-graph-recovery.js
+25 selftest-adapter-plane.js
+26 selftest-frontier-direction-workbench.js
+27 selftest-standalone-capability-router.js
+28 selftest-repository-independence.js
+
+SUITE_RESULT: passed=28 failed=0 total=28
+
+REGRESSION RECEIPTS RETAINED BY THE FULL RUN
+- Pair recovery actual SIGKILL probes: 25
+- Graph recovery actual SIGKILL probes: 28
+- Combined actual SIGKILL probes: 53
+- Pair restart rollbacks: 14
+- Pair restart commits: 4 recovered plus 2 already final
+- Graph restart rollbacks: 20
+- Graph restart commits: 2 recovered plus 1 already committed
+- Repository language directories: 102
+- Per-language payload files: 612
+- Stable machine keyboard keys: 4,896
+- Frontier direction builds: 58/58 passed
+- Production readiness claimed: 0 directions
+
+TRUTH BOUNDARY
+A grammar-derived capsule is a scoped capability description, not authority. This trial
+does not claim autonomous source authorship, Python workspace writing, sandboxed candidate
+execution, behavioral correctness from syntax, production readiness, deployment authority,
+or runtime correctness across all 102 languages. Missing implementations and the failed
+host sandbox probe remain explicit holds.

@@ -1,0 +1,61 @@
+{
+  "schema": "axm.code.placement-plane-contract.v1",
+  "version": "1.2.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.project-map.v1",
+    "axm.code.project-map-observation.v1",
+    "axm.code.change-intent.v1",
+    "axm.code.placement-plan.v1",
+    "axm.code.placement-registry-snapshot.v1"
+  ],
+  "model": {
+    "projectMap": "A digest-bound description of existing modules, ownership, mutability, paths, test seams, and an explicit extension, basename, or path-context language signal. It may remain caller-declared or arrive inside a fresh read-only Hand observation.",
+    "projectMapObservation": "A separately authorized read-only Hand receipt proving current matching paths and byte digests inside one explicit workspace root while retaining caller-declared semantic roles.",
+    "changeIntent": "An explicit software direction, code-role kind, ownership signals, public seams, dependencies, and verifier targets.",
+    "placementDecision": "A deterministic extend, create, or hold result bound to the language grammar and project map.",
+    "authorizedExecution": "A later Hand may apply a fresh plan only after checking the named preconditions and returning receipts."
+  },
+  "truth": {
+    "placementPlanIsSourceCode": false,
+    "placementPlanIsWorkspaceMutation": false,
+    "callerProjectMapIsFreshWorkspaceProof": false,
+    "plannerReadsWorkspace": false,
+    "freshReadOnlyHandObservationMayBindPlanning": true,
+    "handDigestIsSignerProof": false,
+    "liveObservationRemovesPreMutationRecheck": false,
+    "declaredOwnershipIsObservedOwnership": false,
+    "languageGrammarBindingIsToolchainVerification": false,
+    "explicitLanguageBindingSignalRequired": true,
+    "extensionLanguageBindingSupported": true,
+    "basenameLanguageBindingSupported": true,
+    "pathContextLanguageBindingSupported": true,
+    "targetPathMustMatchDeclaredLanguageSignal": true,
+    "plannedPathIsValidAfterWorkspaceDrift": false,
+    "deterministicPlacementReplacesCodingCompetence": false,
+    "authorizedHandsMayApplyFreshPassingPlan": true,
+    "ambiguousOwnerMayBeGuessed": false,
+    "protectedTargetMayBeBypassed": false
+  },
+  "permissions": [],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "tool-execution",
+    "network-access",
+    "dependency-install",
+    "ambiguous-owner-selection",
+    "path-traversal",
+    "path-or-basename-language-binding-without-explicit-convention",
+    "protected-target-bypass",
+    "stale-map-as-current-proof",
+    "stale-project-map-observation",
+    "future-dated-project-map-observation",
+    "project-map-observation-over-five-minutes",
+    "tampered-project-map-observation",
+    "plan-as-code-evidence",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "NONE"
+}

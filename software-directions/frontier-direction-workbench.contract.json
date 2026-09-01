@@ -1,0 +1,51 @@
+{
+  "schema": "axm.code.frontier-direction-workbench-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.frontier-direction-build-packet.v1",
+    "axm.code.frontier-direction-reference-build.v1",
+    "axm.code.frontier-direction-trial-result.v1",
+    "axm.code.frontier-direction-user-report.v1",
+    "axm.code.placement-plan.v1"
+  ],
+  "trialModel": {
+    "directionCount": 29,
+    "levelsPerDirection": 2,
+    "levelNames": ["seed", "stretch"],
+    "totalReferenceBuilds": 58,
+    "humanInterventionDuringIndividualRun": false,
+    "singleFrontierModelPerspective": true,
+    "beginnerReferenceReady": "Both bounded executable probes pass deterministically, concrete local adapter receipts are valid, deterministic reference placement plans are ready, and unsupported real-world adapters remain visible."
+  },
+  "truth": {
+    "referenceBuildIsProductionBuild": false,
+    "beginnerReferenceReadyIsProductionReady": false,
+    "modeledTimingIsHardwareTiming": false,
+    "modeledSecurityIsSecurityCertification": false,
+    "requestedVerifierIsEvidence": false,
+    "passedAdapterReceiptIsUniversalProof": false,
+    "referenceProjectMapIsCallerWorkspace": false,
+    "placementPlanIsSourceCode": false,
+    "placementPlanIsWorkspaceMutation": false,
+    "singleFrontierModelTrialIsUniversalModelFinding": false,
+    "missingEvidenceIsLanguageIncapability": false,
+    "humanFollowupMayBeAddedLater": true
+  },
+  "permissions": ["current-node-version-read", "bounded-in-memory-reference-execution"],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "external-tool-execution",
+    "child-process-execution",
+    "network-access",
+    "dependency-install",
+    "real-deployment",
+    "physical-control",
+    "hardware-evidence-without-hardware",
+    "security-certification",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "BOUNDED_LOCAL_ADAPTER_ONLY"
+}

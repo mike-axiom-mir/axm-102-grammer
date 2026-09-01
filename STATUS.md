@@ -1,6 +1,6 @@
 # AXM 102 Grammar Status
 
-Verified standalone recovery state: **2026-08-29**
+Verified standalone recovery state: **2026-08-30**
 
 Source checkpoint used for recovery:
 
@@ -75,9 +75,154 @@ All measurements below came from the successful recovery verification run before
 - router surface present: `layout`, `press`
 - generated-keyboard drift during check: 0
 
+### Software-direction layer
+
+- reusable direction profiles: 29
+- direction families: 5
+- explicit direction axes: 7
+- runtime axis values: 11
+- verification axis values: 20
+- primary-source provenance records: 12
+- individually composed profiles: 29
+- profiles may compose into hybrid stacks without duplicating language grammars
+- caller-supplied evidence gaps remain distinct from language incapability
+- frontier-model seed builds: 29/29 passed
+- frontier-model stretch builds: 29/29 passed
+- beginner reference ready: 29/29 directions
+- production ready claimed: 0 directions
+- per-direction helpfulness and tuning observations: 29
+- concrete local adapters: 10 (one runtime, nine verifiers)
+- passed runtime adapter receipts: 58
+- passed verifier adapter receipts: 76
+- unsupported verifier targets retained: 20
+- directions with at least one concrete local verifier: 26/29
+- verifier categories still requiring external/specialized adapters: 11/20
+- deterministic code roles: 10
+- deterministic change kinds: 40
+- direction-to-role hint coverage: 29/29
+- frontier reference placement plans: 58/58 ready
+- placement holds during valid frontier references: 0
+- adversarial placement holds verified: 10
+- explicit language placement bindings: 102/102 ready
+- extension bindings: 97
+- exact-basename bindings: 3
+- path-context bindings: 2
+- additional Ansible path-context route: passed
+- bounded read-only project-map Hand: present
+- directly observed temporary workspaces: 3
+- directly observed module files: 6
+- live language-binding modes observed: extension, exact basename, path context
+- project-map observation lifetime: 5 minutes
+- no-mutation workspace snapshot probe: passed
+- project-map Hand adversarial holds verified: 13
+- separately authorized JavaScript workspace-edit Hand: present
+- exact target count per editing transaction: 2
+- successful isolated editing transactions: 2 (replace and create)
+- intentional verifier-failure transactions rolled back: 1/1
+- editing Hand language-parse receipts exercised: 14
+- editing Hand registered-verifier receipts exercised: 3
+- editing Hand adversarial holds verified: 10
+- durable workspace-edit journal and exclusive cooperating-Hand lease: present
+- actual worker-process `SIGKILL` recovery probes: 25
+- replace journal boundaries crash-tested: 11/11
+- create journal boundaries crash-tested: 9/9
+- restart rollbacks verified: 14
+- restart commits verified: 4 recovered plus 2 already committed
+- restart-surviving replay, lease contention, tamper, unknown-byte, mode-drift, and torn-tail behavior: verified
+- universal power-loss recovery and two-file atomicity claimed: no
+- bounded edit-graph plane and separately authorized graph Hand: present
+- graph boundary: 2-4 placement entries and 4-8 exact targets
+- focused graph trial: 3 dependency-linked entries and 6 existing targets
+- edit-graph planner adversarial holds verified: 6
+- graph application adversarial holds verified: 5
+- successful isolated six-target graph transactions: 1
+- intentional six-target verifier-failure transactions rolled back: 1/1
+- graph Hand language-parse receipts exercised: 24
+- graph Hand registered-verifier receipts exercised: 6
+- six-target graph journal boundaries crash-tested: 23/23
+- actual graph worker-process `SIGKILL` recovery probes: 28
+- graph restart rollbacks verified: 20
+- graph restart commits verified: 2 recovered plus 1 already committed
+- original pair Hand held by an active graph lease: verified
+- total actual pair-plus-graph `SIGKILL` probes: 53
+- universal power-loss recovery and four-to-eight-file atomicity claimed: no
+- grammar-driven Hand foundry: present
+- foundry placement-plan boundary: 1-4 plans
+- production-shaped Python fixture: 6 mapped files, 1 planned source/test pair
+- JavaScript graph foundry fixture: 3 plans, 6 targets
+- unique role capsules derived per manifest: 6
+- total focused foundry capsules exercised: 12
+- spawned parser passes: 3 (2 Python, 1 JavaScript)
+- spawned parser syntax holds: 1
+- candidate programs executed by spawned parsers: 0
+- focused foundry workspace mutations: 0
+- Hand-foundry adversarial manifest holds verified: 9
+- graph digest and exact installation order bound into multi-plan capsules: yes
+- current usable fixed tools in verification host: Node, Python 3, `prlimit`
+- installed but unusable host sandbox: `bwrap` (`NAMESPACE_PERMISSION_DENIED`)
+- exact PR #51 Python donor implementation digest reproduced: yes
+- digest-bound bounded Python recipe registry: present
+- registered bounded Python recipes: 2
+- independently bound builder/verifier-runner digests: 2/2
+- registered recipes: record-field transform; required-string-fields validator
+- required-fields direct registry adversarial holds: 8
+- cross-recipe author-receipt dispatches accepted: 0
+- bounded recipe evidence observer Hand: present
+- exactly declared evidence files observed: 6/6
+- proposal JavaScript files parsed without import/execution: 2/2
+- proposal JSON files parsed: 4/4
+- current evidence byte-digest matches: 6/6
+- core proposal digest bindings to observed files: 3/3
+- proposal evidence observation lifetime: 5 minutes
+- caller test claims reproduced by observer: no
+- semantic safety/human review claimed by observer: no/no
+- proposed modules loaded/candidates executed/child processes: 0/0/0
+- observer workspace/registry mutations and promotions: 0/0/0
+- evidence observer adversarial holds: 19
+- replay-isolation qualification Hand: present
+- replay-isolation policy digest: `72e00fc7f6a3b462baa9a6e7d81ea9eb86d2de45266210e445cf4e4bbc81aa9a`
+- required isolation/resource providers: Bubblewrap / `prlimit`
+- host isolation qualification result: held (`NAMESPACE_PERMISSION_DENIED`)
+- fixed replay-policy probe processes on unavailable host: 0
+- proposed source reads/mounts/module loads by replay-isolation Hand: 0/0/0
+- caller tests executed/claims reproduced: 0/0
+- isolation certification claimed on current host: no
+- replay-isolation adversarial holds: 16
+- non-executing bounded recipe admission plane: present
+- deterministic staging receipts: 2
+- staged candidate entries / active registry additions: 1/0
+- hypothetical next registry entry count: 3
+- replay-isolation receipts bound: 1
+- unresolved activation gaps retained: 6
+- current evidence files directly observed and parsed: 6/6
+- caller test claims reproduced / semantic safety independently verified: no/no
+- proposed source reads by admission plane / observer: 0/2
+- proposed module loads/admission child processes: 0/0
+- admission selections/authorizations/promotions: 0/0/0
+- admission adversarial holds: 24
+- separately authorized Python pair writer/rollback path: present
+- provenance-locked Python runtime verifier: present
+- successful bounded Python author-to-application transactions: 1
+- provenance-locked Python runtime passes: 1
+- intentional Python verifier failures restored both original files: 1/1
+- bounded Python parser receipts exercised: 8
+- bounded Python adversarial holds verified: 11
+- deterministic Foundry activation plane: present
+- distinct registered recipes activated: 2
+- automatic bounded Python Hand assemblies committed: 2
+- caller-supplied candidate bundles/parser contexts/verifier adapters during activation: 0/0/0
+- activation parser receipts: 8
+- activation provenance-locked verifier passes: 2
+- activation adversarial holds: 16
+- required rollback capsule validated before activation: yes
+- Foundry self-authorizations: 0
+- arbitrary Python execution or general Python authoring claimed: no
+- host namespace/filesystem/network isolation claimed by bounded verifier: no
+- production repositories edited by the focused trial: 0
+
 ## Truth boundaries retained
 
-- The base organ selftest still reports Python runtime correctness as `UNKNOWN`; source review evidence is donor-bound and is not promoted into a stronger runtime claim.
+- The base organ selftest still reports general Python runtime correctness as `UNKNOWN`. The runtime evidence is narrower: two exact registered recipes were independently regenerated, receipt-bound, and passed their emitted selftests plus recipe-specific semantic probes. That does not imply competence outside either recipe.
 - `.m` and `.v` remain ambiguous extension cases rather than being silently forced to one language.
 - The original keyboard integration selftest imports `code-prebuild-twin.js`. That test was not copied because Prebuild belongs to the wider Creation Fabric. The standalone keyboard bank and router surface were verified directly instead.
 - The v2.12 creation-session planner is an integration layer across Work Context, Production Draft, Build Window, Prebuild/admission and other wider platform modules. It is deliberately not bundled into this focused repository.
@@ -86,3 +231,35 @@ All measurements below came from the successful recovery verification run before
 ## Repository independence
 
 The temporary recovery courier was removed after verification. The repository now contains the recovered bytes themselves and does not depend on a submodule, symlink, clone script, or source-repository pointer to function as the 102-language body.
+
+## Standalone capability verification lane
+
+Branch: `codex/standalone-capability-verification-v1`
+
+This lane adds a bounded composition surface without importing Grammar Glass or the wider Creation Fabric:
+
+- one deterministic capability capsule across organ, grammar, eye, discovery, cheatcode, influence, template, and semantic-keyboard layers;
+- exact language selection with fail-closed ambiguity, conflict, unknown, and case-alias handling;
+- a dedicated keyboard selftest covering 102 banks and all 4,896 stable keys;
+- a cross-platform Node test runner for all standalone checks;
+- a committed full-suite verification transcript.
+- 29 reusable software-direction overlays, seven axis catalogs, hybrid composition, non-selecting suggestions, and caller-evidence gap reports;
+- optional direction binding in the standalone capability capsule.
+- a 58-build frontier-user maturity trial with per-direction usefulness and tuning logs.
+- a concrete local adapter plane with runtime/verifier receipts and explicit unsupported targets.
+- a deterministic code-placement grammar with language binding, unique-owner selection, verification placement, drift preconditions, required Hands, and fail-closed ambiguity/protection/path rules.
+- a bounded read-only project-map Hand with complete matching-file coverage, current-byte digests, five-minute freshness, and fail-closed symlink/traversal/broad-root/stale/tamper rules.
+- a separately authorized exact-byte JavaScript/Python pair editing Hand with immediate map/digest preflight, language-bound parser and verifier receipts, two-target commit, durable Linux crash recovery, restart-surviving replay refusal, and an exclusive cooperating-Hand lease.
+- a separately authorized bounded edit-graph Hand for two to four placement entries and four to eight targets, with deterministic dependency order, all-target rollback, graph journaling/recovery, and the same workspace lease namespace as the pair Hand.
+- a grammar-driven Hand foundry that derives scoped capability capsules from placement plans, environment evidence, and current organ/profile digests; it now binds a non-executing JavaScript/Python syntax parser, the authorized Python pair writer, and the available bounded donor recipe without treating it as general authoring.
+- a bounded Python record-transform author plus provenance-locked runtime verifier that complete one real author-to-application route while refusing arbitrary candidate substitution.
+- a second independently implemented required-fields recipe with its own builder, receipt, runner digest, semantic probes, and cross-recipe refusal; it is current-source/test bound and makes no human-review claim.
+- a digest-bound registry that routes only its two exact bounded recipes and invalidates old manifest/selection/authorization bindings when membership changes.
+- an exact-six-file read-only proposal evidence observer that binds current bytes and non-executing JavaScript/JSON parse results without importing, executing, writing, or reproducing caller test claims.
+- a replay-isolation qualification Hand that either certifies one fixed empty-root Bubblewrap policy without proposal execution or emits a digest-bound host/policy hold; it never substitutes Node permissions or `node:vm` for malicious-code isolation.
+- a non-executing admission/staging plane that requires both live receipts before receipting a proposed entry and hypothetical registry digest, while retaining isolated adversarial replay, human review, explicit source change, regression, manifest, and authorization as unresolved gates.
+- a Foundry activation plane that consumes explicit host authority and automatically assembles the selected bounded author, parser, recipe-specific verifier, writer, rollback, and receipts without caller-supplied glue.
+
+Lane verification result: **34/34 checks passed**.
+
+The composition test also verifies all 102 explicit language identities, Rust file detection, Python shebang detection, compatible `.m` disambiguation, conflicting `.py`/Rust refusal, missing/unknown language holds, malformed-input refusal, deterministic capsule hashing, suggestion-without-selection, a game/multiplayer hybrid, direction tensions, gap semantics, and the no-source/no-execution/no-mutation boundary. The frontier workbench test executes all 58 seed/stretch reference builds twice for determinism, binds all 58 to deterministic placement plans, preserves real-world verifier gaps, and refuses production-readiness promotion. The placement test verifies extend/create decisions plus ambiguity, locked owner, unsafe path, language mismatch, invalid kind, and missing-dependency holds. The project-map Hand test observes extension, basename, and path-context workspaces; proves byte drift changes the map digest; snapshots zero mutation; and verifies 13 fail-closed receipt/filesystem cases. The foundry tests probe fixed tool capabilities, rebind all executable paths at use time, retain the unusable namespace sandbox as a seam, derive 12 scoped capsules across Python and JavaScript, bind the graph digest and exact installation order, pass three syntax parses, hold one invalid Python candidate, execute no candidate program, mutate no workspace, and verify twelve environment/foundry fail-closed cases. The bounded Python application test reproduces the reviewed donor digest, authors and commits one exact application/test pair, executes the exact recipe under resource limits, restores both files after a forced verifier failure, and proves eleven fail-closed cases without claiming arbitrary Python support. The registry test binds two distinct builders and verifier runners, runs the required-fields recipe directly, and proves eight registry/selection/candidate/parameter/cross-recipe holds. The proposal evidence observer directly reads six exact files, parses two JavaScript sources and four JSON objects without import or execution, and proves nineteen filesystem/digest/parse/binding holds. The replay-isolation test binds the live evidence/environment receipts to one fixed policy, emits a no-process qualified hold on the current namespace-denied host, executes no proposal bytes, and proves sixteen input/environment/policy/receipt holds. The admission test consumes both live receipts, deterministically stages one unreviewed proposal twice, computes a hypothetical next registry digest, retains six activation gaps, leaves the active registry unchanged, and proves twenty-four structural/evidence/observation/isolation/collision/authority holds. The activation test supplies only the manifest, recipe selection, live receipts, roots, declaration, and explicit host authority; the plane assembles every Hand for both active entries, commits two transactions, requires rollback capability, and proves sixteen no-mutation holds without caller-supplied candidates, parser context, or verifier adapter. The pair editing Hand test commits JavaScript replace/create candidates, forces and verifies exact rollback, exercises 14 parser and three verifier receipts, and checks ten authorization/digest/drift/path/protection holds without touching a production repository; its recovery test performs 25 real `SIGKILL` events. The graph tests deterministically order three dependency-linked entries, commit or restore six targets, exercise 24 parser and six verifier receipts, prove eleven planner/application holds, and perform 28 real `SIGKILL` events across all 23 graph journal boundaries plus replay, cross-API lease, tamper, ambiguity, mode, and torn-tail cases. The adapter test verifies 58 runtime receipts, 76 concrete verifier receipts, the supported/unsupported partition of all 20 verifier categories, and no workspace, child-process, network, install, deployment, or physical-control authority. The repository-independence test verifies the 102 six-file bodies, all 29 direction profiles, all seven direction axes, the 58-trial, placement, foundry, evidence-observer, replay-isolation, admission, registry, activation, pair and graph Hands, all bounded Python contracts, and adapter contracts/catalogs, parses every JSON file, and refuses symlinks or submodules.

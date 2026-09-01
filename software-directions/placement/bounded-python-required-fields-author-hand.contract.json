@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.bounded-python-required-fields-author-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-required-fields-author-receipt.v1", "axm.code.edit-candidate.v1"],
+  "model": {
+    "scope": "Author exactly one dependency-free Python validator for a bounded set of required non-empty string fields and its inert selftest.",
+    "provenance": "This is a second source-and-adversarial-test-bound recipe in the AXM 102 registry; it is independent of the reviewed PR #51 record-transform donor.",
+    "application": "The result is candidate bytes only; registry selection, parser, provenance-locked verifier, writer, rollback, and explicit host authority remain separate."
+  },
+  "limits": {"sourceBasename": "capability.py", "verificationBasename": "selftest.py", "maxRequiredFields": 16, "maxInputKeys": 128, "maxInputBytes": 65536},
+  "truth": {"candidateGenerated": true, "candidateExecuted": false, "workspaceRead": false, "workspaceMutation": false, "generalPythonAuthoringClaimed": false, "runtimeCorrectnessClaimedByAuthor": false, "humanReviewClaimed": false},
+  "permissions": ["bounded-in-memory-deterministic-candidate-generation"],
+  "refuses": ["general-python-authoring", "workspace-read", "workspace-mutation", "candidate-execution", "network-use", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "BOUNDED_IN_MEMORY_AUTHORING_ONLY"
+}

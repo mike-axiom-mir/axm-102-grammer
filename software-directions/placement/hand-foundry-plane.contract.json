@@ -1,0 +1,17 @@
+{
+  "schema": "axm.code.hand-foundry-plane-contract.v1",
+  "version": "1.2.0",
+  "status": "TEST",
+  "provides": ["axm.code.hand-spawn-manifest.v1", "axm.code.spawned-hand-capsule.v1", "axm.code.spawned-parser-hand-receipt.v1"],
+  "model": {
+    "need": "Use the requiredHands already emitted by one to four digest-bound placement plans; require the actual edit-graph receipt whenever more than one plan is supplied; do not invent a hidden workflow.",
+    "spawn": "Bind a known Hand implementation or digest-bound bounded-recipe registry to the selected language organ, grammar profile, targets, environment, and authority gate.",
+    "hold": "Missing source, recipe inputs, implementation, verifier binding, or tool remains explicit instead of becoming a fake Hand. A provenance-locked recipe verifier does not become a generic Python sandbox.",
+    "authority": "A spawned capability capsule is not permission to read, write, execute candidate code, install, deploy, or promote."
+  },
+  "limits": {"minPlacementPlans": 1, "maxPlacementPlans": 4, "maxHandCapsules": 8, "environmentObservationTtlMs": 300000},
+  "truth": {"grammarCanParameterizeHands": true, "multiPlanManifestRequiresEditGraphBinding": true, "foundryCanInventMissingImplementation": false, "foundryCanSelfAuthorize": false, "spawnedParserExecutesCandidate": false, "failedSandboxProbeMayBePromoted": false, "verifiedDonorSourceMayBeBoundAsBoundedRecipe": true, "boundedPythonRecipeRegistryPresent": true, "registeredPythonRecipeCount": 2, "boundedRecipeMeansGeneralAuthoring": false, "pythonPairWriterAvailableBehindAuthorization": true, "provenanceLockedVerifierMeansGenericSandbox": false},
+  "permissions": [],
+  "refuses": ["workspace-read", "workspace-mutation", "candidate-code-execution", "network-use", "dependency-install", "implicit-authority", "unknown-hand-guessing", "recipe-without-layout-and-parameters", "bounded-recipe-as-general-authoring", "provenance-locked-verifier-as-generic-sandbox", "failed-sandbox-as-usable", "automatic-promotion", "automatic-canon"],
+  "authority": "NONE"
+}

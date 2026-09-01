@@ -1,0 +1,121 @@
+{
+  "schema": "axm.code.direction-adapter-catalog.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "adapters": [
+    {
+      "id": "node-reference-runtime-v1",
+      "kind": "runtime",
+      "implementation": "nodeReferenceRuntime",
+      "inputSchema": "axm.code.frontier-direction-build-packet.v1",
+      "outputSchema": "axm.code.direction-runtime-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": null,
+      "scope": "Execute one bounded in-memory reference handler twice in the current Node process."
+    },
+    {
+      "id": "node-check-surface-v1",
+      "kind": "verifier",
+      "implementation": "nodeCheckSurface",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "unit-test",
+      "scope": "Require the exact requested check names and true Boolean outcomes."
+    },
+    {
+      "id": "node-layer-integration-v1",
+      "kind": "verifier",
+      "implementation": "nodeLayerIntegration",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "integration-test",
+      "scope": "Verify packet-to-build digest binding, schema, output, and declared capability linkage."
+    },
+    {
+      "id": "node-deterministic-replay-v1",
+      "kind": "verifier",
+      "implementation": "nodeDeterministicReplay",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "deterministic-replay",
+      "scope": "Compare two separately executed reference-build receipts byte-for-byte by canonical digest."
+    },
+    {
+      "id": "node-structural-parse-v1",
+      "kind": "verifier",
+      "implementation": "nodeStructuralParse",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "structural-parse",
+      "scope": "Parse the bounded JSON output or validate the reference HTML document structure."
+    },
+    {
+      "id": "node-recovery-semantics-v1",
+      "kind": "verifier",
+      "implementation": "nodeRecoverySemantics",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "recovery-test",
+      "scope": "Require a passing restore, rollback, resume, checkpoint, undo, recovery, or migration check."
+    },
+    {
+      "id": "node-reference-simulation-v1",
+      "kind": "verifier",
+      "implementation": "nodeReferenceSimulation",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "simulation",
+      "scope": "Verify a bounded artifact explicitly marked as simulation with no physical-control authority."
+    },
+    {
+      "id": "node-numerical-finite-v1",
+      "kind": "verifier",
+      "implementation": "nodeNumericalFinite",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "numerical-validation",
+      "scope": "Require all bounded numeric outputs to be finite and all declared checks to pass."
+    },
+    {
+      "id": "node-data-quality-v1",
+      "kind": "verifier",
+      "implementation": "nodeDataQuality",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "data-quality-check",
+      "scope": "Require a passing quarantine, lineage, measure, schema, or data-quality check surface."
+    },
+    {
+      "id": "node-model-evaluation-v1",
+      "kind": "verifier",
+      "implementation": "nodeModelEvaluation",
+      "inputSchema": "axm.code.frontier-direction-reference-build.v1",
+      "outputSchema": "axm.code.direction-verifier-adapter-receipt.v1",
+      "requires": ["node>=18"],
+      "providesVerifierId": "model-evaluation",
+      "scope": "Require a bounded model artifact with passing evaluation or drift observation checks."
+    }
+  ],
+  "knownUnsupportedVerifierIds": [
+    "type-check",
+    "property-test",
+    "fuzzing",
+    "ui-e2e",
+    "accessibility-audit",
+    "compatibility-matrix",
+    "load-test",
+    "security-review",
+    "latency-budget",
+    "conformance-suite",
+    "hardware-in-loop"
+  ],
+  "authority": "NONE"
+}

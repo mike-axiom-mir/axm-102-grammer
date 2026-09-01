@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.edit-graph-plane-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.edit-graph.v1"],
+  "model": {
+    "entry": "One already-ready placement plan remains the authority for one source/verification pair.",
+    "dependency": "An explicit entry dependency orders the dependency entry's verification node before the dependent source node.",
+    "graph": "Two to four placement entries become four to eight unique target nodes with one deterministic topological installation order."
+  },
+  "limits": {"minEntries": 2, "maxEntries": 4, "minTargets": 4, "maxTargets": 8, "maxDependenciesPerEntry": 3, "languageId": "javascript"},
+  "truth": {"graphGeneratesCode": false, "graphReadsWorkspace": false, "graphMutatesWorkspace": false, "graphIsAuthorization": false, "graphIsFilesystemAtomicityProof": false, "dependencyCyclesMayBeGuessed": false},
+  "permissions": [],
+  "refuses": ["duplicate-entry-id", "duplicate-target", "unknown-dependency", "self-dependency", "dependency-cycle", "non-ready-placement-plan", "mixed-project-map", "more-than-eight-targets", "automatic-authorization"],
+  "authority": "NONE"
+}
