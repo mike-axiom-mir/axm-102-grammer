@@ -1,0 +1,51 @@
+{
+  "schema": "axm.code.direction-adapter-plane-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.direction-adapter-resolution.v1",
+    "axm.code.direction-runtime-adapter-receipt.v1",
+    "axm.code.direction-verifier-adapter-receipt.v1",
+    "axm.code.direction-adapter-execution-report.v1"
+  ],
+  "executionBoundary": {
+    "currentProcessRuntimeInspection": true,
+    "boundedInMemoryReferenceExecution": true,
+    "workspaceRead": false,
+    "workspaceMutation": false,
+    "childProcessExecution": false,
+    "networkAccess": false,
+    "dependencyInstall": false,
+    "externalDeployment": false,
+    "physicalControl": false
+  },
+  "truth": {
+    "requestedVerifierIsEvidence": false,
+    "resolvedAdapterIsExecutedEvidence": false,
+    "passedAdapterReceiptIsBoundedEvidence": true,
+    "boundedEvidenceIsUniversalProof": false,
+    "unsupportedAdapterIsFailureOfDirection": false,
+    "unsupportedAdapterIsLanguageIncapability": false,
+    "modeledLatencyIsMeasuredLatency": false,
+    "simulationIsHardwareInLoop": false,
+    "localCheckIsSecurityReview": false,
+    "automaticAdapterInstall": false,
+    "automaticExternalToolUse": false
+  },
+  "permissions": ["current-node-version-read", "bounded-in-memory-reference-execution"],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "child-process-execution",
+    "network-access",
+    "dependency-install",
+    "browser-claim-without-browser",
+    "hardware-claim-without-hardware",
+    "security-review-claim-without-independent-review",
+    "load-claim-without-load-run",
+    "compatibility-claim-without-target-matrix",
+    "automatic-promotion",
+    "automatic-canon"
+  ],
+  "authority": "BOUNDED_LOCAL_ADAPTER_ONLY"
+}

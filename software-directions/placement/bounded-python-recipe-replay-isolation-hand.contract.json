@@ -1,0 +1,17 @@
+{
+  "schema": "axm.code.bounded-python-recipe-replay-isolation-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-recipe-replay-isolation-receipt.v1"],
+  "model": {
+    "gate": "Bind one proposal, caller evidence envelope, live exact-six-file observation, and live toolchain observation to a fixed replay-isolation policy receipt.",
+    "certification": "When Bubblewrap, prlimit, and Node are usable, run only a trusted fixed probe inside an empty-root sandbox with user, PID, IPC, UTS, network, and cgroup namespaces, all capabilities dropped, a read-only /usr, an exact read-only Node executable, ephemeral /tmp, and hard resource limits.",
+    "unavailableHost": "When the current host cannot create the required namespace, emit a digest-bound qualified hold and spawn no replay-policy process.",
+    "futureReplay": "Certification is a prerequisite for a separately authorized future caller-test replay Hand. This Hand never mounts, imports, or executes proposal bytes or caller tests."
+  },
+  "limits": {"proposalsPerReceipt": 1, "maximumReceiptLifetimeMs": 300000, "policyProbeTimeoutMs": 3000, "maxProbeOutputBytes": 65536, "cpuSeconds": 1, "addressSpaceBytes": 2147483648, "openFileLimit": 64, "processLimit": 16, "fileSizeBytes": 1048576, "requiredIsolationProvider": "bubblewrap", "requiredResourceLimitProvider": "prlimit"},
+  "truth": {"fixedTrustedPolicyProbeMayExecute": true, "proposedSourceBytesRead": false, "proposedBytesMountedInSandbox": false, "proposedModuleLoaded": false, "callerTestsMountedInSandbox": false, "callerTestClaimsReproduced": false, "semanticSafetyIndependentlyVerified": false, "digestProvesSignerConsentOrIdentity": false, "receiptProvesHandOrigin": false, "certificationIsReplayAuthorization": false, "certificationIsActivationAuthority": false, "failedProviderProbePromoted": false, "nodePermissionModelTreatedAsMaliciousCodeSandbox": false, "nodeVmTreatedAsSecurityBoundary": false, "workspaceRead": false, "workspaceMutation": false, "registryMutation": false, "automaticPromotion": false},
+  "permissions": ["live-environment-observation-validation", "fixed-empty-root-bubblewrap-policy-probe", "receipt-digest-computation"],
+  "refuses": ["proposal-source-read", "proposal-byte-mount", "proposal-module-import", "caller-test-execution", "candidate-execution", "workspace-read", "workspace-mutation", "network-access", "registry-mutation", "recipe-selection", "activation-authorization", "dependency-install", "deployment", "automatic-promotion", "automatic-canon", "sandbox-certification-after-failed-probe"],
+  "authority": "FIXED_ISOLATION_POLICY_PROBE_ONLY_NO_PROPOSAL_EXECUTION"
+}

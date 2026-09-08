@@ -1,0 +1,12 @@
+{
+  "name": "axm-102-grammar-body",
+  "version": "1.0.0-test",
+  "private": true,
+  "description": "Standalone deterministic AXM 102 code/language grammar body",
+  "scripts": {
+    "test": "node testing/run-all.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

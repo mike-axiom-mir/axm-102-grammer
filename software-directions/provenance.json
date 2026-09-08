@@ -1,0 +1,29 @@
+{
+  "schema": "axm.code.software-direction-provenance.v1",
+  "version": "1.0.0",
+  "status": "RESEARCH_SYNTHESIS",
+  "retrievedOn": "2026-08-29",
+  "sources": [
+    {"id": "iso-25010-2023", "url": "https://www.iso.org/standard/78176.html", "scope": "Product quality characteristics and context-sensitive evaluation"},
+    {"id": "nist-ssdf", "url": "https://csrc.nist.gov/projects/ssdf", "scope": "Outcome comparison as a method for revealing and prioritizing software gaps"},
+    {"id": "android-architecture", "url": "https://developer.android.com/topic/architecture", "scope": "Mobile UI, data, domain, lifecycle, and device architecture"},
+    {"id": "linux-kernel-docs", "url": "https://docs.kernel.org/", "scope": "Kernel, driver, locking, subsystem, and low-level development concerns"},
+    {"id": "zephyr-introduction", "url": "https://docs.zephyrproject.org/latest/introduction/index.html", "scope": "Resource-constrained embedded and IoT systems"},
+    {"id": "unreal-gameplay", "url": "https://dev.epicgames.com/documentation/unreal-engine/gameplay-systems-in-unreal-engine", "scope": "Interactive gameplay mechanics, behaviors, conditions, and world response"},
+    {"id": "w3c-webrtc", "url": "https://www.w3.org/TR/webrtc/", "scope": "Real-time media and application-data communication"},
+    {"id": "kubernetes-overview", "url": "https://kubernetes.io/docs/concepts/overview/", "scope": "Containerized workloads, services, desired state, and automation"},
+    {"id": "spark-structured-streaming", "url": "https://spark.apache.org/docs/latest/streaming/index.html", "scope": "Batch-like and continuous stream processing, latency, and fault-tolerance tradeoffs"},
+    {"id": "pytorch-docs", "url": "https://docs.pytorch.org/docs/stable/index.html", "scope": "Tensor, CPU/GPU, model, and distributed machine-learning systems"},
+    {"id": "ros-interfaces", "url": "https://docs.ros.org/en/humble/Concepts/Basic/Interfaces-Topics-Services-Actions.html", "scope": "Robotics topics, services, actions, and continuous control communication"},
+    {"id": "openxr", "url": "https://registry.khronos.org/OpenXR/", "scope": "XR runtimes, devices, API portability, and conformance"}
+  ],
+  "boundaries": {
+    "singleUniversalTaxonomyClaimed": false,
+    "profilesAreBuildFacingSynthesis": true,
+    "profilesAreMutuallyExclusive": false,
+    "profileSelectionIsArchitectureAuthority": false,
+    "sourceDocumentationIsImplementationAuthority": false,
+    "taxonomyIsExhaustive": false
+  },
+  "authority": "NONE"
+}

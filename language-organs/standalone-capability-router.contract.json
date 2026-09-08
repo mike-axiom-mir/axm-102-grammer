@@ -1,0 +1,53 @@
+{
+  "schema": "axm.code.standalone-capability-router-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.standalone-capability-capsule.v1"
+  ],
+  "composition": {
+    "languageResolution": "Exact caller language or deterministic basename, path, longest-extension, then shebang detection",
+    "organPlan": "Evidence-bound language-organ stage plan",
+    "grammarPlan": "Grammar-native constructs, hazards, rewrite policy, and verifier focus",
+    "specialistReview": "Selected language eye plus bounded 102-eye discovery comparison",
+    "cheatcodes": "Hard activations derived from caller-supplied observation facts",
+    "influence": "Soft bounded candidates that remain evidence-held",
+    "templates": "Deterministic machine or compact AI capsules",
+    "keyboard": "Context-ranked semantic intent keys, never raw source mutation",
+    "softwareDirections": "Optional reusable direction stack with non-selecting suggestions and caller-evidence gap comparison"
+  },
+  "resolutionPolicy": {
+    "unknownLanguage": "HOLD",
+    "ambiguousSignal": "SELECTION_REQUIRED",
+    "explicitLanguageMayResolveCompatibleAmbiguity": true,
+    "explicitLanguageMayOverrideConflictingSignal": false,
+    "caseNormalizedIdentifierAlias": false
+  },
+  "truth": {
+    "capabilityIsAuthority": false,
+    "templateSelectionIsCorrectness": false,
+    "influenceIsEvidence": false,
+    "keyboardIntentIsSourceCode": false,
+    "directionSuggestionIsSelection": false,
+    "directionGapIsLanguageIncapability": false,
+    "runtimeCorrectnessAutomaticallyClaimed": false,
+    "semanticCorrectnessAutomaticallyClaimed": false
+  },
+  "permissions": [],
+  "refuses": [
+    "workspace-read",
+    "workspace-mutation",
+    "tool-execution",
+    "network-access",
+    "dependency-install",
+    "automatic-language-switch",
+    "automatic-direction-selection",
+    "missing-direction-evidence-as-language-incapability",
+    "automatic-promotion",
+    "automatic-canon",
+    "conflicting-explicit-language-override",
+    "ambiguous-language-guess",
+    "source-generation-without-renderer-and-verification"
+  ],
+  "authority": "NONE"
+}

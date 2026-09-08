@@ -1,0 +1,190 @@
+{
+  "schema": "axm.code.frontier-direction-trial-catalog.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "method": {
+    "trialCount": 58,
+    "levels": ["seed", "stretch"],
+    "humanInterventionDuringTrialRun": false,
+    "singleFrontierModelPerspective": true,
+    "productionReadinessClaimed": false,
+    "hardwareEvidenceClaimedWithoutHardware": false,
+    "beginnerReferenceReadyMeaning": "Both bounded executable reference probes pass deterministically; this is not production readiness."
+  },
+  "trials": [
+    {
+      "directionId": "information-website",
+      "seed": {"name": "One accessible page", "goal": "Render one useful content page with semantic landmarks.", "requiredCapabilities": ["SEMANTIC_MARKUP", "ACCESSIBILITY_SEMANTICS"], "requestedVerifiers": ["structural-parse"], "expectedChecks": ["hasLandmarks", "hasTitle"]},
+      "stretch": {"name": "Small responsive publication", "goal": "Render a three-page navigation model with responsive and accessible structure.", "requiredCapabilities": ["SEMANTIC_MARKUP", "RESPONSIVE_LAYOUT", "CONTENT_NAVIGATION", "ACCESSIBILITY_SEMANTICS"], "requestedVerifiers": ["structural-parse", "accessibility-audit"], "expectedChecks": ["multiPage", "responsive", "accessibleNav"]},
+      "frontierObservation": {"helpful": "The profile made content navigation, responsiveness, and accessibility first-class instead of visual afterthoughts.", "needsTuning": "It still needs a concrete browser/render adapter and content-quality checks before it can judge a real site."}
+    },
+    {
+      "directionId": "interactive-web-app",
+      "seed": {"name": "Validated counter form", "goal": "Accept a valid event, reject invalid input, and update UI state.", "requiredCapabilities": ["UI_STATE_MODEL", "EVENT_HANDLING", "FORM_VALIDATION"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["validatesInput", "changesState"]},
+      "stretch": {"name": "Offline task route", "goal": "Model routes, an authentication boundary, and an offline action queue.", "requiredCapabilities": ["UI_STATE_MODEL", "CLIENT_ROUTING", "AUTH_SESSION_BOUNDARY", "OFFLINE_SYNC"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["routes", "offlineQueue", "authBoundary"]},
+      "frontierObservation": {"helpful": "The state, route, validation, authentication, and offline prompts prevented a frontier model from treating the web app as only screens.", "needsTuning": "Framework-specific lifecycle, browser storage, and threat-model adapters remain external."}
+    },
+    {
+      "directionId": "mobile-app",
+      "seed": {"name": "Lifecycle-safe tap counter", "goal": "Preserve simple state across a pause/resume cycle and process touch input.", "requiredCapabilities": ["DEVICE_LIFECYCLE", "TOUCH_INTERACTION", "OFFLINE_LOCAL_STATE"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["lifecyclePersists", "touchUpdates"]},
+      "stretch": {"name": "Offline field capture", "goal": "Gate device permission, bound background work, and queue offline records for sync.", "requiredCapabilities": ["PERMISSION_BOUNDARY", "BACKGROUND_WORK_LIMITS", "OFFLINE_LOCAL_STATE", "DEVICE_API_ADAPTER"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["permissionGated", "backgroundBounded", "offlineSync"]},
+      "frontierObservation": {"helpful": "Lifecycle, permission, offline, and background limits immediately changed the build plan from desktop-like assumptions.", "needsTuning": "Real Android/iOS lifecycle and device APIs require platform adapters and representative device testing."}
+    },
+    {
+      "directionId": "desktop-app",
+      "seed": {"name": "Local note document", "goal": "Handle a window event and produce a safe local-save intent.", "requiredCapabilities": ["WINDOW_EVENT_LOOP", "FILESYSTEM_BOUNDARY"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["eventLoopResponds", "safeLocalWrite"]},
+      "stretch": {"name": "Migrating cancellable editor", "goal": "Migrate local state, cancel a long task, and describe an update flow.", "requiredCapabilities": ["LOCAL_STATE_MIGRATION", "LONG_RUNNING_TASK_CONTROL", "INSTALL_UPDATE_FLOW"], "requestedVerifiers": ["unit-test", "recovery-test"], "expectedChecks": ["cancelableTask", "migratedState", "updatePlan"]},
+      "frontierObservation": {"helpful": "The direction prompts exposed file boundaries, migration, cancellation, and install/update concerns that UI-first generation often misses.", "needsTuning": "Native packaging, signing, filesystem permissions, and OS integration need platform-specific evidence."}
+    },
+    {
+      "directionId": "game",
+      "seed": {"name": "One-room movement loop", "goal": "Advance a frame and move a player from mapped input under a simple rule.", "requiredCapabilities": ["FRAME_LOOP", "PLAYER_INPUT_MAP", "WORLD_STATE_MODEL", "GAMEPLAY_RULE_SYSTEM"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["inputMovesPlayer", "frameAdvances"]},
+      "stretch": {"name": "Replayable score challenge", "goal": "Run a deterministic rules sequence and restore a versioned save.", "requiredCapabilities": ["WORLD_STATE_MODEL", "SAVE_STATE_VERSIONING", "DETERMINISTIC_REPLAY", "GAMEPLAY_RULE_SYSTEM"], "requestedVerifiers": ["unit-test", "deterministic-replay"], "expectedChecks": ["replayDeterministic", "saveVersioned", "rulesApply"]},
+      "frontierObservation": {"helpful": "Frame loop, input, world ownership, rules, saves, and replay gave the model a much better game skeleton than a generic app prompt.", "needsTuning": "Asset production, rendering, feel, performance profiling, and engine-specific lifecycle are still outside the profile."}
+    },
+    {
+      "directionId": "simulation",
+      "seed": {"name": "Deterministic population step", "goal": "Advance explicit time and emit one measurement.", "requiredCapabilities": ["TIME_STEP_MODEL", "SCENARIO_INPUT", "MEASUREMENT_OUTPUT"], "requestedVerifiers": ["simulation"], "expectedChecks": ["timeAdvances", "measurementEmitted"]},
+      "stretch": {"name": "Reproducible scenario replay", "goal": "Repeat a seeded scenario, snapshot state, and bind replay provenance.", "requiredCapabilities": ["MODEL_STATE_SNAPSHOT", "RANDOM_SEED_CONTROL", "REPLAY_PROVENANCE", "MEASUREMENT_OUTPUT"], "requestedVerifiers": ["simulation", "deterministic-replay"], "expectedChecks": ["seedReproducible", "snapshotRestores", "provenanceBound"]},
+      "frontierObservation": {"helpful": "The distinction between model state, explicit time, measurement, seed, and provenance kept the model from confusing animation with simulation truth.", "needsTuning": "Domain equations, calibration data, uncertainty, and numerical validation need a subject-specific adapter."}
+    },
+    {
+      "directionId": "xr-spatial",
+      "seed": {"name": "Tracked spatial target", "goal": "Transform one tracked pose into a declared coordinate space and map an action.", "requiredCapabilities": ["SPATIAL_COORDINATE_MODEL", "POSE_TRACKING", "XR_INPUT_ACTIONS"], "requestedVerifiers": ["conformance-suite"], "expectedChecks": ["poseTransforms", "actionMapped"]},
+      "stretch": {"name": "Capability-aware comfort scene", "goal": "Negotiate a missing device feature, enforce a modeled frame budget, and hold unsafe motion.", "requiredCapabilities": ["DEVICE_CAPABILITY_NEGOTIATION", "FRAME_LATENCY_CONTROL", "COMFORT_SAFETY_BOUNDARY"], "requestedVerifiers": ["conformance-suite"], "expectedChecks": ["fallbackNegotiated", "latencyBudgeted", "comfortGuard"]},
+      "frontierObservation": {"helpful": "Coordinate ownership, device negotiation, latency, and comfort boundaries made the spatial assumptions explicit.", "needsTuning": "The reference probe cannot replace headset observation, motion comfort studies, or hardware-in-loop evidence."}
+    },
+    {
+      "directionId": "creative-media-editor",
+      "seed": {"name": "Undoable layer edit", "goal": "Apply a non-destructive layer operation and undo it exactly.", "requiredCapabilities": ["NON_DESTRUCTIVE_EDIT_MODEL", "UNDO_REDO_HISTORY", "TIMELINE_OR_LAYER_GRAPH"], "requestedVerifiers": ["unit-test", "recovery-test"], "expectedChecks": ["nonDestructive", "undoRestores"]},
+      "stretch": {"name": "Bounded layered export", "goal": "Process a larger layer graph in chunks, preserve import/export provenance, and restore the exported project model.", "requiredCapabilities": ["TIMELINE_OR_LAYER_GRAPH", "LARGE_ASSET_STREAMING", "IMPORT_EXPORT_PROVENANCE", "PLUGIN_BOUNDARY"], "requestedVerifiers": ["integration-test", "recovery-test"], "expectedChecks": ["layerGraph", "streamBounded", "provenanceExports", "exportRestores"]},
+      "frontierObservation": {"helpful": "The profile pushed edits toward reversible operations with explicit history, layer topology, streaming, and provenance.", "needsTuning": "Real codec behavior, color/audio correctness, GPU limits, and third-party plugin isolation require adapters."}
+    },
+    {
+      "directionId": "backend-api",
+      "seed": {"name": "Validated greeting endpoint", "goal": "Honor a tiny request/response contract and reject malformed input.", "requiredCapabilities": ["API_CONTRACT", "INPUT_VALIDATION", "ERROR_CONTRACT"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["contractReturns", "invalidRejected"]},
+      "stretch": {"name": "Idempotent bounded job API", "goal": "Persist one job, serialize a repeated request at the boundary, enforce timeout, and emit bounded diagnostics.", "requiredCapabilities": ["CONCURRENT_REQUEST_CONTROL", "PERSISTENCE_BOUNDARY", "OBSERVABILITY", "CANCELLATION_TIMEOUT"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["retryIdempotent", "timeoutBounded", "observable"]},
+      "frontierObservation": {"helpful": "Contract, validation, errors, persistence, retries, observability, and timeout prompts prevented a happy-path-only endpoint.", "needsTuning": "A framework, database, auth scheme, load target, and deployment environment still need explicit binding."}
+    },
+    {
+      "directionId": "distributed-cloud",
+      "seed": {"name": "Two-node partial failure", "goal": "Contain one failed node and avoid duplicating a retried operation.", "requiredCapabilities": ["PARTIAL_FAILURE_MODEL", "RETRY_IDEMPOTENCY"], "requestedVerifiers": ["integration-test"], "expectedChecks": ["partialFailureContained", "retryIdempotent"]},
+      "stretch": {"name": "Rolling replicated service", "goal": "Model consistency, scaling, observability, a rolling version change, and rollback restoration.", "requiredCapabilities": ["CONSISTENCY_POLICY", "HORIZONTAL_SCALING", "DISTRIBUTED_OBSERVABILITY", "ROLLING_CHANGE_CONTROL"], "requestedVerifiers": ["integration-test", "recovery-test"], "expectedChecks": ["quorumDefined", "scales", "rollingChange", "rollbackRestores"]},
+      "frontierObservation": {"helpful": "Partial failure, idempotency, consistency, scaling, and rolling-change questions gave the frontier model the right failure vocabulary early.", "needsTuning": "Real scheduler, network partitions, cloud costs, service discovery, and load evidence are not supplied by the profile."}
+    },
+    {
+      "directionId": "live-media-streaming",
+      "seed": {"name": "Consent-gated jitter buffer", "goal": "Require capture consent and order a few delayed media packets.", "requiredCapabilities": ["MEDIA_CAPTURE", "BUFFER_JITTER_CONTROL", "STREAM_PRIVACY_CONTROL"], "requestedVerifiers": ["integration-test"], "expectedChecks": ["bufferOrders", "captureConsent"]},
+      "stretch": {"name": "Adaptive synchronized call", "goal": "Adapt quality to bandwidth, bound modeled clock skew, and fall back for a missing device feature.", "requiredCapabilities": ["AUDIO_VIDEO_SYNC", "BANDWIDTH_ADAPTATION", "DEVICE_NEGOTIATION", "STREAM_PRIVACY_CONTROL"], "requestedVerifiers": ["integration-test"], "expectedChecks": ["adaptsBandwidth", "syncBounded", "deviceFallback"]},
+      "frontierObservation": {"helpful": "The profile made consent, jitter, synchronization, adaptation, and device negotiation part of the initial design.", "needsTuning": "Codec, browser/media stack, real latency, packet loss, and load measurements need live adapters."}
+    },
+    {
+      "directionId": "collaboration-multiplayer",
+      "seed": {"name": "Two-user shared counter", "goal": "Merge ordered operations under one explicit authority rule.", "requiredCapabilities": ["SHARED_STATE_PROTOCOL", "AUTHORITY_MODEL", "ORDERING_MODEL"], "requestedVerifiers": ["integration-test", "deterministic-replay"], "expectedChecks": ["operationsMerge", "authorityExplicit"]},
+      "stretch": {"name": "Reconnectable shared session", "goal": "Resolve a concurrent edit, resynchronize a disconnected client, and reject abusive input.", "requiredCapabilities": ["CONFLICT_RESOLUTION", "RECONNECT_RESYNC", "PREDICTION_RECONCILIATION", "ABUSE_BOUNDARY"], "requestedVerifiers": ["integration-test", "deterministic-replay"], "expectedChecks": ["conflictResolved", "reconnectResyncs", "abuseRejected"]},
+      "frontierObservation": {"helpful": "Authority, ordering, conflict, reconnect, prediction, and abuse boundaries stopped the model from assuming shared state is trivial.", "needsTuning": "Transport choice, scale, anti-cheat/moderation policy, and real latency budgets still need context."}
+    },
+    {
+      "directionId": "enterprise-workflow",
+      "seed": {"name": "Role-gated approval", "goal": "Advance one approval state only for the allowed role.", "requiredCapabilities": ["ROLE_PERMISSION_MODEL", "WORKFLOW_STATE_MACHINE"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["roleDenied", "workflowAdvances"]},
+      "stretch": {"name": "Versioned order workflow", "goal": "Audit a rule-versioned transaction and preserve an in-flight workflow boundary.", "requiredCapabilities": ["AUDIT_TRAIL", "BUSINESS_RULE_VERSIONING", "TRANSACTION_BOUNDARY", "BACKWARD_COMPATIBILITY"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["auditComplete", "ruleVersioned", "transactionAtomic"]},
+      "frontierObservation": {"helpful": "Roles, long-lived state, audit, rule versions, transactions, and compatibility made consequential business behavior visible.", "needsTuning": "Actual regulation, accounting semantics, organizational policy, and external integrations require human/domain authority."}
+    },
+    {
+      "directionId": "database-storage-search",
+      "seed": {"name": "Indexed record lookup", "goal": "Validate a tiny schema and retrieve a record by an explicit query.", "requiredCapabilities": ["SCHEMA_MODEL", "QUERY_PLAN", "INDEX_STRATEGY"], "requestedVerifiers": ["integration-test"], "expectedChecks": ["schemaValid", "queryReturns"]},
+      "stretch": {"name": "Transactional migration and restore", "goal": "Use an index, roll back a failed transaction, migrate, and restore a backup.", "requiredCapabilities": ["INDEX_STRATEGY", "TRANSACTION_SEMANTICS", "MIGRATION_PATH", "BACKUP_RECOVERY"], "requestedVerifiers": ["integration-test", "recovery-test"], "expectedChecks": ["indexUsed", "transactionRollsBack", "backupRestores"]},
+      "frontierObservation": {"helpful": "Schema, query, index, transaction, migration, durability, and recovery prompts produced a more complete storage plan.", "needsTuning": "Engine-specific isolation, realistic data volume, disk failure, and performance plans require real infrastructure."}
+    },
+    {
+      "directionId": "batch-data-pipeline",
+      "seed": {"name": "Validated row transform", "goal": "Apply one reproducible transform and quarantine a malformed record.", "requiredCapabilities": ["REPRODUCIBLE_TRANSFORM", "FAILED_RECORD_QUARANTINE", "DATA_LINEAGE"], "requestedVerifiers": ["data-quality-check"], "expectedChecks": ["transformDeterministic", "badRecordQuarantined"]},
+      "stretch": {"name": "Restartable partition pipeline", "goal": "Partition work, resume from checkpoint, repeat safely, and retain full lineage.", "requiredCapabilities": ["CHECKPOINT_RESUME", "IDEMPOTENT_STAGE", "PARTITION_STRATEGY", "DATA_LINEAGE"], "requestedVerifiers": ["data-quality-check", "recovery-test"], "expectedChecks": ["resumeCheckpoint", "stageIdempotent", "lineageComplete"]},
+      "frontierObservation": {"helpful": "Lineage, drift, checkpoints, idempotency, partitioning, quarantine, and reproducibility gave the model strong pipeline guardrails.", "needsTuning": "Dataset contracts, privacy rules, scheduler behavior, and realistic throughput still need binding."}
+    },
+    {
+      "directionId": "event-stream-processing",
+      "seed": {"name": "Event-time window sum", "goal": "Aggregate events by declared event time and preserve ordering information.", "requiredCapabilities": ["EVENT_TIME_MODEL", "WINDOW_SEMANTICS", "ORDERING_GUARANTEE"], "requestedVerifiers": ["property-test"], "expectedChecks": ["windowAggregates", "orderTracked"]},
+      "stretch": {"name": "Late-event restartable stream", "goal": "Apply a late-event policy, backpressure, and checkpoint recovery.", "requiredCapabilities": ["LATE_EVENT_POLICY", "BACKPRESSURE_CONTROL", "STREAM_CHECKPOINT", "DELIVERY_GUARANTEE"], "requestedVerifiers": ["property-test", "recovery-test"], "expectedChecks": ["lateEventHandled", "backpressureApplied", "checkpointRestores"]},
+      "frontierObservation": {"helpful": "Event time, windows, ordering, delivery, backpressure, checkpoints, and late events exposed semantics that generic streaming prompts omit.", "needsTuning": "Broker/runtime semantics, watermark strategy, scale, and operational recovery require an engine adapter."}
+    },
+    {
+      "directionId": "analytics-bi",
+      "seed": {"name": "Filtered revenue measure", "goal": "Compute one measure under an explicit filter context.", "requiredCapabilities": ["SEMANTIC_MEASURE_MODEL", "FILTER_CONTEXT", "AGGREGATION_SEMANTICS"], "requestedVerifiers": ["unit-test", "numerical-validation"], "expectedChecks": ["measureCorrect", "filterApplied"]},
+      "stretch": {"name": "Traceable refreshed dashboard model", "goal": "Drill into a measure, bind data provenance and refresh version, and show uncertainty.", "requiredCapabilities": ["DATA_PROVENANCE", "REFRESH_POLICY", "DRILLDOWN_TRACE", "UNCERTAINTY_DISPLAY"], "requestedVerifiers": ["unit-test", "numerical-validation"], "expectedChecks": ["drilldownTraces", "refreshVersioned", "uncertaintyShown"]},
+      "frontierObservation": {"helpful": "Measure semantics, filter context, provenance, refresh, drilldown, and uncertainty prevented attractive-but-ambiguous dashboard logic.", "needsTuning": "Business meaning, source reliability, privacy, and visualization usability still need human and data-owner review."}
+    },
+    {
+      "directionId": "ai-ml",
+      "seed": {"name": "Shape-checked threshold model", "goal": "Separate a tiny training input from inference and run an evaluation harness.", "requiredCapabilities": ["MODEL_SHAPE_CONTRACT", "TRAINING_INFERENCE_SEPARATION", "EVALUATION_HARNESS"], "requestedVerifiers": ["model-evaluation", "numerical-validation"], "expectedChecks": ["shapeChecked", "evaluationRuns"]},
+      "stretch": {"name": "Versioned fallback model", "goal": "Bind dataset/model versions, use a fallback path, observe drift, and retain uncertainty.", "requiredCapabilities": ["DATASET_PROVENANCE", "MODEL_VERSIONING", "ACCELERATOR_FALLBACK", "DRIFT_OBSERVATION", "UNCERTAINTY_BOUNDARY"], "requestedVerifiers": ["model-evaluation", "numerical-validation"], "expectedChecks": ["versionsBound", "fallbackWorks", "driftObserved"]},
+      "frontierObservation": {"helpful": "Dataset provenance, shape, train/inference separation, evaluation, versions, fallback, uncertainty, and drift created a disciplined model boundary.", "needsTuning": "The profile does not provide real datasets, model weights, safety evaluation, accelerator evidence, or deployment monitoring."}
+    },
+    {
+      "directionId": "scientific-hpc",
+      "seed": {"name": "Parallel vector reduction", "goal": "Compare a decomposed numerical reduction with a reference under explicit tolerance.", "requiredCapabilities": ["NUMERICAL_PRECISION_POLICY", "PARALLEL_DECOMPOSITION", "REFERENCE_DATASET"], "requestedVerifiers": ["numerical-validation", "property-test"], "expectedChecks": ["precisionBounded", "parallelMatches"]},
+      "stretch": {"name": "Checkpointed reproducible sweep", "goal": "Resume a seeded parameter sweep and preserve result provenance.", "requiredCapabilities": ["RANDOM_SEED_CONTROL", "CHECKPOINT_RESUME", "RESULT_PROVENANCE", "REFERENCE_DATASET"], "requestedVerifiers": ["numerical-validation", "deterministic-replay", "recovery-test"], "expectedChecks": ["checkpointResumes", "seedReplays", "provenanceComplete"]},
+      "frontierObservation": {"helpful": "Precision, decomposition, layout, seeds, checkpoints, provenance, and reference data gave the model scientific rather than merely fast-compute priorities.", "needsTuning": "Actual numerical methods, hardware topology, memory pressure, domain validation, and large-scale performance remain untested."}
+    },
+    {
+      "directionId": "kernel-driver-runtime",
+      "seed": {"name": "Bounded privileged request", "goal": "Reject an unprivileged request and model exclusive buffer ownership.", "requiredCapabilities": ["PRIVILEGE_BOUNDARY", "MEMORY_OWNERSHIP", "FAULT_CONTAINMENT"], "requestedVerifiers": ["property-test"], "expectedChecks": ["ownershipSafe", "privilegeDenied"]},
+      "stretch": {"name": "Interrupt-safe ABI model", "goal": "Bound interrupt work, preserve an ABI contract, and contain a simulated device fault.", "requiredCapabilities": ["INTERRUPT_CONTEXT", "ABI_COMPATIBILITY", "DEVICE_LIFECYCLE", "FAULT_CONTAINMENT"], "requestedVerifiers": ["property-test"], "expectedChecks": ["interruptBounded", "abiStable", "faultContained"]},
+      "frontierObservation": {"helpful": "Privilege, ownership, locking, interrupt, ABI, lifecycle, and containment prompts strongly corrected ordinary application assumptions.", "needsTuning": "This is only a userspace model; compiler, kernel, race, device, fuzz, and hardware evidence remain mandatory."}
+    },
+    {
+      "directionId": "embedded-firmware-iot",
+      "seed": {"name": "Bounded sensor threshold", "goal": "Read a modeled sensor within a fixed memory and step budget.", "requiredCapabilities": ["BOUNDED_MEMORY", "REAL_TIME_DEADLINE", "DEVICE_COMMUNICATION"], "requestedVerifiers": ["simulation"], "expectedChecks": ["memoryBounded", "deadlineMet"]},
+      "stretch": {"name": "Power-aware rollback controller", "goal": "Model a power budget, isolate register access, and roll back a failed update.", "requiredCapabilities": ["POWER_BUDGET", "HARDWARE_REGISTER_BOUNDARY", "SAFE_OTA_ROLLBACK", "INTERRUPT_SAFETY"], "requestedVerifiers": ["simulation", "recovery-test"], "expectedChecks": ["powerBudgeted", "registerIsolated", "rollbackSafe"]},
+      "frontierObservation": {"helpful": "Memory, power, interrupts, registers, deadlines, communication, and rollback shifted the model toward bounded-device thinking.", "needsTuning": "Board definitions, electrical behavior, toolchain, timing analysis, radio, and hardware-in-loop are still absent."}
+    },
+    {
+      "directionId": "robotics-industrial-control",
+      "seed": {"name": "Fail-safe bounded actuator", "goal": "Keep a modeled actuator inside a safety envelope and enter fail-safe on bad input.", "requiredCapabilities": ["CONTROL_LOOP", "ACTUATOR_SAFETY_ENVELOPE", "FAIL_SAFE_STATE"], "requestedVerifiers": ["simulation"], "expectedChecks": ["controlBounded", "failSafeStops"]},
+      "stretch": {"name": "Synchronized fused control trace", "goal": "Fuse two sensors, synchronize messages, and preserve a simulation-to-hardware trace boundary.", "requiredCapabilities": ["SENSOR_FUSION", "MESSAGE_INTERFACE", "TIME_SYNCHRONIZATION", "SIMULATION_TO_HARDWARE_TRACE"], "requestedVerifiers": ["simulation", "deterministic-replay"], "expectedChecks": ["sensorFused", "timeSynced", "tracePreserved"]},
+      "frontierObservation": {"helpful": "Control, fusion, safety envelope, messages, time, fail-safe, and traceability made physical consequences impossible to ignore.", "needsTuning": "Plant dynamics, safety certification, sensor faults, real-time OS, and hardware-in-loop require experts and physical evidence."}
+    },
+    {
+      "directionId": "networking-telecom",
+      "seed": {"name": "Bounded packet parser", "goal": "Parse one valid packet and contain malformed lengths.", "requiredCapabilities": ["PROTOCOL_STATE_MACHINE", "PACKET_BOUNDARY", "MALFORMED_INPUT_CONTAINMENT"], "requestedVerifiers": ["property-test", "fuzzing"], "expectedChecks": ["packetParsed", "malformedRejected"]},
+      "stretch": {"name": "Congestion-aware retry route", "goal": "Apply timeout/retry, congestion backpressure, routing, and wire-version rules.", "requiredCapabilities": ["TIMEOUT_RETRY_POLICY", "CONGESTION_BACKPRESSURE", "ROUTING_POLICY", "WIRE_COMPATIBILITY"], "requestedVerifiers": ["property-test", "fuzzing"], "expectedChecks": ["timeoutRetries", "congestionBackpressure", "wireCompatible"]},
+      "frontierObservation": {"helpful": "Protocol state, packet boundaries, retries, congestion, routing, wire compatibility, and malformed input gave the model precise network seams.", "needsTuning": "Real sockets, kernel queues, packet captures, interoperability, load, and latency need external adapters."}
+    },
+    {
+      "directionId": "security-identity-cryptography",
+      "seed": {"name": "Least-privilege session", "goal": "Deny an unauthorized action and prevent secret disclosure in diagnostics.", "requiredCapabilities": ["TRUST_BOUNDARY", "AUTHORIZATION_POLICY", "SECRET_HANDLING"], "requestedVerifiers": ["property-test", "integration-test"], "expectedChecks": ["unauthorizedDenied", "secretRedacted"]},
+      "stretch": {"name": "Rotating audited identity", "goal": "Rotate an identity, record an audit event, and delegate cryptographic primitives to a named boundary.", "requiredCapabilities": ["IDENTITY_LIFECYCLE", "CRYPTOGRAPHIC_PRIMITIVE_BOUNDARY", "AUDIT_EVENT", "ATTACK_MODEL"], "requestedVerifiers": ["property-test", "integration-test"], "expectedChecks": ["identityRotated", "auditRecorded", "primitiveExternal"]},
+      "frontierObservation": {"helpful": "Trust, identity lifecycle, authorization, secrets, primitive boundaries, audit, and attacks kept the model from inventing casual security.", "needsTuning": "No reference probe can certify security; approved primitives, threat review, fuzzing depth, operations, and independent audit remain required."}
+    },
+    {
+      "directionId": "smart-contract-ledger",
+      "seed": {"name": "Invariant-preserving transfer", "goal": "Move a modeled balance deterministically while rejecting replay.", "requiredCapabilities": ["DETERMINISTIC_TRANSACTION", "LEDGER_STATE_INVARIANT", "EVENT_AUDIT"], "requestedVerifiers": ["unit-test", "property-test"], "expectedChecks": ["transferInvariant", "replayRejected"]},
+      "stretch": {"name": "Governed irreversible upgrade", "goal": "Hold reentrancy, bound execution cost, and require explicit upgrade governance.", "requiredCapabilities": ["ECONOMIC_COST_BUDGET", "REENTRANCY_BOUNDARY", "UPGRADE_GOVERNANCE", "IRREVERSIBLE_CHANGE_HOLD"], "requestedVerifiers": ["unit-test", "property-test", "fuzzing"], "expectedChecks": ["reentrancyHeld", "costBounded", "upgradeGoverned"]},
+      "frontierObservation": {"helpful": "Determinism, invariants, cost, reentrancy, governance, events, and irreversible holds gave the model the right high-risk checklist.", "needsTuning": "Chain semantics, compiler, formal verification, economic attacks, governance law, and independent security review are not supplied."}
+    },
+    {
+      "directionId": "cli-automation",
+      "seed": {"name": "Dry-run rename command", "goal": "Parse explicit arguments and describe a filesystem change without applying it.", "requiredCapabilities": ["ARGUMENT_CONTRACT", "FILESYSTEM_SAFETY", "DRY_RUN"], "requestedVerifiers": ["unit-test"], "expectedChecks": ["argsParsed", "dryRunNoWrite"]},
+      "stretch": {"name": "Portable idempotent batch command", "goal": "Normalize paths, repeat safely, and emit structured diagnostics.", "requiredCapabilities": ["CROSS_PLATFORM_PATHS", "IDEMPOTENT_OPERATION", "STRUCTURED_DIAGNOSTIC", "PROCESS_BOUNDARY"], "requestedVerifiers": ["unit-test", "property-test"], "expectedChecks": ["idempotentRepeat", "pathsPortable", "diagnosticStructured"]},
+      "frontierObservation": {"helpful": "Arguments, filesystem/process boundaries, dry-run, diagnostics, path portability, and idempotency produced a safer automation design.", "needsTuning": "Actual shell behavior, permissions, signals, platform differences, and destructive-operation policy need runtime evidence."}
+    },
+    {
+      "directionId": "compiler-interpreter-runtime",
+      "seed": {"name": "Tiny expression parser", "goal": "Tokenize and parse one expression and locate a syntax diagnostic.", "requiredCapabilities": ["LEX_PARSE_PIPELINE", "SOURCE_DIAGNOSTIC"], "requestedVerifiers": ["structural-parse", "fuzzing"], "expectedChecks": ["tokensParsed", "diagnosticLocated"]},
+      "stretch": {"name": "Scoped transform pipeline", "goal": "Resolve scope, preserve a transformation invariant, and keep execution behind a boundary.", "requiredCapabilities": ["SYMBOL_SCOPE_MODEL", "INTERMEDIATE_REPRESENTATION", "TRANSFORMATION_INVARIANT", "CODEGEN_OR_EXECUTION_BOUNDARY"], "requestedVerifiers": ["structural-parse", "property-test"], "expectedChecks": ["scopeResolved", "transformPreserves", "executionSeparated"]},
+      "frontierObservation": {"helpful": "Parse, scope, semantics, IR, invariants, execution boundary, and diagnostics gave the model a coherent language pipeline.", "needsTuning": "Grammar coverage, type system, optimization proof, target ABI, fuzz corpus, and compatibility policy remain language-specific."}
+    },
+    {
+      "directionId": "library-sdk-plugin",
+      "seed": {"name": "Stable greeting library", "goal": "Expose one public API and prove its reference example.", "requiredCapabilities": ["PUBLIC_API_CONTRACT", "REFERENCE_EXAMPLE"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["apiStable", "exampleWorks"]},
+      "stretch": {"name": "Versioned sandboxed extension", "goal": "Preserve consumer compatibility, isolate a plugin lifecycle, and provide migration guidance.", "requiredCapabilities": ["SEMANTIC_VERSIONING", "CONSUMER_COMPATIBILITY", "HOST_LIFECYCLE_BOUNDARY", "EXTENSION_SANDBOX", "MIGRATION_GUIDE"], "requestedVerifiers": ["unit-test", "integration-test"], "expectedChecks": ["versionCompatible", "pluginSandboxed", "migrationDocumented"]},
+      "frontierObservation": {"helpful": "API, versions, consumers, host lifecycle, sandbox, migration, and examples pushed the model toward maintainable reuse.", "needsTuning": "Package ecosystem, binary/API compatibility, hostile plugins, release automation, and real consumer matrices need adapters."}
+    },
+    {
+      "directionId": "build-deployment-infrastructure",
+      "seed": {"name": "Reproducible two-step build", "goal": "Order a dependency graph and reproduce the same artifact digest.", "requiredCapabilities": ["DEPENDENCY_GRAPH", "REPRODUCIBLE_BUILD", "ARTIFACT_PROVENANCE"], "requestedVerifiers": ["structural-parse"], "expectedChecks": ["graphOrdered", "buildReproducible"]},
+      "stretch": {"name": "Idempotent reversible deployment", "goal": "Apply desired state twice, inject a secret only at runtime, and retain rollback.", "requiredCapabilities": ["DESIRED_STATE", "IDEMPOTENT_APPLY", "ENVIRONMENT_BOUNDARY", "SECRET_INJECTION", "ROLLBACK_PLAN"], "requestedVerifiers": ["structural-parse", "recovery-test"], "expectedChecks": ["applyIdempotent", "secretNotBaked", "rollbackDefined"]},
+      "frontierObservation": {"helpful": "Graph, reproducibility, desired state, idempotency, environment, secrets, rollback, and provenance made deployment a designed system.", "needsTuning": "Concrete CI, cloud/runtime, credentials, policy, supply-chain scanning, and rollback drills require external infrastructure."}
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "axm.code.workspace-edit-graph-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.edit-graph-authorization.v1", "axm.code.workspace-edit-graph-transaction-receipt.v1", "axm.code.workspace-edit-graph-journal-record.v1", "axm.code.workspace-edit-graph-recovery-receipt.v1"],
+  "model": {
+    "candidate": "A capable model or deterministic renderer supplies every exact source and verification candidate; the graph Hand does not generate code.",
+    "authorization": "One explicit short-lived authorization binds one graph, four to eight targets, all candidate digests, a fresh observation, verifier adapters, workspace, and separate journal root.",
+    "application": "Install in the graph's deterministic topological order under one lease and journal, parse every target, verify every placement entry, then commit all or restore all.",
+    "recovery": "Known pre-verification Linux crash states roll back every graph target; verified states finish cleanup; ambiguous bytes, modes, artifacts, paths, journal, or lease state hold."
+  },
+  "limits": {"minEntries": 2, "maxEntries": 4, "minTargets": 4, "maxTargets": 8, "authorizationTtlMs": 60000, "maxCandidateBytesPerTarget": 1048576, "maxVerifierBindings": 8, "maxJournalBytes": 1048576, "languageId": "javascript", "durableRecoveryPlatform": "linux"},
+  "truth": {"handGeneratesCode": false, "dependencyOrderIsCodingCompetence": false, "multiFileAtomicityClaimed": false, "linuxProcessCrashRecoveryProvided": true, "universalPowerLossRecoveryClaimed": false, "replayProtectionSurvivesRestart": true, "simultaneousHandMutationPreventedByLease": true, "externalNonHandMutationPrevented": false, "automaticStaleLeaseBreaking": false, "productionRepositoryTrialClaimed": false},
+  "permissions": ["bounded-explicit-root-workspace-read", "explicit-four-to-eight-target-workspace-write", "same-directory-transaction-artifact-create", "rollback-restore", "separate-explicit-journal-root-read-write", "exclusive-workspace-lease-create-release", "registered-verifier-adapter-invocation"],
+  "refuses": ["code-generation", "graph-over-eight-targets", "graph-under-four-targets", "dependency-cycle", "duplicate-target", "stale-or-tampered-authorization", "workspace-drift", "unplanned-target", "failed-parser-or-verifier-as-success", "ambiguous-recovery-state", "tampered-journal", "automatic-stale-lease-breaking", "network-access", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "EXPLICIT_SINGLE_GRAPH_TRANSACTION_WORKSPACE_EDIT"
+}

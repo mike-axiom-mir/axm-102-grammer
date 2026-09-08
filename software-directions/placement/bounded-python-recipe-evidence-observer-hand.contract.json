@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.bounded-python-recipe-evidence-observer-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-recipe-evidence-declaration.v1", "axm.code.bounded-python-recipe-evidence-observation.v1"],
+  "model": {
+    "scope": "Read exactly six caller-declared proposal evidence files beneath one explicit absolute workspace root, recompute their current byte digests, and syntax-parse JavaScript or JSON without importing or executing proposed modules.",
+    "binding": "Bind the observation to the proposal, caller evidence envelope, declaration, workspace-root identity, exact relative paths, current file bytes, parse results, and a five-minute lifetime.",
+    "admission": "The admission plane may consume this receipt as direct evidence of file presence, current bytes, digest matches, and parseability. Test claims, semantic safety, human review, execution results, and promotion remain unproved."
+  },
+  "limits": {"ttlMs": 300000, "requiredFileCount": 6, "maxFileBytes": 1048576, "maxTotalBytes": 6291456, "maxPathBytes": 240, "maxPathDepth": 12, "dynamicModuleLoading": false, "childProcessExecution": false},
+  "truth": {"filePresenceAndBytesDirectlyObserved": true, "proposalCoreDigestsBoundToObservedFiles": true, "javascriptParsedWithoutExecution": true, "jsonParsedWithoutExecution": true, "callerTestClaimsReproduced": false, "semanticSafetyIndependentlyVerified": false, "humanReviewCompleted": false, "digestIsSignerConsentOrIdentityProof": false, "freshnessIsCorrectness": false, "observationIsMutationAuthority": false, "observationIsPromotionAuthority": false},
+  "permissions": ["exact-six-declared-files-read", "current-byte-digest-computation", "non-executing-javascript-syntax-parse", "json-parse"],
+  "refuses": ["relative-workspace-root", "filesystem-root-read", "directory-scan", "undeclared-file-read", "path-traversal", "symlink-following", "non-regular-file", "invalid-utf8", "file-limit-escalation", "digest-drift", "proposal-core-digest-mismatch", "module-import", "dynamic-module-loading", "candidate-generation", "candidate-execution", "child-process-execution", "workspace-mutation", "registry-mutation", "recipe-selection", "activation-authorization", "network-use", "dependency-install", "deployment", "promotion", "canon-change"],
+  "authority": "EXACT_SIX_FILES_READ_ONLY_NO_EXECUTION"
+}

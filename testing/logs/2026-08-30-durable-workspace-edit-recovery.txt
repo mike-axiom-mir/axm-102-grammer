@@ -1,0 +1,52 @@
+Branch: codex/standalone-capability-verification-v1
+Lane parent commit before this upgrade: e7c44b5b72f9f7b22b3f41e0db109ea587bc7ee4
+Runtime: Linux 6.18.35 x86_64; Node v24.19.0; Python 3.12.13
+Observed: 2026-08-30T08:51:05Z through 2026-08-30T08:51:15Z (bounded local process stream)
+
+Command: node software-directions/placement/selftest-workspace-edit-recovery.js
+Result:
+{
+  "ok": true,
+  "actualSigkillCrashCount": 25,
+  "replacePhaseCount": 11,
+  "createPhaseCount": 9,
+  "rollbackRecoveryCount": 14,
+  "commitRecoveryCount": 4,
+  "alreadyFinalCount": 2,
+  "durableReplayAcrossProcessRestartHeld": true,
+  "simultaneousWorkspaceLeaseHeld": true,
+  "tamperedJournalHeld": true,
+  "ambiguousWorkspaceStateHeld": true,
+  "modeDriftHeld": true,
+  "trailingPartialJournalRecovered": true,
+  "universalPowerLossProofClaimed": false
+}
+
+Command: node testing/run-all.js
+Result: SUITE_RESULT: passed=23 failed=0 total=23
+Process exit: 0
+
+Crash matrix:
+- replace: PREPARED, SOURCE_TEMP_WRITTEN, SOURCE_BACKED_UP, SOURCE_INSTALLED, VERIFICATION_TEMP_WRITTEN, VERIFICATION_BACKED_UP, VERIFICATION_INSTALLED, INSTALLED_PARSED, VERIFIED, CLEANUP_COMPLETE, COMMITTED
+- create: PREPARED, SOURCE_TEMP_WRITTEN, SOURCE_INSTALLED, VERIFICATION_TEMP_WRITTEN, VERIFICATION_INSTALLED, INSTALLED_PARSED, VERIFIED, CLEANUP_COMPLETE, COMMITTED
+- five additional killed-process setups exercised lease contention and durable replay, journal tamper, unknown target bytes, target mode drift, and a torn trailing journal record
+
+Recovery assertions:
+- every pre-VERIFIED known state restored exact prior bytes and modes and removed transaction artifacts
+- VERIFIED and CLEANUP_COMPLETE states preserved exact candidate bytes and completed artifact cleanup
+- COMMITTED states were verified and crash-left leases were released without rewriting target bytes
+- a second process could not mutate while the first transaction lease remained
+- the original authorization remained refused after recovery in a fresh process
+- digest-chain tampering, unknown bytes, and mode drift held without recovery mutation or guessing
+- one incomplete trailing JSON record was truncated only under the valid lease, after which exact rollback completed
+
+Truth boundary:
+- this is Linux process-crash/restart evidence for generated temporary workspaces
+- it is not universal sudden-power-loss proof, atomic filesystem replacement of both targets, automatic stale-lease recovery, exclusion of writers that bypass the Hand, adapter-purity proof, or a production-repository trial
+
+Stream receipt:
+- claim: the durable workspace-edit recovery matrix and expanded standalone suite pass
+- stream: stdout/stderr from the two named Node commands in this branch
+- expected events: recovery JSON with ok=true and actualSigkillCrashCount=25; SUITE_RESULT with passed=23 failed=0 total=23; process exit 0
+- matched events: all expected events emitted during the ten-second window; no refuting event emitted
+- raw rolling buffer released: yes; this bounded transcript is the retained evidence

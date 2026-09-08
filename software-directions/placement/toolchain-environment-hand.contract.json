@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.toolchain-environment-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.toolchain-environment-observation.v1"],
+  "model": {
+    "observation": "Probe only the fixed Node, Python, resource-limit, and Linux namespace tools needed by the first Hand-foundry trial.",
+    "isolation": "Installed sandbox software is not usable evidence until a harmless namespace probe succeeds in the current host.",
+    "freshness": "An observation expires after five minutes and is never mutation or execution authorization."
+  },
+  "limits": {"ttlMs": 300000, "probeTimeoutMs": 3000, "maxProbeOutputBytes": 65536},
+  "truth": {"toolInstalledMeansUsable": false, "probePassMeansArbitraryCodeIsSafe": false, "observationIsExecutionAuthority": false, "candidateCodeExecuted": false, "workspaceRead": false, "workspaceMutation": false},
+  "permissions": ["fixed-tool-path-inspection", "fixed-version-probe", "harmless-sandbox-capability-probe", "harmless-resource-limit-probe"],
+  "refuses": ["workspace-read", "candidate-code-execution", "network-use", "dependency-install", "sandbox-claim-after-failed-probe", "automatic-authority", "automatic-promotion", "automatic-canon"],
+  "authority": "BOUNDED_ENVIRONMENT_OBSERVATION_ONLY"
+}

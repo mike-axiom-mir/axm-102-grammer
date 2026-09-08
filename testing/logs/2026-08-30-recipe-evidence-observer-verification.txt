@@ -1,0 +1,167 @@
+AXM 102 GRAMMAR — READ-ONLY RECIPE EVIDENCE OBSERVER VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: e4f27c70064dffd16ee81ed22375760cabc75baf
+Lane parent tree: 69fd077dcb6595bbc0a91dfea55464cb4a291c9e
+Production repositories edited by trials: 0
+
+PURPOSE
+Replace blind trust in six caller-supplied proposal-file digest claims with a bounded,
+read-only observation of the current files, while preserving the hard boundary against
+module import, candidate execution, workspace mutation, registry mutation, activation,
+promotion, or canon change.
+
+ARCHITECTURE
+The new bounded-python-recipe-evidence-observer-hand.js:
+- accepts one explicit absolute workspace root;
+- reads exactly six declared relative paths and performs no directory scan;
+- refuses filesystem roots, aliases, traversal, duplicate paths, symlinks in any path
+  component, non-regular files, invalid UTF-8, byte drift, oversize inputs, digest drift,
+  duplicated evidence digests, and proposal-core digest mismatch;
+- hashes the current bytes of author source/contract, verifier source/contract, parameter
+  contract, and adversarial-test receipt;
+- binds author source to builderSha256, verifier source to verifierRunnerSha256, and the
+  parameter contract to recipeSha256;
+- parses two CommonJS JavaScript sources with vm.Script but never runs them;
+- parses four JSON objects;
+- emits a five-minute, digest-bound observation receipt.
+
+The v1.1 admission plane now requires that live receipt. It independently validates the
+receipt digest, lifetime, authority boundary, six-file set, proposal/evidence bindings,
+and observed digests before it stages a descriptor. Admission itself still performs no
+workspace read and has no execution, mutation, selection, authorization, or promotion API.
+
+OBSERVER COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-evidence-observer-hand.js
+
+OBSERVER RESULT
+{
+  "ok": true,
+  "exactDeclaredFilesObserved": 6,
+  "javascriptFilesParsedWithoutExecution": 2,
+  "jsonFilesParsed": 4,
+  "currentByteDigestMatches": 6,
+  "proposalCoreDigestBindings": 3,
+  "ttlMs": 300000,
+  "callerTestClaimsReproduced": false,
+  "semanticSafetyIndependentlyVerified": false,
+  "proposedModulesLoaded": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawned": 0,
+  "workspaceMutations": 0,
+  "registryMutations": 0,
+  "promotions": 0,
+  "adversarialHolds": 19
+}
+
+OBSERVER ADVERSARIAL HOLDS
+1. relative workspace root
+2. filesystem root
+3. missing declaration
+4. traversal-shaped declared path
+5. duplicate declared path
+6. attempted extra module-path field injection
+7. missing declared file
+8. symlink target
+9. directory substituted for a regular file
+10. current bytes no longer matching the evidence digest
+11. invalid JavaScript author source
+12. invalid JSON verifier contract
+13. invalid UTF-8 parameter contract
+14. evidence file over the one-MiB limit
+15. proposal builder digest not matching observed author source
+16. proposal changed without recomputing its digest
+17. evidence changed without recomputing its digest
+18. duplicated evidence digest
+19. evidence bound to another proposal
+
+Additional receipt-validation refusals cover a tampered receipt digest, a forged claim that
+tests were reproduced, a duplicated observed path, a stale receipt, and a future-dated receipt.
+
+The JavaScript fixtures contain top-level filesystem writes that would create a marker if
+the source were imported or executed. The marker remained absent. Proposed-module load calls,
+child-process calls, candidate executions, workspace mutations, registry changes, and
+promotions all remained zero.
+
+ADMISSION COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-admission-plane.js
+
+ADMISSION RESULT
+{
+  "ok": true,
+  "deterministicStageReceipts": 2,
+  "activeRegistryRecipeCount": 2,
+  "stagedCandidateEntryCount": 1,
+  "hypotheticalNextRegistryEntryCount": 3,
+  "activationGapCount": 5,
+  "evidenceFilesObservedByReadOnlyHand": 6,
+  "currentEvidenceByteDigestMatches": 6,
+  "evidenceFilesParsedWithoutImport": 6,
+  "callerTestClaimsReproduced": false,
+  "semanticSafetyIndependentlyVerified": false,
+  "proposedSourceBytesReadByAdmissionPlane": 0,
+  "proposedSourceFilesReadByObserver": 2,
+  "proposedModulesLoaded": 0,
+  "authorsInvoked": 0,
+  "verifiersInvoked": 0,
+  "candidatesGenerated": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawned": 0,
+  "activeRegistryMutations": 0,
+  "selectionsIssued": 0,
+  "activationAuthorizationsIssued": 0,
+  "promotions": 0,
+  "adversarialHolds": 20
+}
+
+ADMISSION OBSERVATION HOLDS ADDED
+1. missing observer receipt
+2. tampered observer receipt
+3. stale observer receipt
+4. future-dated observer receipt
+5. observer receipt bound to different evidence
+
+The prior fifteen proposal, evidence, registry, collision, unsafe-authority, and injection
+holds remain. The active two-entry registry stayed byte-identical and the staged descriptor
+remained unselectable.
+
+FULL SUITE COMMAND
+npm test
+
+FULL SUITE RESULT
+SUITE_RESULT: passed=33 failed=0 total=33
+Process exit: 0
+Observed completion: 2026-08-30T20:41:32Z
+
+REGRESSION EVIDENCE RETAINED
+- language organs: 102
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- parsed JSON files: 644
+- active bounded Python recipes: 2
+- both active recipes activated through Foundry: pass
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- production repository trial edits: 0
+
+TRUTH BOUNDARY
+This upgrade proves that six exact declared files existed, their current bytes matched the
+claimed digests, their JavaScript/JSON syntax parsed without import, and three proposal-core
+digests matched the observed artifacts. It does not prove the caller's test claims, source
+semantics, runtime safety, authorship, identity, consent, human review, or registry fitness.
+Parsing is not executing, and a digest is not a signature.
+
+UNRESOLVED ACTIVATION GAPS RETAINED
+1. HUMAN_REVIEW_REQUIRED
+2. EXPLICIT_REGISTRY_SOURCE_CHANGE_REQUIRED
+3. FULL_REGRESSION_REQUIRED
+4. FRESH_FOUNDRY_MANIFEST_REQUIRED
+5. FRESH_HOST_AUTHORIZATION_REQUIRED
+
+NEXT MEASURED GAP
+Independently reproducing a proposed recipe's adversarial-test claims requires a real isolation
+boundary for untrusted author/verifier modules. The current host reports bubblewrap installed
+but unusable because namespace permission is denied. A future replay Hand must therefore bind
+to a proven usable sandbox and fail closed when isolation is unavailable; it must not treat
+syntax parsing or static scanning as runtime-safety proof.

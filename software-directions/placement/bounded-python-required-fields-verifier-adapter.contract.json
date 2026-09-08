@@ -1,0 +1,15 @@
+{
+  "schema": "axm.code.bounded-python-required-fields-verifier-adapter-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["unit-test", "axm.code.bounded-python-verifier-adapter.v1"],
+  "model": {
+    "scope": "Execute only candidates exactly regenerated from a digest-valid bounded required-fields author receipt.",
+    "execution": "Run the source, emitted selftest, and semantic probes in memory using restricted imports/builtins, Python isolated mode, and prlimit resource bounds.",
+    "boundary": "This adapter is registered to one recipe and refuses arbitrary Python. The host provides no namespace-enforced filesystem or network isolation."
+  },
+  "truth": {"hostNamespaceSandbox": false, "hostFilesystemIsolation": false, "hostNetworkIsolation": false, "arbitraryCandidateExecution": false, "exactRegisteredCandidateRequired": true, "runtimePassIsUniversalCorrectnessProof": false, "rawProcessOutputRetained": false},
+  "permissions": ["exact-registered-candidate-execution", "bounded-python-child-process-execution"],
+  "refuses": ["candidate-without-valid-author-receipt", "candidate-not-exactly-regenerated", "cross-recipe-receipt", "environment-binding-drift", "execution-without-prlimit", "arbitrary-python-execution", "workspace-read", "workspace-mutation", "network-authority", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "PROVENANCE_LOCKED_RUNTIME_VERIFICATION_ONLY"
+}

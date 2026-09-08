@@ -1,0 +1,16 @@
+{
+  "schema": "axm.code.bounded-python-recipe-registry-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["axm.code.bounded-python-recipe-registry.v1", "axm.code.foundry-recipe-selection.v1"],
+  "model": {
+    "scope": "Route only exact, digest-bound Python recipes to their own author and provenance-locked verifier implementations.",
+    "binding": "The registry digest covers sorted entry descriptors; each descriptor covers recipe, builder, author receipt, verifier runner, provenance class, and refusal of general authoring or arbitrary execution.",
+    "extension": "Adding a recipe changes the registry digest and therefore invalidates old manifest/selection/authorization combinations until a host explicitly approves the new binding."
+  },
+  "limits": {"language": "python", "scope": "pair", "registeredRecipeCount": 2, "maxTargetsPerActivation": 2, "unboundedPluginLoading": false},
+  "truth": {"registryPresent": true, "entriesDigestBound": true, "recipeSpecificAuthorValidation": true, "recipeSpecificVerifierRequired": true, "crossRecipeDispatchAllowed": false, "generalPythonAuthoring": false, "arbitraryCandidateExecution": false, "registryGrantsMutationAuthority": false},
+  "permissions": ["registered-recipe-selection", "registered-author-and-verifier-routing"],
+  "refuses": ["unregistered-recipe", "selection-digest-drift", "registry-digest-drift", "builder-substitution", "verifier-substitution", "cross-recipe-author-receipt", "dynamic-module-loading", "general-python-authoring", "arbitrary-python-execution", "implicit-mutation-authority", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "ROUTING_ONLY_NO_MUTATION_OR_EXECUTION_AUTHORITY"
+}

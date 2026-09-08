@@ -1,0 +1,171 @@
+AXM 102 GRAMMAR — REPLAY-ISOLATION GATE VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: 8ea5af2032c3f0b55cf86b5d1ebf83a1aaa28476
+Lane parent tree: d437cc7ff269d958111cd91977eba9803d2dee4d
+Production repositories edited by trials: 0
+
+PURPOSE
+Add the real isolation prerequisite for eventually reproducing a proposed bounded Python
+recipe's caller-supplied adversarial-test claims. The upgrade must fail closed when the host
+cannot enforce the boundary and must not substitute JavaScript parsing, node:vm, or Node's
+permission model for malicious-code isolation.
+
+PRIMARY BOUNDARY REFERENCES
+- Node permission model: https://nodejs.org/api/permissions.html
+  The official documentation describes it as a seat belt for trusted code, not a security
+  guarantee against malicious code.
+- Node vm: https://nodejs.org/api/vm.html
+  The official documentation explicitly says node:vm is not a security mechanism.
+- Bubblewrap: https://github.com/containers/bubblewrap
+  Bubblewrap supplies the empty mount namespace and separate user/PID/IPC/UTS/network
+  namespaces; the calling arguments remain the policy.
+
+IMPLEMENTED BOUNDARY
+bounded-python-recipe-replay-isolation-hand.js:
+- binds one proposal digest, caller-evidence digest, live six-file observation, evidence-root
+  identity, and live toolchain observation;
+- emits an expiring, digest-bound receipt for one fixed policy;
+- accepts no caller command, module path, source bytes, runner, mount, or environment;
+- never reads proposal source bytes itself and never mounts proposal/workspace bytes;
+- never imports or executes proposed modules or caller tests;
+- if all providers are usable, executes only a fixed trusted probe through prlimit + bwrap;
+- if any required provider is unavailable, emits a qualified hold and starts no policy probe.
+
+FIXED POLICY
+- policy SHA-256: 72e00fc7f6a3b462baa9a6e7d81ea9eb86d2de45266210e445cf4e4bbc81aa9a
+- empty anonymous root filesystem
+- user, PID, IPC, UTS, network, and cgroup-try namespaces
+- UID/GID 65534; hostname axm-replay; all capabilities dropped
+- read-only /usr plus one exact observed Node executable mounted read-only
+- ephemeral /tmp mode 01777; no /etc, /workspace, /home, or /root mount
+- cleared environment with fixed PATH/HOME/TMPDIR/LANG/LC_ALL
+- CPU: 1 second
+- address-space limit: 2,147,483,648 bytes
+- open files: 64
+- processes: 16
+- output file: 1,048,576 bytes
+- core size: 0
+- wall timeout: 3,000 ms
+- captured output: at most 65,536 bytes
+
+POLISH CORRECTION
+The first draft used the existing Python-oriented 256 MiB address-space ceiling. A direct
+trusted compatibility probe showed modern Node could not initialize under that virtual-memory
+limit. The final policy uses a still-bounded 2 GiB ceiling; the exact trusted Node startup
+probe passed under the final CPU/address-space/file/process/core envelope. Proposal code was
+not involved in either compatibility probe.
+
+ISOLATION COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-replay-isolation-hand.js
+
+ISOLATION RESULT
+{
+  "ok": true,
+  "hostIsolationProvider": "bubblewrap",
+  "hostIsolationInstalled": true,
+  "hostIsolationUsable": false,
+  "hostIsolationErrorCode": "NAMESPACE_PERMISSION_DENIED",
+  "result": "RECIPE_REPLAY_ISOLATION_HELD_HOST_PROVIDER_UNAVAILABLE",
+  "isolationCertified": false,
+  "fixedPolicyProbeProcesses": 0,
+  "proposedSourceFilesReadByGate": 0,
+  "proposedBytesMountedInSandbox": 0,
+  "proposedModulesLoaded": 0,
+  "callerTestsExecuted": 0,
+  "callerTestClaimsReproduced": false,
+  "candidatesExecuted": 0,
+  "workspaceMutations": 0,
+  "registryMutations": 0,
+  "activationAuthorizations": 0,
+  "syntheticPolicyEvaluatorPasses": 1,
+  "syntheticPolicyEvaluatorHolds": 1,
+  "unresolvedGapCount": 4,
+  "adversarialHolds": 16
+}
+
+The synthetic evaluator fixtures exercise only pure output validation; they do not certify
+this host. Certification remains false because the real namespace probe failed.
+
+ADMISSION V1.2
+The admission plane now requires and binds a live qualified replay-isolation receipt. A
+host-unavailable or failed-policy receipt may still stage a descriptor for external review,
+but ISOLATED_ADVERSARIAL_REPLAY_REQUIRED is retained as an activation gap. Admission receives
+no execution or registry authority and spawns no process.
+
+ADMISSION COMMAND
+node software-directions/placement/selftest-bounded-python-recipe-admission-plane.js
+
+ADMISSION RESULT
+{
+  "ok": true,
+  "deterministicStageReceipts": 2,
+  "activeRegistryRecipeCount": 2,
+  "stagedCandidateEntryCount": 1,
+  "hypotheticalNextRegistryEntryCount": 3,
+  "activationGapCount": 6,
+  "evidenceFilesObservedByReadOnlyHand": 6,
+  "currentEvidenceByteDigestMatches": 6,
+  "evidenceFilesParsedWithoutImport": 6,
+  "replayIsolationResult": "RECIPE_REPLAY_ISOLATION_HELD_HOST_PROVIDER_UNAVAILABLE",
+  "replayIsolationCertified": false,
+  "replayIsolationReceiptBound": true,
+  "callerTestClaimsReproduced": false,
+  "semanticSafetyIndependentlyVerified": false,
+  "proposedSourceBytesReadByAdmissionPlane": 0,
+  "proposedSourceFilesReadByObserver": 2,
+  "proposedModulesLoaded": 0,
+  "authorsInvoked": 0,
+  "verifiersInvoked": 0,
+  "candidatesGenerated": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawnedByAdmissionPlane": 0,
+  "activeRegistryMutations": 0,
+  "selectionsIssued": 0,
+  "activationAuthorizationsIssued": 0,
+  "promotions": 0,
+  "adversarialHolds": 24
+}
+
+FULL SUITE COMMAND
+npm test
+
+FULL SUITE RESULT
+SUITE_RESULT: passed=34 failed=0 total=34
+Process exit: 0
+Observed completion: 2026-08-30T21:36:46Z
+
+REGRESSION EVIDENCE RETAINED
+- language organs: 102
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- parsed JSON files: 645
+- active bounded Python recipes: 2
+- both active recipes activated through Foundry: pass
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- production repository trial edits: 0
+
+TRUTH BOUNDARY
+This checkpoint certifies no sandbox on the current host and executes no caller code. It proves
+that the system detects the missing namespace capability, binds that result to the proposal and
+observations, refuses stale/tampered/mismatched receipts, and prevents the admission descriptor
+from silently erasing the replay gap. A receipt digest is not proof of author identity, consent,
+or Hand origin. Even a passing fixed policy probe would not reproduce caller tests, prove source
+semantics, establish human review, authorize replay, activate a recipe, or grant promotion.
+
+UNRESOLVED ADMISSION ACTIVATION GAPS
+1. ISOLATED_ADVERSARIAL_REPLAY_REQUIRED
+2. HUMAN_REVIEW_REQUIRED
+3. EXPLICIT_REGISTRY_SOURCE_CHANGE_REQUIRED
+4. FULL_REGRESSION_REQUIRED
+5. FRESH_FOUNDRY_MANIFEST_REQUIRED
+6. FRESH_HOST_AUTHORIZATION_REQUIRED
+
+NEXT MEASURED GAP
+Run this fixed policy on a host where Bubblewrap namespaces are genuinely usable. Only after
+the real policy probe certifies filesystem and network isolation should a separate, explicit,
+short-lived replay authorization be designed. That future Hand must mount exactly the six
+observed proposal files read-only, execute only the declared adversarial test entrypoint, bind
+all output and exit evidence, and keep replay certification separate from registry activation.

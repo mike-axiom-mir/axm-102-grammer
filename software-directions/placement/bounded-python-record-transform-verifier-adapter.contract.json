@@ -1,0 +1,23 @@
+{
+  "schema": "axm.code.bounded-python-record-transform-verifier-adapter-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": ["unit-test", "axm.code.bounded-python-verifier-adapter.v1"],
+  "model": {
+    "scope": "Execute only candidates exactly regenerated from a digest-valid bounded Python record-transform author receipt.",
+    "execution": "Run the source and emitted selftest in memory with a restricted builtin/import surface, isolated Python mode, and prlimit CPU, address-space, file-descriptor, wall-time, and output limits.",
+    "boundary": "This is a provenance-locked recipe verifier, not a sandbox for arbitrary Python. The host currently provides no namespace-enforced filesystem or network isolation."
+  },
+  "truth": {
+    "hostNamespaceSandbox": false,
+    "hostFilesystemIsolation": false,
+    "hostNetworkIsolation": false,
+    "arbitraryCandidateExecution": false,
+    "exactDonorCandidateRequired": true,
+    "runtimePassIsUniversalCorrectnessProof": false,
+    "rawProcessOutputRetained": false
+  },
+  "permissions": ["exact-donor-candidate-execution", "bounded-python-child-process-execution"],
+  "refuses": ["candidate-without-valid-author-receipt", "candidate-not-exactly-regenerated", "environment-binding-drift", "execution-without-prlimit", "arbitrary-python-execution", "workspace-read", "workspace-mutation", "network-authority", "dependency-install", "deployment", "automatic-promotion", "automatic-canon"],
+  "authority": "PROVENANCE_LOCKED_RUNTIME_VERIFICATION_ONLY"
+}

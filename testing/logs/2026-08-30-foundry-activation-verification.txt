@@ -1,0 +1,124 @@
+AXM 102 GRAMMAR — FOUNDRY ACTIVATION VERIFICATION
+Date: 2026-08-30 UTC
+Lane: codex/standalone-capability-verification-v1
+Lane parent commit: 09be8a24991f53c5d01ec4c108450ea581265f85
+Lane parent tree: 893425609ce214b6f80fd81752ff0d7d66b28bc6
+Production repositories edited by trials: 0
+
+ENVIRONMENT RECEIPT
+Contract OS / actual: Linux / Linux 6.18.35 x86_64
+Contract repository path / actual: axm-102-grammer lane / exact lane present
+Contract Node / actual: >=18 / v24.19.0
+Contract Python / actual: Python 3 / Python 3.12.13
+Contract hard limits / actual: prlimit / util-linux 2.39.3 usable
+Contract namespace sandbox / actual: optional truthful seam / bubblewrap 0.9.0 installed but unusable
+Environment seam: HOST_SANDBOX_UNAVAILABLE:NAMESPACE_PERMISSION_DENIED
+Unknown environment holds: none
+Safe to proceed as contracted: yes, for the exact provenance-locked recipe only
+Raw readings released: yes
+
+ACTIVATION MODEL
+The caller supplied:
+- workspace and separate journal roots
+- project declaration and fresh observation
+- one Python pair placement plan
+- one validated Hand Foundry manifest
+- one live toolchain environment observation
+- one digest-bound bounded-recipe selection
+- one explicit single-activation host authorization
+
+The caller did not supply:
+- candidate source or verification bytes
+- parser context
+- verifier adapter
+- derived exact edit authorization
+
+The activation plane:
+1. validated the manifest, plan, observation, environment, recipe selection, and host authorization
+2. required author, parser, verifier, exact writer, and rollback capsules with exact implementation bindings
+3. invoked the donor-bound deterministic author
+4. constructed the provenance-locked verifier
+5. narrowed explicit host activation authority into one exact candidate-bound edit authorization
+6. passed the Foundry parser capsule and live environment to the durable pair writer
+7. returned the author, parser, verifier, transaction, rollback/recovery, and activation receipts
+
+COMMAND
+node software-directions/placement/selftest-foundry-activation-plane.js
+
+RESULT
+{
+  "ok": true,
+  "automaticHandAssembliesCommitted": 1,
+  "callerSuppliedCandidateBundles": 0,
+  "callerSuppliedParserContexts": 0,
+  "callerSuppliedVerifierAdapters": 0,
+  "authorReceipts": 1,
+  "pythonParserReceipts": 4,
+  "provenanceLockedVerifierPasses": 1,
+  "durableWriterTransactions": 1,
+  "rollbackCapsuleRequired": true,
+  "repeatedCommittedActivationsHeldByStateDrift": 1,
+  "underlyingDurableReplayProtectionReused": true,
+  "adversarialHolds": 13,
+  "foundrySelfAuthorizations": 0,
+  "arbitraryCandidateExecutions": 0,
+  "generalPythonAuthoringClaimed": false,
+  "hostNamespaceSandboxUsable": false
+}
+
+SUCCESS PATH
+- One existing Python application owner and declared selftest seam were observed read-only.
+- The Foundry manifest contained six unique role capsules.
+- Recipe selection bound the reviewed PR #51 recipe, builder digests, and exact parameters.
+- Explicit host authorization bound both roots, manifest, plan, observation, environment,
+  parser capsule, author/verifier implementations, recipe selection, TTL, rollback, and recovery.
+- The activation plane generated both candidate files and assembled parser/verifier/writer inputs.
+- Four Python AST parser receipts passed without executing candidate code.
+- The provenance-locked verifier regenerated exact candidates and passed the emitted selftest
+  plus semantic probes under Python isolated mode and prlimit.
+- The durable pair writer committed exactly two targets.
+- The unrelated notes/human.txt file remained byte-identical.
+
+ADVERSARIAL HOLDS
+1. repeated activation after the committed project state changed
+2. missing activation authorization
+3. tampered manifest digest
+4. digest-valid manifest with substituted rollback implementation
+5. tampered recipe-selection digest
+6. unsupported recipe identity
+7. invalid bounded recipe parameters
+8. authorization bound to another manifest
+9. authorization requesting arbitrary candidate execution
+10. stale activation authorization
+11. authorization bound to another parser capsule
+12. tampered environment observation
+13. workspace drift after observation
+
+Every adversarial fixture matched its exact before/after workspace snapshot at return.
+
+COMMAND
+npm test
+
+RESULT
+SUITE_RESULT: passed=30 failed=0 total=30
+Process exit: 0
+Observed completion: 2026-08-30T19:17:16Z
+
+REGRESSION EVIDENCE RETAINED BY THE FULL RUN
+- language organs: 102
+- stable machine keyboard keys: 4,896
+- direction seed/stretch builds: 58/58
+- bounded Python direct application commit/rollback trial: pass
+- pair Hand actual SIGKILL probes: 25
+- graph Hand actual SIGKILL probes: 28
+- total actual SIGKILL probes: 53
+- pair recovery rollbacks: 14
+- graph recovery rollbacks: 20
+
+TRUTH BOUNDARY
+The activation plane proves deterministic assembly for one reviewed Python recipe and one
+pair transaction. It consumes explicit host authority and narrows it to exact generated
+candidates; its digest is not identity, signature, or consent proof. It does not provide
+a general recipe registry, general Python authoring, arbitrary model-candidate execution,
+namespace/filesystem/network isolation, graph activation, deployment, promotion, canon
+authority, universal correctness, or universal sudden-power-loss safety.

@@ -1,0 +1,52 @@
+{
+  "schema": "axm.code.project-map-hand-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "provides": [
+    "axm.code.project-map-declaration.v1",
+    "axm.code.project-map-observation.v1"
+  ],
+  "model": {
+    "declaration": "The caller declares architectural meaning, roles, mutability, ownership, roots, language binding, and the complete expected module list.",
+    "observation": "The Hand reads only the explicit absolute workspace root, maps every matching source/test file, hashes current bytes, and emits a five-minute receipt.",
+    "plannerBinding": "The placement plane validates the receipt, digest, coverage, authority boundary, and freshness before using its project map."
+  },
+  "limits": {
+    "ttlMs": 300000,
+    "maxEntries": 10000,
+    "maxFiles": 4096,
+    "maxFileBytes": 4194304,
+    "maxTotalBytes": 33554432,
+    "maxDepth": 32,
+    "callerMayOnlyLowerLimits": true
+  },
+  "truth": {
+    "filesystemBytesCanProveArchitecturalMeaning": false,
+    "semanticRolesAreCallerDeclared": true,
+    "filePathsAndBytesAreDirectlyObserved": true,
+    "allMatchingFilesMustBeMapped": true,
+    "digestIsSignerProof": false,
+    "freshnessIsCorrectness": false,
+    "observationIsMutationAuthority": false,
+    "preMutationRecheckStillRequired": true
+  },
+  "permissions": [
+    "bounded-explicit-root-workspace-read"
+  ],
+  "refuses": [
+    "relative-workspace-root",
+    "filesystem-root-scan",
+    "path-traversal",
+    "symlink-following",
+    "unmapped-matching-file",
+    "missing-declared-module",
+    "caller-limit-escalation",
+    "workspace-mutation",
+    "tool-execution",
+    "network-access",
+    "dependency-install",
+    "semantic-ownership-inference",
+    "stale-receipt-as-live-evidence"
+  ],
+  "authority": "BOUNDED_WORKSPACE_READ_ONLY"
+}
