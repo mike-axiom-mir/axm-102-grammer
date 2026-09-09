@@ -1,0 +1,62 @@
+name: Verify standalone repository body
+
+on:
+  pull_request:
+    paths:
+      - 'language-organs/**'
+      - 'software-directions/**'
+      - 'testing/**'
+      - 'package.json'
+      - '.github/workflows/verify-standalone-body.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'language-organs/**'
+      - 'software-directions/**'
+      - 'testing/**'
+      - 'package.json'
+      - '.github/workflows/verify-standalone-body.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Node ${{ matrix.node }} / Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: '18'
+            python: '3.11'
+          - node: '22'
+            python: '3.13'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Show runtime boundary
+        env:
+          AXM_PYTHON: python
+        run: |
+          node --version
+          "$AXM_PYTHON" --version
+
+      - name: Run complete standalone verification suite
+        env:
+          AXM_PYTHON: python
+        run: npm test
