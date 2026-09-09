@@ -60,6 +60,35 @@ const capsule = compose({
 
 An explicit language may resolve a compatible ambiguous signal such as `.m`. It may not silently override a conflicting signal such as `languageId: rust` with a `.py` path.
 
+### Consume it outside this checkout
+
+The repository can produce a dependency-free npm tarball without publishing it
+to a registry. `private: true` remains set so release is always deliberate.
+
+```sh
+npm pack --ignore-scripts
+npm install --offline --ignore-scripts ./axm-102-grammar-body-1.0.0-test.tgz
+```
+
+The installed package exposes the same read-only composition API:
+
+```js
+const {compose} = require('axm-102-grammar-body');
+const capsule = compose({filePath: 'src/world.rs', operation: 'refactor'});
+```
+
+It also exposes a stdin/stdout process boundary suitable for optional local
+adapters in other repositories:
+
+```sh
+printf '%s' '{"filePath":"src/world.rs","operation":"refactor"}' | axm-grammar-capabilities --pretty
+```
+
+The CLI accepts at most one MiB of UTF-8 JSON and reads no caller source file.
+It performs no network request, tool execution, installation, workspace
+mutation, language switch, promotion, or CANON change. Held language resolution
+is a valid capsule; malformed CLI input exits non-zero with a JSON refusal.
+
 ## Software direction layers
 
 `software-directions/direction-stack.js` supplies 29 composable software profiles plus runtime, execution, state, quality, risk, verification, and distribution axes. It separates language grammar from software purpose: one language profile can serve websites, games, services, firmware, data systems, or hybrids without duplicating the grammar body.
