@@ -148,6 +148,44 @@ function buildSnapshot({source = {}} = {}) {
   };
   return Object.freeze({...core, capabilitySnapshotSha256: sha256(core)});
 }
+function verifySnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+    throw Error('GRAMMAR_GLASS_SNAPSHOT_OBJECT_REQUIRED');
+  }
+  if (snapshot.schema !== SCHEMA) throw Error('GRAMMAR_GLASS_SNAPSHOT_SCHEMA_INVALID');
+  if (!isHex(snapshot.capabilitySnapshotSha256, 64)) {
+    throw Error('GRAMMAR_GLASS_SNAPSHOT_DIGEST_REQUIRED');
+  }
+  const {capabilitySnapshotSha256, ...core} = snapshot;
+  if (sha256(core) !== capabilitySnapshotSha256) {
+    throw Error('GRAMMAR_GLASS_SNAPSHOT_DIGEST_MISMATCH');
+  }
+
+  const replayed = buildSnapshot({source: snapshot.source});
+  if (canon(replayed) !== canon(snapshot)) {
+    throw Error('GRAMMAR_GLASS_SNAPSHOT_PACKAGE_REPLAY_MISMATCH');
+  }
+  return Object.freeze({
+    schema: 'axm.grammar-102.capability-snapshot-verification.v1',
+    version: '1.0.0',
+    result: 'VERIFIED_EXACT_PACKAGE_REPLAY',
+    source: replayed.source,
+    capabilitySnapshotSha256,
+    profileCount: replayed.grammarIdentity.profileCount,
+    presentLensIds: Object.entries(replayed.layers)
+      .filter(([, layer]) => layer.state === 'PRESENT')
+      .map(([id]) => id)
+      .sort(),
+    truth: {
+      exactPackageReplayMatched: true,
+      digestIsSignature: false,
+      sourceMetadataAuthenticated: false,
+      grammarGlassImported: false,
+      activationPerformed: false,
+      authority: 'NONE'
+    }
+  });
+}
 function parseArgs(argv) {
   const out = {source: {}};
   for (let i = 0; i < argv.length; i++) {
@@ -172,4 +210,4 @@ function main(argv = process.argv.slice(2)) {
   return snapshot;
 }
 if (require.main === module) main();
-module.exports = {SCHEMA, canon, sha256, sourceMetadata, buildSnapshot, parseArgs, main};
+module.exports = {SCHEMA, canon, sha256, sourceMetadata, buildSnapshot, verifySnapshot, parseArgs, main};

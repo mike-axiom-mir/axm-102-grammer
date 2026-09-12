@@ -57,6 +57,7 @@ const checks = [
   [process.execPath, ['software-directions/selftest-frontier-direction-workbench.js']],
   [process.execPath, ['language-organs/selftest-standalone-capability-router.js']],
   [process.execPath, ['testing/selftest-package-consumer.js']],
+  [process.execPath, ['testing/selftest-grammar-glass-package-bridge.js']],
   [process.execPath, ['testing/selftest-repository-independence.js']]
 ];
 
