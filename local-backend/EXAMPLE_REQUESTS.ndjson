@@ -1,0 +1,6 @@
+{"op":"health"}
+{"op":"detect","input":{"filePath":"src/main.py"}}
+{"op":"language","input":{"languageId":"rust"}}
+{"op":"capability","input":{"languageId":"json"}}
+{"op":"analyze","input":{"languageId":"json","source":"{\"hello\":[1,true,null]}"}}
+{"op":"render","input":{"source":"abc","edits":[{"startByte":1,"endByte":2,"replacement":"Z"}]}}
