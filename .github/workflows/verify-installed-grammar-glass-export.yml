@@ -1,0 +1,48 @@
+name: Verify installed Grammar Glass export
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "bin/axm-grammar-glass-snapshot.js"
+      - "language-organs/export-grammar-glass-capability-snapshot.js"
+      - "testing/selftest-grammar-glass-package-bridge.js"
+      - "testing/run-all.js"
+      - ".github/workflows/verify-installed-grammar-glass-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-consumer:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax
+        run: |
+          node --check bin/axm-grammar-glass-snapshot.js
+          node --check language-organs/export-grammar-glass-capability-snapshot.js
+          node --check testing/selftest-grammar-glass-package-bridge.js
+      - name: Run complete stacked provider suite
+        run: npm test
+      - name: Check out the exact Grammar Glass consumer contract
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-grammer-glass
+          ref: b670747e266e370fab38eaa7d10fd46f4d0b93eb
+          path: grammar-glass-consumer
+      - name: Prove installed provider to real consumer
+        env:
+          AXM_GRAMMAR_GLASS_ROOT: ${{ github.workspace }}/grammar-glass-consumer
+          AXM_SOURCE_BRANCH: automation/installed-grammar-glass-export-v1
+        run: node testing/selftest-grammar-glass-package-bridge.js

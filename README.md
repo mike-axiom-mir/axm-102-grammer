@@ -89,6 +89,37 @@ It performs no network request, tool execution, installation, workspace
 mutation, language switch, promotion, or CANON change. Held language resolution
 is a valid capsule; malformed CLI input exits non-zero with a JSON refusal.
 
+### Carry the 102 body into Grammar Glass
+
+The local package also exposes the repository's existing provenance-bound
+`axm.grammar-102.capability-snapshot.v1` export. An installed tarball has no Git
+directory, so the caller must supply the exact source commit and should supply
+the tree and branch it received the package from:
+
+```sh
+axm-grammar-glass-snapshot create \
+  --commit <40-hex-source-commit> \
+  --tree <40-hex-source-tree> \
+  --branch <source-branch> \
+  --out grammar-102-capability.json
+```
+
+The same installed package can deterministically replay the export against its
+included grammar body before a consumer admits it:
+
+```sh
+axm-grammar-glass-snapshot verify < grammar-102-capability.json
+```
+
+Library consumers can use
+`require('axm-102-grammar-body/grammar-glass-snapshot')` to call
+`buildSnapshot()` and `verifySnapshot()` directly. Verification checks the
+snapshot digest and exact replay against the installed package body. It does
+not authenticate the caller-supplied source metadata or package authorship,
+activate the import in Grammar Glass, select a lens, rank a generation, promote
+anything, or grant merge/CANON authority. The package remains private and no
+registry publication is performed.
+
 ## Software direction layers
 
 `software-directions/direction-stack.js` supplies 29 composable software profiles plus runtime, execution, state, quality, risk, verification, and distribution axes. It separates language grammar from software purpose: one language profile can serve websites, games, services, firmware, data systems, or hybrids without duplicating the grammar body.

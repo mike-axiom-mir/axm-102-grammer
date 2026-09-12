@@ -7,14 +7,17 @@
   "main": "language-organs/standalone-capability-router.js",
   "exports": {
     ".": "./language-organs/standalone-capability-router.js",
+    "./grammar-glass-snapshot": "./language-organs/export-grammar-glass-capability-snapshot.js",
     "./contract": "./language-organs/standalone-capability-router.contract.json",
     "./package.json": "./package.json"
   },
   "bin": {
-    "axm-grammar-capabilities": "bin/axm-grammar-capabilities.js"
+    "axm-grammar-capabilities": "bin/axm-grammar-capabilities.js",
+    "axm-grammar-glass-snapshot": "bin/axm-grammar-glass-snapshot.js"
   },
   "files": [
     "bin/",
+    "language-organs/export-grammar-glass-capability-snapshot.js",
     "language-organs/standalone-capability-router.js",
     "language-organs/standalone-capability-router.contract.json",
     "language-organs/registry.js",
