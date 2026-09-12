@@ -136,7 +136,7 @@ const directedGame = router.compose({
   }
 });
 assert.strictEqual(directedGame.result, 'CAPABILITY_CAPSULE_READY_NO_EXECUTION_AUTHORITY');
-assert.deepStrictEqual(directedGame.directions.selected.directionIds, ['game', 'collaboration-multiplayer']);
+assert.deepStrictEqual(directedGame.directions.selected.directionIds, ['collaboration-multiplayer', 'game']);
 assert.strictEqual(directedGame.directions.selected.selectedProfiles.length, 2);
 assert.strictEqual(directedGame.directions.selected.tensions.some(item => item.id === 'REAL_TIME_DISTRIBUTED_STATE_TENSION'), true);
 assert.strictEqual(directedGame.directions.gaps.result, 'DIRECTION_GAPS_FOUND');
