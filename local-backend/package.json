@@ -1,0 +1,16 @@
+{
+  "name": "axm-102-grammar-local-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portable deterministic offline-first backend for the AXM 102 Grammar body",
+  "type": "commonjs",
+  "scripts": {
+    "selftest": "node selftest-portable.js",
+    "health": "node cli.js --health",
+    "server": "node server.js",
+    "server:json": "node server.js --adapter-pack ./adapters/strict-portable-pack.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,44 @@
+name: Portable local backend
+
+on:
+  pull_request:
+    paths:
+      - "local-backend/**"
+      - "language-organs/candidate-renderer.js"
+      - "language-organs/capability-levels.js"
+      - "language-organs/capability-passport.js"
+      - "language-organs/deep-analysis.js"
+      - "language-organs/evidence-passport.js"
+      - "language-organs/grammar-bridge-atlas.js"
+      - "language-organs/intent-renderer.js"
+      - "language-organs/parser-assisted-detection.js"
+      - "language-organs/parser-spine.js"
+      - "language-organs/project-graph.js"
+      - "language-organs/semantic-graph.js"
+      - "language-organs/structural-facts.js"
+      - "language-organs/verifier-ladder.js"
+      - "testing/run-all.js"
+      - ".github/workflows/portable-local-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run portable backend selftest
+        run: node local-backend/selftest-portable.js
+      - name: Run complete repository suite
+        run: npm test
