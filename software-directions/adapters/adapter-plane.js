@@ -18,9 +18,31 @@ function held(result, errorCode = null, details = {}) {
   return freeze({...body, resolutionSha256: registry.hash(body)});
 }
 
+function packetIdentity(packet) {
+  const claimedPacketSha256 = packet.packetSha256;
+  if (typeof claimedPacketSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(claimedPacketSha256)) {
+    return {valid: false, result: 'ADAPTER_PACKET_DIGEST_REQUIRED', errorCode: 'PACKET_SHA256_INVALID', claimedPacketSha256: typeof claimedPacketSha256 === 'string' ? claimedPacketSha256 : null, observedPacketSha256: null};
+  }
+  const body = {...packet};
+  delete body.packetSha256;
+  let observedPacketSha256;
+  try {
+    observedPacketSha256 = registry.hash(body);
+  } catch (error) {
+    return {valid: false, result: 'ADAPTER_PACKET_DIGEST_UNVERIFIABLE', errorCode: 'PACKET_CANONICALIZATION_FAILED', claimedPacketSha256, observedPacketSha256: null};
+  }
+  if (observedPacketSha256 !== claimedPacketSha256) {
+    return {valid: false, result: 'ADAPTER_PACKET_DIGEST_MISMATCH', errorCode: 'PACKET_SHA256_MISMATCH', claimedPacketSha256, observedPacketSha256};
+  }
+  return {valid: true, claimedPacketSha256, observedPacketSha256};
+}
+
 function resolve(packet) {
   if (!packet || typeof packet !== 'object' || Array.isArray(packet)) return held('ADAPTER_PACKET_REQUIRED');
   if (packet.schema !== 'axm.code.frontier-direction-build-packet.v1' || packet.result !== 'FRONTIER_DIRECTION_BUILD_PACKET_READY_NO_EXECUTION_AUTHORITY') return held('ADAPTER_PACKET_NOT_READY');
+  const identity = packetIdentity(packet);
+  if (!identity.valid) return held(identity.result, identity.errorCode, {claimedPacketSha256: identity.claimedPacketSha256, observedPacketSha256: identity.observedPacketSha256});
+  if (!packet.challenge || typeof packet.challenge !== 'object' || Array.isArray(packet.challenge)) return held('ADAPTER_PACKET_CHALLENGE_INVALID');
   const requested = packet.challenge.requestedVerifiers;
   if (!Array.isArray(requested) || requested.some(id => typeof id !== 'string')) return held('ADAPTER_VERIFIER_TARGETS_INVALID');
   const runtimeAdapter = registry.all().find(adapter => adapter.kind === 'runtime');

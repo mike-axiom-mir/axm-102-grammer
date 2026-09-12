@@ -13,6 +13,8 @@ const execution = adapters.execute(packet);
 
 Resolution is not evidence. A verifier ID enters `verifiedVerifierIds` only after its adapter runs and returns `VERIFIER_ADAPTER_PASS`.
 
+Before resolution or execution, the adapter plane recomputes the incoming build packet's `packetSha256` over the complete packet body. Missing, malformed, or stale digests hold before any reference build runs. This preserves identity continuity between the packet that was prepared and the packet named by later receipts; it is not authentication. A caller that constructs different packet bytes and deliberately computes a new valid digest is not thereby trusted, authorized, or proven to be the original producer.
+
 The first plane contains one bounded Node in-memory runtime and nine verifier adapters:
 
 - unit test;
