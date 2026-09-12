@@ -1,0 +1,56 @@
+name: Execution report process admission
+
+on:
+  push:
+    branches:
+      - automation/truth-sentinel-execution-report-process-admission-20260911
+    paths:
+      - 'software-directions/adapters/**'
+      - '.github/workflows/execution-report-process-admission.yml'
+  pull_request:
+    paths:
+      - 'software-directions/adapters/**'
+      - '.github/workflows/execution-report-process-admission.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-process-admission:
+    name: Node ${{ matrix.node }} / Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: '18'
+            python: '3.11'
+          - node: '22'
+            python: '3.13'
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v7
+
+      - name: Assert exact source identity
+        shell: bash
+        run: test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Run focused raw process admission contract
+        run: node software-directions/adapters/selftest-execution-report-process.js
+
+      - name: Run complete standalone verification suite
+        env:
+          AXM_PYTHON: python
+        run: npm test
