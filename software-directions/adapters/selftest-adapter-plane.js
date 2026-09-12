@@ -58,6 +58,43 @@ assert.strictEqual(plane.resolve(null).result, 'ADAPTER_PACKET_REQUIRED');
 assert.strictEqual(plane.resolve({schema: 'wrong'}).result, 'ADAPTER_PACKET_NOT_READY');
 assert.strictEqual(plane.execute(null).result, 'ADAPTER_EXECUTION_HELD');
 
+function mutableClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+const renamedChallenge = mutableClone(gamePacket);
+renamedChallenge.challenge.name = `${renamedChallenge.challenge.name} (changed after packet hash)`;
+const renamedResolution = plane.resolve(renamedChallenge);
+const renamedExecution = plane.execute(renamedChallenge);
+assert.strictEqual(renamedResolution.result, 'ADAPTER_PACKET_DIGEST_MISMATCH');
+assert.strictEqual(renamedResolution.errorCode, 'PACKET_SHA256_MISMATCH');
+assert.strictEqual(renamedResolution.claimedPacketSha256, gamePacket.packetSha256);
+assert(/^[a-f0-9]{64}$/.test(renamedResolution.observedPacketSha256));
+assert.notStrictEqual(renamedResolution.observedPacketSha256, renamedResolution.claimedPacketSha256);
+assert.strictEqual(renamedExecution.result, 'ADAPTER_EXECUTION_HELD');
+assert.strictEqual(renamedExecution.build, null);
+
+const changedPolicy = mutableClone(gamePacket);
+changedPolicy.runPolicy.productionReadinessClaimed = true;
+assert.strictEqual(plane.resolve(changedPolicy).result, 'ADAPTER_PACKET_DIGEST_MISMATCH');
+assert.strictEqual(plane.execute(changedPolicy).build, null);
+
+const extraField = mutableClone(gamePacket);
+extraField.unboundCallerNote = 'this field was not part of the prepared packet';
+assert.strictEqual(plane.resolve(extraField).result, 'ADAPTER_PACKET_DIGEST_MISMATCH');
+
+const missingDigest = mutableClone(gamePacket);
+delete missingDigest.packetSha256;
+const missingDigestResolution = plane.resolve(missingDigest);
+assert.strictEqual(missingDigestResolution.result, 'ADAPTER_PACKET_DIGEST_REQUIRED');
+assert.strictEqual(missingDigestResolution.errorCode, 'PACKET_SHA256_INVALID');
+assert.strictEqual(plane.execute(missingDigest).result, 'ADAPTER_EXECUTION_HELD');
+
+const malformedDigest = mutableClone(gamePacket);
+malformedDigest.packetSha256 = 'not-a-sha256';
+assert.strictEqual(plane.resolve(malformedDigest).result, 'ADAPTER_PACKET_DIGEST_REQUIRED');
+assert.strictEqual(plane.execute(malformedDigest).build, null);
+
 let buildCount = 0; let runtimeReceiptCount = 0; let verifierReceiptCount = 0; let unsupportedTargetCount = 0; let zeroCoverageBuildCount = 0;
 for (const profile of directionRegistry.all()) {
   for (const level of workbench.LEVELS) {
@@ -101,6 +138,7 @@ console.log(JSON.stringify({
   verifierReceiptCount,
   unsupportedTargetCount,
   zeroCoverageBuildCount,
+  packetIdentityRegressionCount: 5,
   snapshotSha256: snapshot.snapshotSha256,
   authority: 'BOUNDED_LOCAL_ADAPTER_ONLY'
 }, null, 2));
