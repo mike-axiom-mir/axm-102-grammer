@@ -1,0 +1,37 @@
+{
+  "schema": "axm.102-grammar.capability-registry-receipt/v1",
+  "generator": "tools/capability-discovery/generate-registry.mjs",
+  "pattern_provenance": {
+    "repo": "mike-axiom-mir/axm-grammer-glass",
+    "ref": "automation/capability-weaver-grammar-glass-discovery-v0.1",
+    "path": "tools/capability-discovery/generate-registry.mjs",
+    "relationship": "adapted-source-backed-discovery-pattern-no-runtime-dependency",
+    "upstream_pattern": "mike-axiom-mir/axm-local-game-hub#automation/capability-weaver-hub-registry-v0.1"
+  },
+  "inputs": [
+    {
+      "path": "LICENSE",
+      "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+    },
+    {
+      "path": "language-organs/standalone-capability-router.js",
+      "git_blob_sha1": "e9cc40c113cd2b5d299c2e97deed592d92327244"
+    },
+    {
+      "path": "software-directions/direction-stack.js",
+      "git_blob_sha1": "982c8289b31d230a0d318e672a72346754e1a518"
+    }
+  ],
+  "output": {
+    "path": "registry/public-capabilities.jsonl",
+    "records": 2,
+    "sha256": "a2b49b609f988cde7f00c37f44e634a21eb18eca81902cdfd9965c9eb28af537"
+  },
+  "truth": {
+    "declarations_are_runtime_proof": false,
+    "grants_authority": false,
+    "public_discovery_is_explicit_opt_in": true,
+    "source_exports_remain_authoritative": true,
+    "license_claim_is_bound_to_repository_license": true
+  }
+}

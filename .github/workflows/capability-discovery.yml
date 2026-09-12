@@ -1,0 +1,102 @@
+name: Public Capability Discovery
+
+on:
+  pull_request:
+    paths:
+      - ".axm/discovery-public.json"
+      - ".github/workflows/capability-discovery.yml"
+      - "docs/CAPABILITY_DISCOVERY.md"
+      - "registry/public-capabilities.jsonl"
+      - "registry/public-capabilities.receipt.json"
+      - "tools/capability-discovery/**"
+      - "language-organs/standalone-capability-router.js"
+      - "software-directions/direction-stack.js"
+      - "LICENSE"
+  push:
+    branches:
+      - main
+    paths:
+      - ".axm/discovery-public.json"
+      - ".github/workflows/capability-discovery.yml"
+      - "docs/CAPABILITY_DISCOVERY.md"
+      - "registry/public-capabilities.jsonl"
+      - "registry/public-capabilities.receipt.json"
+      - "tools/capability-discovery/**"
+      - "language-organs/standalone-capability-router.js"
+      - "software-directions/direction-stack.js"
+      - "LICENSE"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    name: Source contract · Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - "18"
+          - "22"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify generated discovery contract
+        run: |
+          node --check tools/capability-discovery/generate-registry.mjs
+          node --check tools/capability-discovery/test-registry.mjs
+          node --test tools/capability-discovery/test-registry.mjs
+          node tools/capability-discovery/generate-registry.mjs --check
+      - name: Preserve complete standalone grammar regression
+        run: npm test
+
+  discovery-bridge:
+    name: Discovery Buddy compatibility
+    needs: source-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Checkout pinned Discovery Buddy
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-discovery-buddy
+          ref: 1a94fc2481d1cfc9234dea7c86af4777126d3924
+          path: .ci/discovery-buddy
+      - name: Scan real provider worktree in public mode
+        shell: bash
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/axm-102-provider" "$GITHUB_SHA"
+          PYTHONPATH="$GITHUB_WORKSPACE/.ci/discovery-buddy" \
+            python -m discovery_buddy scan "$RUNNER_TEMP/axm-102-provider" \
+              --output-dir "$RUNNER_TEMP/discovery" --public
+          python - "$RUNNER_TEMP/discovery/public-discovery.json" <<'PY'
+          import json
+          import sys
+
+          path = sys.argv[1]
+          with open(path, "r", encoding="utf-8") as handle:
+              index = json.load(handle)
+
+          assert index["schema"] == "axm.discovery-index/v0.1"
+          assert index["visibility"] == "PUBLIC_SAFE_DECLARED_ONLY"
+          assert index["summary"]["repositories"] == 1
+          assert index["summary"]["capability_records"] == 2
+
+          repo = index["repositories"][0]
+          assert repo["repo"] == "mike-axiom-mir/axm-102-grammer"
+          records = repo["capabilities"]["records"]
+          assert [record["id"] for record in records] == [
+              "axm.code.software-direction-stack.v1",
+              "axm.code.standalone-capability-capsule.v1",
+          ]
+          assert all(record["status"] == "TEST" for record in records)
+          assert repo["capabilities"]["sources"][0]["errors"] == 0
+          print("discovery-bridge: PASS · 1 repo · 2 TEST capability records")
+          PY
