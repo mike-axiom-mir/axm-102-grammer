@@ -100,9 +100,15 @@ const adapters = require('./adapters/adapter-plane.js');
 
 const resolution = adapters.resolve(packet);
 const execution = adapters.execute(packet);
+const verification = adapters.verifyExecutionReport(execution, {
+  expectedPacketSha256: packet.packetSha256,
+  expectedReportSha256: execution.reportSha256
+});
 ```
 
 Resolution alone is not evidence. Only a passed adapter receipt enters `verifiedVerifierIds`. The first plane supports nine local verifier categories and keeps eleven external or specialized categories unsupported. See `adapters/README.md` for the exact partition and authority boundary.
+
+The same plane can independently admit an exact caller-pinned completed report without rerunning adapters. It validates nested digests, current registry bindings, reconstructed resolution identity, derived evidence summaries, and closed authority. This is content-integrity verification, not producer authentication or renewed execution evidence.
 
 ## Deterministic code placement
 
