@@ -3,6 +3,41 @@
   "version": "1.0.0-test",
   "private": true,
   "description": "Standalone deterministic AXM 102 code/language grammar body",
+  "license": "Apache-2.0",
+  "main": "language-organs/standalone-capability-router.js",
+  "exports": {
+    ".": "./language-organs/standalone-capability-router.js",
+    "./contract": "./language-organs/standalone-capability-router.contract.json",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "axm-grammar-capabilities": "bin/axm-grammar-capabilities.js"
+  },
+  "files": [
+    "bin/",
+    "language-organs/standalone-capability-router.js",
+    "language-organs/standalone-capability-router.contract.json",
+    "language-organs/registry.js",
+    "language-organs/families.json",
+    "language-organs/human-developer-perspective.json",
+    "language-organs/grammar-profile-registry.js",
+    "language-organs/specialist-eye-registry.js",
+    "language-organs/code-native-discovery-seam.js",
+    "language-organs/machine-template-fabric.js",
+    "language-organs/template-fast-router.js",
+    "language-organs/template-pattern-miner.js",
+    "language-organs/machine-code-keyboard-fabric.js",
+    "language-organs/machine-code-keyboard-router.js",
+    "language-organs/machine-cheatcode-fabric.js",
+    "language-organs/machine-cheatcode-influence-mesh.js",
+    "language-organs/organs/",
+    "software-directions/axis-catalog.json",
+    "software-directions/direction-catalog.json",
+    "software-directions/provenance.json",
+    "software-directions/direction-registry.js",
+    "software-directions/direction-stack.js",
+    "software-directions/direction-gap-detector.js"
+  ],
   "scripts": {
     "test": "node testing/run-all.js"
   },
