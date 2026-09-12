@@ -1,0 +1,61 @@
+name: Software Direction Desk experience
+
+on:
+  pull_request:
+    paths:
+      - 'software-directions/direction-desk-server.js'
+      - 'software-directions/direction-desk.html'
+      - 'software-directions/selftest-direction-desk.js'
+      - 'software-directions/test-direction-desk-chromium.js'
+      - 'software-directions/direction-stack.js'
+      - 'software-directions/direction-gap-detector.js'
+      - 'software-directions/direction-registry.js'
+      - 'software-directions/axis-catalog.json'
+      - 'software-directions/direction-catalog.json'
+      - '.github/workflows/direction-desk-experience.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Syntax
+        run: |
+          node --check software-directions/direction-desk-server.js
+          node --check software-directions/selftest-direction-desk.js
+      - name: Direction stack prerequisite
+        run: node software-directions/selftest-direction-stack.js
+      - name: Direction Desk contract
+        run: node software-directions/selftest-direction-desk.js
+
+  chromium-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Browser availability
+        run: |
+          command -v google-chrome || command -v chromium || command -v chromium-browser
+      - name: Exercise real local Desk
+        env:
+          AXM_DIRECTION_DESK_ARTIFACT_DIR: direction-desk-browser-artifacts
+        run: node software-directions/test-direction-desk-chromium.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software-direction-desk-browser-evidence
+          path: direction-desk-browser-artifacts
+          if-no-files-found: error
+          retention-days: 7
