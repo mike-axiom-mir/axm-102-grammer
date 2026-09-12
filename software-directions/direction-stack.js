@@ -101,7 +101,7 @@ function compose(rawInput = {}) {
     const unknown = input[axis].filter(id => !allowed.has(id));
     if (unknown.length) return held('UNKNOWN_DIRECTION_AXIS_VALUE', null, {axis, unknownValues: unknown});
   }
-  const directionIds = [...new Set(input.directionIds)];
+  const directionIds = [...new Set(input.directionIds)].sort();
   const profiles = directionIds.map(id => registry.get(id));
   const axes = {
     runtime: sourceUnion(profiles, 'typicalRuntimes', input.runtime),

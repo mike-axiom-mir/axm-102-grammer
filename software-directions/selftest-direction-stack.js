@@ -23,9 +23,14 @@ const gameInput = {
 };
 const game = directions.compose(gameInput);
 const gameRepeat = directions.compose(gameInput);
+const gamePermutation = directions.compose({
+  ...gameInput,
+  directionIds: ['collaboration-multiplayer', 'game', 'collaboration-multiplayer']
+});
 assert.deepStrictEqual(gameRepeat, game, 'same direction stack input is deterministic');
+assert.deepStrictEqual(gamePermutation, game, 'direction-set permutations share one canonical stack identity');
 assert.strictEqual(game.result, 'DIRECTION_STACK_READY_NO_AUTHORITY');
-assert.deepStrictEqual(game.directionIds, ['game', 'collaboration-multiplayer']);
+assert.deepStrictEqual(game.directionIds, ['collaboration-multiplayer', 'game']);
 assert.strictEqual(game.duplicateDirectionCount, 1);
 assert(game.expectations.capabilities.some(item => item.id === 'FRAME_LOOP' && item.sourceDirections.includes('game')));
 assert(game.expectations.capabilities.some(item => item.id === 'SHARED_STATE_PROTOCOL' && item.sourceDirections.includes('collaboration-multiplayer')));
