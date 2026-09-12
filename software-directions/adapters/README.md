@@ -9,11 +9,19 @@ const adapters = require('./adapter-plane.js');
 const packet = workbench.prepare({directionId: 'game', level: 'stretch'});
 const resolution = adapters.resolve(packet);
 const execution = adapters.execute(packet);
+const verification = adapters.verifyExecutionReport(execution, {
+  expectedPacketSha256: packet.packetSha256,
+  expectedReportSha256: execution.reportSha256
+});
 ```
 
 Resolution is not evidence. A verifier ID enters `verifiedVerifierIds` only after its adapter runs and returns `VERIFIER_ADAPTER_PASS`.
 
 Before resolution or execution, the adapter plane recomputes the incoming build packet's `packetSha256` over the complete packet body. Missing, malformed, or stale digests hold before any reference build runs. This preserves identity continuity between the packet that was prepared and the packet named by later receipts; it is not authentication. A caller that constructs different packet bytes and deliberately computes a new valid digest is not thereby trusted, authorized, or proven to be the original producer.
+
+Completed execution reports can be admitted later without rerunning adapters. `verifyExecutionReport()` requires caller-owned pins for both the prepared packet and the exact report, limits input to 1 MiB of strict finite JSON, verifies the report/build/runtime/verifier digests, binds every adapter to the current registry snapshot, reconstructs the resolution digest, and recomputes result, coverage, evidence, and failure summaries. Unknown top-level fields hold rather than silently extending the v1 contract.
+
+Verification proves that the supplied bytes match the caller's pins and remain internally consistent with this adapter registry. It does not re-evaluate verifier observations, authenticate who produced either digest, establish that a caller obtained its pins independently, turn bounded evidence into universal proof, or grant execution, promotion, or CANON authority.
 
 The first plane contains one bounded Node in-memory runtime and nine verifier adapters:
 

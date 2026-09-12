@@ -6,11 +6,13 @@
     "axm.code.direction-adapter-resolution.v1",
     "axm.code.direction-runtime-adapter-receipt.v1",
     "axm.code.direction-verifier-adapter-receipt.v1",
-    "axm.code.direction-adapter-execution-report.v1"
+    "axm.code.direction-adapter-execution-report.v1",
+    "axm.code.direction-adapter-execution-verification.v1"
   ],
   "executionBoundary": {
     "currentProcessRuntimeInspection": true,
     "boundedInMemoryReferenceExecution": true,
+    "boundedInMemoryEvidenceVerification": true,
     "workspaceRead": false,
     "workspaceMutation": false,
     "childProcessExecution": false,
@@ -23,6 +25,9 @@
     "requestedVerifierIsEvidence": false,
     "resolvedAdapterIsExecutedEvidence": false,
     "passedAdapterReceiptIsBoundedEvidence": true,
+    "executionReportRequiresCallerPacketAndReportPins": true,
+    "executionReportVerificationReexecutesAdapters": false,
+    "executionReportVerificationAuthenticatesProducer": false,
     "boundedEvidenceIsUniversalProof": false,
     "unsupportedAdapterIsFailureOfDirection": false,
     "unsupportedAdapterIsLanguageIncapability": false,
@@ -32,7 +37,7 @@
     "automaticAdapterInstall": false,
     "automaticExternalToolUse": false
   },
-  "permissions": ["current-node-version-read", "bounded-in-memory-reference-execution"],
+  "permissions": ["current-node-version-read", "bounded-in-memory-reference-execution", "bounded-in-memory-evidence-verification"],
   "refuses": [
     "workspace-read",
     "workspace-mutation",
@@ -44,6 +49,7 @@
     "security-review-claim-without-independent-review",
     "load-claim-without-load-run",
     "compatibility-claim-without-target-matrix",
+    "execution-report-verification-without-caller-pins",
     "automatic-promotion",
     "automatic-canon"
   ],
