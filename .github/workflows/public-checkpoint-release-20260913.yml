@@ -2,6 +2,8 @@ name: Publish 2026-09-13 public checkpoint
 
 on:
   push:
+    branches:
+      - main
     paths:
       - .github/workflows/public-checkpoint-release-20260913.yml
 
@@ -12,7 +14,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Create prerelease checkpoint once
+      - name: Recreate prerelease checkpoint from main
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: public-checkpoint-2026-09-13
@@ -20,7 +22,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then exit 0; fi
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes
+          fi
           repo_name="${GITHUB_REPOSITORY#*/}"
           cat > release-notes.md <<EOF
           Public experimental checkpoint of ${repo_name}.
