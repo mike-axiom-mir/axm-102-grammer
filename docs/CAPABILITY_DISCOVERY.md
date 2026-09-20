@@ -4,10 +4,12 @@ This repository already contains reusable deterministic capability surfaces. Thi
 
 ## Declared capabilities
 
-`registry/public-capabilities.jsonl` currently exposes exactly two `TEST` declarations:
+`registry/public-capabilities.jsonl` currently exposes exactly three `TEST` declarations:
 
 - `axm.code.standalone-capability-capsule.v1` — the read-only 102-language standalone composition surface implemented by `language-organs/standalone-capability-router.js`.
 - `axm.code.software-direction-stack.v1` — the explicit software-direction composition surface in `software-directions/direction-stack.js`, including the separate `axm.code.software-direction-suggestion-report.v1` suggestion interface.
+
+- `axm.code.program-compilation.v1` — the typed, bounded JavaScript/Python source compiler in `code-programs/index.js`, with recipe capture and restoration.
 
 The source modules remain authoritative for behavior, status, exports, and authority. The generated registry is discovery evidence only.
 
@@ -27,13 +29,13 @@ The registry pattern is adapted from the source-backed discovery lane in `mike-a
 
 ## Public discovery bridge
 
-`.axm/discovery-public.json` is an explicit opt-in for Discovery Buddy's bounded public mode. CI pins Discovery Buddy at commit `1a94fc2481d1cfc9234dea7c86af4777126d3924`, scans a real worktree of this repository, and requires both declarations to appear with `TEST` status.
+`.axm/discovery-public.json` is an explicit opt-in for Discovery Buddy's bounded public mode. CI pins Discovery Buddy at commit `1a94fc2481d1cfc9234dea7c86af4777126d3924`, scans a real worktree of this repository, and requires all three declarations to appear with `TEST` status.
 
 That pin is a compatibility probe, not a dependency of the grammar body.
 
 ## License and provenance
 
-The repository carries Apache License 2.0 in `LICENSE`. The generator verifies that license text before emitting the public registry and includes the exact `LICENSE` Git blob identity in its receipt. This is provenance/integrity evidence; it is not author authentication or legal advice.
+The repository carries Mozilla Public License 2.0 in `LICENSE`. The generator verifies that license text before emitting the public registry and includes the exact `LICENSE` Git blob identity in its receipt. This is provenance/integrity evidence; it is not author authentication or legal advice.
 
 ## Truth and authority boundary
 

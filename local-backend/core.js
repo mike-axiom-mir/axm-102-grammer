@@ -18,8 +18,9 @@ const evidence=require('../language-organs/evidence-passport.js');
 const assistedDetection=require('../language-organs/parser-assisted-detection.js');
 const bridges=require('../language-organs/grammar-bridge-atlas.js');
 const adapters=require('./adapter-host.js');
+const codePrograms=require('../code-programs/index.js');
 
-const API_VERSION='1.2.0';
+const API_VERSION='1.3.0';
 const MAX_SOURCE_BYTES=64*1024*1024;
 
 function sourceBytes(input={}){
@@ -45,7 +46,8 @@ function createCore(pack=adapters.blank()){
   function handle(request={}){
     if(!request||typeof request!=='object'||Array.isArray(request))throw Error('REQUEST_NOT_OBJECT');
     const op=String(request.op||''),input=request.input&&typeof request.input==='object'&&!Array.isArray(request.input)?request.input:{};
-    if(op==='health')return{schema:'axm.code.local-backend-health.v1',result:'READY',apiVersion:API_VERSION,languageCount:registry.all().length,adapters:adapters.list(pack),operations:['health','languages','language','detect','detect-assisted','grammar-plan','eye-plan','discover','keyboard-layout','keyboard-press','keyboard-program','capability','parse','structure','semantic','analyze','deep-analysis','project-graph','project-impact','render','intent-render','render-verify','intent-render-verify','evidence-passport','bridge-build','bridge-query'],truth:{offlineDefault:true,aiRequired:false,networkRequired:false,workspaceMutation:false}};
+    if(op==='health')return{schema:'axm.code.local-backend-health.v1',result:'READY',apiVersion:API_VERSION,languageCount:registry.all().length,adapters:adapters.list(pack),operations:['health','languages','language','detect','detect-assisted','grammar-plan','eye-plan','discover','keyboard-layout','keyboard-press','keyboard-program','capability','parse','structure','semantic','analyze','deep-analysis','project-graph','project-impact','render','intent-render','render-verify','intent-render-verify','evidence-passport','bridge-build','bridge-query','code-program'],truth:{offlineDefault:true,aiRequired:false,networkRequired:false,workspaceMutation:false}};
+    if(op==='code-program')return codePrograms.handle(input);
     if(op==='languages')return{schema:'axm.code.local-backend-languages.v1',result:'READY',languages:registry.all().map(o=>({languageId:o.languageId,organId:o.organId,displayName:o.displayName,family:o.family,kind:o.kind,capability:measured(pack,o.languageId).level}))};
     if(op==='language'){
       const o=registry.getByLanguageId(String(input.languageId||''));if(!o)return{result:'UNKNOWN_LANGUAGE',languageId:input.languageId||null};

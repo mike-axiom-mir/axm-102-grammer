@@ -33,11 +33,12 @@ function replaceAll(relativePath, fixture, from, to) {
   fs.writeFileSync(target, after, 'utf8');
 }
 
-test('real repository exposes exactly two bounded TEST declarations', () => {
+test('real repository exposes exactly three bounded TEST declarations', () => {
   const result = deriveRegistry(root);
   assert.deepEqual(
     result.rows.map((row) => row.id),
     [
+      'axm.code.program-compilation.v1',
       'axm.code.software-direction-stack.v1',
       'axm.code.standalone-capability-capsule.v1'
     ]
@@ -52,7 +53,7 @@ test('real repository exposes exactly two bounded TEST declarations', () => {
     assert.equal(row.truth.grants_authority, false);
     assert.equal(row.provenance.license_evidence, 'LICENSE');
   }
-  assert.equal(result.receipt.output.records, 2);
+  assert.equal(result.receipt.output.records, 3);
   assert.equal(result.receipt.truth.source_exports_remain_authoritative, true);
 });
 

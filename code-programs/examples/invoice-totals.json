@@ -1,0 +1,245 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "invoiceTotals",
+    "functions": [
+      {
+        "name": "lineCost",
+        "params": [
+          {
+            "name": "quantity",
+            "type": "number"
+          },
+          {
+            "name": "unitPrice",
+            "type": "number"
+          }
+        ],
+        "returns": "number",
+        "body": {
+          "op": "multiply",
+          "left": {
+            "op": "ref",
+            "name": "quantity"
+          },
+          "right": {
+            "op": "ref",
+            "name": "unitPrice"
+          }
+        }
+      },
+      {
+        "name": "invoice",
+        "params": [
+          {
+            "name": "entries",
+            "type": {
+              "list": {
+                "record": {
+                  "name": "string",
+                  "quantity": "number",
+                  "unitPrice": "number",
+                  "active": "boolean"
+                }
+              }
+            }
+          },
+          {
+            "name": "taxRate",
+            "type": "number"
+          }
+        ],
+        "returns": {
+          "record": {
+            "subtotal": "number",
+            "tax": "number",
+            "total": "number",
+            "labels": {
+              "list": "string"
+            }
+          }
+        },
+        "body": {
+          "op": "let",
+          "name": "activeEntries",
+          "value": {
+            "op": "filter",
+            "input": {
+              "op": "ref",
+              "name": "entries"
+            },
+            "item": "entry",
+            "body": {
+              "op": "field",
+              "value": {
+                "op": "ref",
+                "name": "entry"
+              },
+              "key": "active"
+            }
+          },
+          "body": {
+            "op": "let",
+            "name": "subtotalValue",
+            "value": {
+              "op": "fold",
+              "input": {
+                "op": "map",
+                "input": {
+                  "op": "ref",
+                  "name": "activeEntries"
+                },
+                "item": "entry",
+                "body": {
+                  "op": "call",
+                  "function": "lineCost",
+                  "args": [
+                    {
+                      "op": "field",
+                      "value": {
+                        "op": "ref",
+                        "name": "entry"
+                      },
+                      "key": "quantity"
+                    },
+                    {
+                      "op": "field",
+                      "value": {
+                        "op": "ref",
+                        "name": "entry"
+                      },
+                      "key": "unitPrice"
+                    }
+                  ]
+                }
+              },
+              "item": "amount",
+              "acc": "total",
+              "initial": {
+                "op": "literal",
+                "type": "number",
+                "value": 0
+              },
+              "body": {
+                "op": "add",
+                "left": {
+                  "op": "ref",
+                  "name": "total"
+                },
+                "right": {
+                  "op": "ref",
+                  "name": "amount"
+                }
+              }
+            },
+            "body": {
+              "op": "record",
+              "fields": {
+                "subtotal": {
+                  "op": "ref",
+                  "name": "subtotalValue"
+                },
+                "tax": {
+                  "op": "multiply",
+                  "left": {
+                    "op": "ref",
+                    "name": "subtotalValue"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "name": "taxRate"
+                  }
+                },
+                "total": {
+                  "op": "add",
+                  "left": {
+                    "op": "ref",
+                    "name": "subtotalValue"
+                  },
+                  "right": {
+                    "op": "multiply",
+                    "left": {
+                      "op": "ref",
+                      "name": "subtotalValue"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "name": "taxRate"
+                    }
+                  }
+                },
+                "labels": {
+                  "op": "map",
+                  "input": {
+                    "op": "ref",
+                    "name": "activeEntries"
+                  },
+                  "item": "entry",
+                  "body": {
+                    "op": "trim",
+                    "value": {
+                      "op": "field",
+                      "value": {
+                        "op": "ref",
+                        "name": "entry"
+                      },
+                      "key": "name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "exports": [
+      "invoice"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "invoice",
+      "args": [
+        [
+          {
+            "name": " bolts ",
+            "quantity": 3,
+            "unitPrice": 4,
+            "active": true
+          },
+          {
+            "name": "skip",
+            "quantity": 50,
+            "unitPrice": 20,
+            "active": false
+          }
+        ],
+        0.25
+      ],
+      "expected": {
+        "subtotal": 12,
+        "tax": 3,
+        "total": 15,
+        "labels": [
+          "bolts"
+        ]
+      }
+    },
+    {
+      "function": "invoice",
+      "args": [
+        [],
+        0.21
+      ],
+      "expected": {
+        "subtotal": 0,
+        "tax": 0,
+        "total": 0,
+        "labels": []
+      }
+    }
+  ]
+}

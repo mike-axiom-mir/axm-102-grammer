@@ -6,6 +6,25 @@ This is the clean standalone home for the AXM 102 code/language grammar body.
 
 It contains the actual recovered source and generated language-specific materializations for all 102 code/language organs, including grammar-native profiles, specialist eyes, machine template banks, machine keyboard banks, and machine cheatcode banks, together with their focused deterministic generators, registries, and checks.
 
+## Composable JavaScript/Python code generation
+
+`code-programs/` now turns a typed, explicit program into standalone source and
+optional tests. Its 48 composable operations cover arithmetic, validation,
+branching, immutable bindings, function calls, record/list construction, map,
+filter, fold, stable sorting, Unicode-aware slicing and text transformations.
+Eight bundled recipes are starting examples; programs can combine the atoms in
+new ways without AI or a network connection.
+
+The same layer captures individual functions with their dependency closures in
+an additive, digest-bound recipe archive. Renaming does not multiply stored
+atoms. Changes to constants, field names, types or logic remain distinct.
+
+Use `require('axm-102-grammar-body/code-programs')`, `axm-code-program`, or the
+existing backend's `code-program` operation. See
+[`code-programs/README.md`](code-programs/README.md) for runnable examples,
+operation contracts, limits and the exact source/execution boundary. Existing
+102-language identity and native parser/rewriter capability levels are preserved.
+
 ## Recovery checkpoint
 
 - source repository: `mike-axiom-mir/axm-collaboration-platform`
@@ -67,7 +86,7 @@ to a registry. `private: true` remains set so release is always deliberate.
 
 ```sh
 npm pack --ignore-scripts
-npm install --offline --ignore-scripts ./axm-102-grammar-body-1.0.0-test.tgz
+npm install --offline --ignore-scripts ./axm-102-grammar-body-1.1.0-test.tgz
 ```
 
 The installed package exposes the same read-only composition API:

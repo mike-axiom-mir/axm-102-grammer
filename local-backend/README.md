@@ -2,7 +2,7 @@
 
 Status: **portable deterministic backend implementation / TEST**
 
-API: `1.2.0`
+API: `1.3.0`
 
 The backend makes the 102 Grammar body callable by a person, a local application, another AI/agent with shell access, a VM/container, or a packaged host without changing the grammar logic.
 
@@ -97,6 +97,20 @@ or:
 
 The default backend does not open arbitrary workspace paths. A host that already has explicit workspace authority can read bytes, submit them, inspect the returned candidate/evidence, and separately decide whether to write accepted bytes.
 
+## Composable source generation
+
+The `code-program` operation routes to the same typed JavaScript/Python compiler
+shipped in the standalone npm package:
+
+```json
+{"op":"code-program","input":{"action":"recipe","id":"invoice-totals","languageId":"python"}}
+```
+
+It returns source/test artifacts, or accepts `catalog`, `validate`, `compile`,
+`capture` and `restore` actions. This route compiles explicit program data; it
+never executes candidate code or writes a workspace/archive. It does not change
+native language G0–G6 claims. See [code programs](../code-programs/README.md).
+
 ## Operations
 
 Knowledge/control:
@@ -131,6 +145,7 @@ Candidate/verification:
 - `render-verify`
 - `intent-render-verify`
 - `evidence-passport`
+- `code-program`
 
 Cross-language comparison:
 

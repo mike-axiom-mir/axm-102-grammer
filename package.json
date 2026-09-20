@@ -1,19 +1,21 @@
 {
   "name": "axm-102-grammar-body",
-  "version": "1.0.0-test",
+  "version": "1.1.0-test",
   "private": true,
   "description": "Standalone deterministic AXM 102 code/language grammar body",
-  "license": "Apache-2.0",
+  "license": "MPL-2.0",
   "main": "language-organs/standalone-capability-router.js",
   "exports": {
     ".": "./language-organs/standalone-capability-router.js",
     "./grammar-glass-snapshot": "./language-organs/export-grammar-glass-capability-snapshot.js",
     "./contract": "./language-organs/standalone-capability-router.contract.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./code-programs": "./code-programs/index.js"
   },
   "bin": {
     "axm-grammar-capabilities": "bin/axm-grammar-capabilities.js",
-    "axm-grammar-glass-snapshot": "bin/axm-grammar-glass-snapshot.js"
+    "axm-grammar-glass-snapshot": "bin/axm-grammar-glass-snapshot.js",
+    "axm-code-program": "bin/axm-code-program.js"
   },
   "files": [
     "bin/",
@@ -39,7 +41,18 @@
     "software-directions/provenance.json",
     "software-directions/direction-registry.js",
     "software-directions/direction-stack.js",
-    "software-directions/direction-gap-detector.js"
+    "software-directions/direction-gap-detector.js",
+    "code-programs/index.js",
+    "code-programs/common.js",
+    "code-programs/checker.js",
+    "code-programs/emitter.js",
+    "code-programs/runtime-js.js",
+    "code-programs/runtime-python.js",
+    "code-programs/reuse.js",
+    "code-programs/recipes.js",
+    "code-programs/contract.json",
+    "code-programs/README.md",
+    "code-programs/examples/"
   ],
   "scripts": {
     "test": "node testing/run-all.js"

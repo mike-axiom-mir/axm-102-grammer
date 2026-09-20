@@ -1,0 +1,91 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "requiredFields",
+    "functions": [
+      {
+        "name": "validContact",
+        "params": [
+          {
+            "name": "contact",
+            "type": {
+              "record": {
+                "name": "string",
+                "email": "string"
+              }
+            }
+          }
+        ],
+        "returns": "boolean",
+        "body": {
+          "op": "and",
+          "left": {
+            "op": "gt",
+            "left": {
+              "op": "length",
+              "value": {
+                "op": "trim",
+                "value": {
+                  "op": "field",
+                  "value": {
+                    "op": "ref",
+                    "name": "contact"
+                  },
+                  "key": "name"
+                }
+              }
+            },
+            "right": {
+              "op": "literal",
+              "type": "number",
+              "value": 0
+            }
+          },
+          "right": {
+            "op": "contains",
+            "left": {
+              "op": "field",
+              "value": {
+                "op": "ref",
+                "name": "contact"
+              },
+              "key": "email"
+            },
+            "right": {
+              "op": "literal",
+              "type": "string",
+              "value": "@"
+            }
+          }
+        }
+      }
+    ],
+    "exports": [
+      "validContact"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "validContact",
+      "args": [
+        {
+          "name": "Mike",
+          "email": "a@b"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "function": "validContact",
+      "args": [
+        {
+          "name": " ",
+          "email": "a@b"
+        }
+      ],
+      "expected": false
+    }
+  ]
+}

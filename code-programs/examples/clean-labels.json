@@ -1,0 +1,82 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "cleanLabelPipeline",
+    "functions": [
+      {
+        "name": "cleanLabels",
+        "params": [
+          {
+            "name": "labels",
+            "type": {
+              "list": "string"
+            }
+          }
+        ],
+        "returns": {
+          "list": "string"
+        },
+        "body": {
+          "op": "filter",
+          "input": {
+            "op": "map",
+            "input": {
+              "op": "ref",
+              "name": "labels"
+            },
+            "item": "label",
+            "body": {
+              "op": "asciiLower",
+              "value": {
+                "op": "trim",
+                "value": {
+                  "op": "ref",
+                  "name": "label"
+                }
+              }
+            }
+          },
+          "item": "clean",
+          "body": {
+            "op": "gt",
+            "left": {
+              "op": "length",
+              "value": {
+                "op": "ref",
+                "name": "clean"
+              }
+            },
+            "right": {
+              "op": "literal",
+              "type": "number",
+              "value": 0
+            }
+          }
+        }
+      }
+    ],
+    "exports": [
+      "cleanLabels"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "cleanLabels",
+      "args": [
+        [
+          "  HELLO ",
+          "\t",
+          "ÉCOLE",
+          "😀 A"
+        ]
+      ],
+      "expected": [
+        "hello",
+        "École",
+        "😀 a"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "splitAndJoin",
+    "functions": [
+      {
+        "name": "retokenize",
+        "params": [
+          {
+            "name": "text",
+            "type": "string"
+          },
+          {
+            "name": "separator",
+            "type": "string"
+          },
+          {
+            "name": "replacement",
+            "type": "string"
+          }
+        ],
+        "returns": "string",
+        "body": {
+          "op": "join",
+          "input": {
+            "op": "split",
+            "left": {
+              "op": "ref",
+              "name": "text"
+            },
+            "right": {
+              "op": "ref",
+              "name": "separator"
+            }
+          },
+          "separator": {
+            "op": "ref",
+            "name": "replacement"
+          }
+        }
+      }
+    ],
+    "exports": [
+      "retokenize"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "retokenize",
+      "args": [
+        "a::b::",
+        "::",
+        "/"
+      ],
+      "expected": "a/b/"
+    },
+    {
+      "function": "retokenize",
+      "args": [
+        "x",
+        "",
+        ","
+      ],
+      "error": "EMPTY_SEPARATOR"
+    }
+  ]
+}

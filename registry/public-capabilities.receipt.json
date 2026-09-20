@@ -11,7 +11,11 @@
   "inputs": [
     {
       "path": "LICENSE",
-      "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+      "git_blob_sha1": "ee6256cdb62a765749a71aae3abea32884301cd1"
+    },
+    {
+      "path": "code-programs/index.js",
+      "git_blob_sha1": "9ef912c1dbdd93010e9b73f5bef0f1ee400a2d05"
     },
     {
       "path": "language-organs/standalone-capability-router.js",
@@ -24,8 +28,8 @@
   ],
   "output": {
     "path": "registry/public-capabilities.jsonl",
-    "records": 2,
-    "sha256": "a2b49b609f988cde7f00c37f44e634a21eb18eca81902cdfd9965c9eb28af537"
+    "records": 3,
+    "sha256": "d7f460ce9c1e0cc8ae00bc821c5e3c7bf22232c531d1e854be6e6979294787a8"
   },
   "truth": {
     "declarations_are_runtime_proof": false,
