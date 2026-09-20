@@ -1,0 +1,103 @@
+{
+  "schema": "axm.code.program-contract.v1",
+  "version": "1.0.0",
+  "status": "TEST",
+  "inputSchema": "axm.code.program.v1",
+  "source": "code-programs/checker.js",
+  "languages": [
+    "javascript",
+    "python"
+  ],
+  "operations": [
+    "literal",
+    "ref",
+    "record",
+    "list",
+    "field",
+    "call",
+    "let",
+    "if",
+    "map",
+    "filter",
+    "some",
+    "every",
+    "fold",
+    "sortBy",
+    "at",
+    "slice",
+    "join",
+    "length",
+    "trim",
+    "asciiLower",
+    "asciiUpper",
+    "not",
+    "negate",
+    "abs",
+    "floor",
+    "ceil",
+    "isNull",
+    "coalesce",
+    "equal",
+    "notEqual",
+    "and",
+    "or",
+    "add",
+    "subtract",
+    "multiply",
+    "divide",
+    "remainder",
+    "min",
+    "max",
+    "lt",
+    "lte",
+    "gt",
+    "gte",
+    "concat",
+    "contains",
+    "startsWith",
+    "endsWith",
+    "split"
+  ],
+  "limits": {
+    "functions": 32,
+    "parameters": 16,
+    "nodes": 4096,
+    "depth": 48,
+    "list": 4096,
+    "fields": 128,
+    "string": 16384,
+    "steps": 100000,
+    "inputNodes": 32768,
+    "bytes": 1048576
+  },
+  "types": [
+    "number",
+    "string",
+    "boolean",
+    "null",
+    {
+      "list": "TYPE"
+    },
+    {
+      "record": {
+        "FIELD": "TYPE"
+      }
+    },
+    {
+      "nullable": "TYPE"
+    }
+  ],
+  "compilationResult": "CODE_PROGRAM_CANDIDATE_READY",
+  "heldResult": "CODE_PROGRAM_HELD",
+  "runtimeExecutionByCompiler": false,
+  "archivePersistenceByCompiler": false,
+  "authority": {
+    "workspaceRead": false,
+    "workspaceMutation": false,
+    "toolExecution": false,
+    "network": false,
+    "install": false,
+    "promotion": false,
+    "canon": false
+  }
+}

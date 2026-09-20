@@ -9,6 +9,27 @@ Source checkpoint used for recovery:
 - commit: `386736aaae3993089dfaf970cf2360894959e3c0`
 - source PR: `#62`
 
+## 2026-09-20 composable code-program upgrade
+
+This section is the new implementation checkpoint; the older recovery
+measurements below remain historical.
+
+- 48 typed, composable source-generation operations; JavaScript and Python targets.
+- Eight bundled application recipes, plus independently generated expression-tree trials.
+- Complete function/dependency modules, explicit data types, stable ordering,
+  bounded execution work, emitted tests, artifact hashes and function source maps.
+- Additive structural recipe capture, reload and restoration; module/function/
+  binding renames deduplicate without erasing constants, field names or logic.
+- Installed package subpath `code-programs`, `axm-code-program` CLI and existing
+  backend integration; package `1.1.0-test`, backend API `1.3.0`.
+- Discovery registry expanded to three source-backed declarations. Its stale
+  Apache-only license check and package license metadata now match current MPL-2.0.
+- Detailed commands and current evidence: `testing/logs/2026-09-20-code-programs-report.md`.
+
+The new compiler emits candidates. It does not execute those candidates,
+activate arbitrary Python in the Foundry, modify an existing workspace, persist
+an archive automatically, or claim native rewriting for all 102 languages.
+
 ## Recovered body
 
 - 102 language directories

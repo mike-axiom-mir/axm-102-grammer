@@ -1,0 +1,58 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "nullableDefaults",
+    "functions": [
+      {
+        "name": "displayName",
+        "params": [
+          {
+            "name": "preferred",
+            "type": {
+              "nullable": "string"
+            }
+          },
+          {
+            "name": "fallbackName",
+            "type": "string"
+          }
+        ],
+        "returns": "string",
+        "body": {
+          "op": "coalesce",
+          "value": {
+            "op": "ref",
+            "name": "preferred"
+          },
+          "fallback": {
+            "op": "ref",
+            "name": "fallbackName"
+          }
+        }
+      }
+    ],
+    "exports": [
+      "displayName"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "displayName",
+      "args": [
+        null,
+        "Guest"
+      ],
+      "expected": "Guest"
+    },
+    {
+      "function": "displayName",
+      "args": [
+        "",
+        "Guest"
+      ],
+      "expected": ""
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "axm.code.program-build-evidence.v1",
+  "observedAtUtc": "2026-09-20T03:12:21.592654+00:00",
+  "baseCommit": "1b7313ca3cc9c29caa760e7e0bdbf778b546f87f",
+  "node": "v24.19.0",
+  "python": "Python 3.12.14",
+  "baseline": {
+    "command": "node testing/run-all.js",
+    "passed": 37,
+    "failed": 0
+  },
+  "current": {
+    "command": "node testing/run-all.js",
+    "passed": 39,
+    "failed": 0,
+    "log": "testing/logs/2026-09-20-code-programs-suite-v2.txt",
+    "logSha256": "0c3876db34604323df63926d7606ba147c5d1e418a0989092f5fe3f69e82e1fa"
+  },
+  "newCompiler": {
+    "languages": [
+      "javascript",
+      "python"
+    ],
+    "operationsExecuted": 48,
+    "standaloneModulesExecuted": 32,
+    "generatedSelftestRuns": 32,
+    "behaviorChecks": 1604,
+    "seededOracleCasesPerLanguage": 768,
+    "compilerAndBoundaryRefusals": 32,
+    "uniqueCapturedFunctions": 9,
+    "archiveRestoreExecuted": true,
+    "installedPackageExecuted": true
+  },
+  "sourceSha256": {
+    "bin/axm-code-program.js": "a347612455fe35dc52a51d681c41f0dbc5dca5e32f4e2a65d4d7d5e8e8cba777",
+    "code-programs/checker.js": "2eff7ee4a45b954e5335978f26f8b03efab6b5d2a21f6b867c237e90e119818b",
+    "code-programs/common.js": "d0916e335db30e8a74517e4753bf4be44507c1ba447af49190d1d5be0445721b",
+    "code-programs/contract.json": "89dc5f974f6e5a940d62ba3dfc40d69e25140c9e08a9d09eff50ed60718baefd",
+    "code-programs/emitter.js": "eb904596c0327780389cf0d79b76e12fe174425369d0553c9e9c7533bb4ad317",
+    "code-programs/index.js": "cfdc48f9921444ed66cfee901b0cbf4c4de5f57ed890f31f75f2f3a42a9f7bcc",
+    "code-programs/recipes.js": "f6f26a1c3d4f43668336d0f423488742ec6c7d248509f2e32776a023da9181d4",
+    "code-programs/reuse.js": "0bd9009b1fef4d277ea3f9fc2133ddb49793368e2cde5ff9737306f8f3c339b6",
+    "code-programs/runtime-js.js": "b9457dcffd31f17d140ac0c3516c316fba3982d468029e0eb022a3dda5055180",
+    "code-programs/runtime-python.js": "e909fee0252f850c7ed4e1d12492934a616de11d9c9838b49685ba2da478737b",
+    "code-programs/selftest.js": "8da17c43afc1898044d6a7c08967a70c8a811c50750d85d4a2578db0c218aa15",
+    "local-backend/core.js": "fa3c7bd6323e7169d8f9cdec282406bd645ea8686f7f96867519f4f0a3b4e3f9",
+    "package.json": "f0eeab74b1350dae684f3e85610892aa03a1c213d1937d89fd96624dd0dae7b5"
+  },
+  "scope": "Bounded typed code-program generation and corpus execution; no arbitrary-language capability promotion, production-readiness claim or implicit registry activation.",
+  "supersedes": "testing/logs/2026-09-20-code-programs-evidence.json",
+  "regression": {
+    "case": "numbered record key ordering near runtime budget",
+    "before": {
+      "javascript": "STEP_LIMIT",
+      "python": 0
+    },
+    "after": {
+      "javascript": 0,
+      "python": 0
+    },
+    "fix": "Canonical Unicode code-point ordering for record comparison and validation; positional ordering for arrays."
+  }
+}

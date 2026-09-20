@@ -29,6 +29,8 @@ try {
   assert(/^sha512-[A-Za-z0-9+/]+=*$/.test(packRows[0].integrity));
   assert(packRows[0].files.some(item => item.path === 'bin/axm-grammar-capabilities.js'));
   assert(!packRows[0].files.some(item => item.path.startsWith('testing/')));
+  assert(packRows[0].files.some(item => item.path === 'code-programs/index.js'));
+  assert(!packRows[0].files.some(item => item.path === 'code-programs/selftest.js'));
   assert(!packRows[0].files.some(item => item.path.startsWith('software-directions/placement/')));
 
   const archive = path.join(temporary, packRows[0].filename);
@@ -61,6 +63,24 @@ try {
   assert.strictEqual(capsule.truth.workspaceMutated, false);
   assert.strictEqual(capsule.truth.toolExecuted, false);
 
+  // Exercise the new author from a separately installed, offline package.
+  const programs = require(path.join(installedRoot, 'code-programs', 'index.js'));
+  run(process.execPath, ['-e', "const p=require('axm-102-grammar-body/code-programs');if(p.catalog().operations.length!==48)process.exit(1)"], {cwd: consumer});
+  const authored = programs.compileRecipe({id: 'invoice-totals', languageId: 'javascript'});
+  assert.equal(authored.result, 'CODE_PROGRAM_CANDIDATE_READY');
+  assert.equal(authored.verification.executed, false);
+  const generated = path.join(consumer, 'generated');
+  fs.mkdirSync(generated);
+  for (const artifact of authored.artifacts) fs.writeFileSync(path.join(generated, artifact.path), artifact.content);
+  run(process.execPath, ['selftest.js'], {cwd: generated});
+  const codeCli = path.join(installedRoot, 'bin', 'axm-code-program.js');
+  const codeResult = JSON.parse(run(process.execPath, [codeCli], {cwd: consumer, input: JSON.stringify({action: 'recipe', id: 'invoice-totals', languageId: 'javascript'})}).stdout);
+  assert.equal(codeResult.compilationSha256, authored.compilationSha256);
+  const captured = programs.remember({program: programs.getRecipe('invoice-totals').program});
+  const invoice = captured.captured.find(row => row.function === 'invoice');
+  const recovered = programs.restore({archive: JSON.parse(JSON.stringify(captured.archive)), structuralSha256: invoice.structuralSha256});
+  assert.equal(programs.compile({program: recovered, languageId: 'python'}).result, 'CODE_PROGRAM_CANDIDATE_READY');
+
   const invalid = run(cliCommand, [...cliPrefix], {cwd: consumer, input: '{', status: 2});
   const refusal = JSON.parse(invalid.stderr);
   assert.strictEqual(refusal.errorCode, 'STDIN_JSON_INVALID');
@@ -77,6 +97,9 @@ try {
     offlineInstall: true,
     externalImport: true,
     externalCli: true,
+    installedCodeCompiler: true,
+    installedGeneratedProgramExecuted: true,
+    installedRecipeCaptureAndRestore: true,
     deterministicCli: true,
     invalidJsonRefused: true,
     authority: capsule.authority

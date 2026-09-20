@@ -14,6 +14,16 @@ const PATTERN_PROVENANCE = 'axm-grammer-glass#automation/capability-weaver-gramm
 
 const SPECS = Object.freeze([
   Object.freeze({
+    id: 'axm.code.program-compilation.v1',
+    source: 'code-programs/index.js',
+    result: 'CODE_PROGRAM_CANDIDATE_READY',
+    purpose: 'Type-check and compile bounded composable data programs into standalone JavaScript or Python source and optional tests, with additive structural recipe reuse.',
+    interfaces: Object.freeze(['axm.code.program-compilation.v1', 'axm.code.program-validation.v1', 'axm.code.program-catalog.v1']),
+    authorityFields: Object.freeze(['workspaceRead', 'workspaceMutation', 'toolExecution', 'network', 'install', 'promotion', 'canon']),
+    exportLine: 'module.exports = {AUTHORITY, LANGUAGE_IDS, catalog, validate, compile, compileRecipe, handle, getRecipe: recipes.getRecipe, emptyArchive: reuse.emptyArchive, remember: reuse.remember, restore: reuse.restore};',
+    secondaryTokens: Object.freeze([])
+  }),
+  Object.freeze({
     id: 'axm.code.standalone-capability-capsule.v1',
     source: 'language-organs/standalone-capability-router.js',
     result: 'CAPABILITY_CAPSULE_READY_NO_EXECUTION_AUTHORITY',
@@ -151,8 +161,8 @@ function validateCapabilitySource(sourceText, spec) {
 }
 
 function validateLicense(sourceText) {
-  if (!sourceText.includes('Apache License') || !sourceText.includes('Version 2.0, January 2004')) {
-    throw new Error('LICENSE no longer carries the Apache License 2.0 text expected by this registry');
+  if (!sourceText.startsWith('Mozilla Public License Version 2.0') || !sourceText.includes('1. Definitions')) {
+    throw new Error('LICENSE no longer carries the Mozilla Public License 2.0 text expected by this registry');
   }
 }
 

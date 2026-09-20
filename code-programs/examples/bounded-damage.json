@@ -1,0 +1,85 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "boundedDamage",
+    "functions": [
+      {
+        "name": "remainingHealth",
+        "params": [
+          {
+            "name": "health",
+            "type": "number"
+          },
+          {
+            "name": "damage",
+            "type": "number"
+          },
+          {
+            "name": "armor",
+            "type": "number"
+          }
+        ],
+        "returns": "number",
+        "body": {
+          "op": "max",
+          "left": {
+            "op": "literal",
+            "type": "number",
+            "value": 0
+          },
+          "right": {
+            "op": "subtract",
+            "left": {
+              "op": "ref",
+              "name": "health"
+            },
+            "right": {
+              "op": "max",
+              "left": {
+                "op": "literal",
+                "type": "number",
+                "value": 0
+              },
+              "right": {
+                "op": "subtract",
+                "left": {
+                  "op": "ref",
+                  "name": "damage"
+                },
+                "right": {
+                  "op": "ref",
+                  "name": "armor"
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "exports": [
+      "remainingHealth"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "remainingHealth",
+      "args": [
+        100,
+        30,
+        5
+      ],
+      "expected": 75
+    },
+    {
+      "function": "remainingHealth",
+      "args": [
+        10,
+        30,
+        5
+      ],
+      "expected": 0
+    }
+  ]
+}

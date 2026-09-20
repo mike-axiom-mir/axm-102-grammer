@@ -9,6 +9,7 @@ on:
       - "registry/public-capabilities.jsonl"
       - "registry/public-capabilities.receipt.json"
       - "tools/capability-discovery/**"
+      - "code-programs/**"
       - "language-organs/standalone-capability-router.js"
       - "software-directions/direction-stack.js"
       - "LICENSE"
@@ -22,6 +23,7 @@ on:
       - "registry/public-capabilities.jsonl"
       - "registry/public-capabilities.receipt.json"
       - "tools/capability-discovery/**"
+      - "code-programs/**"
       - "language-organs/standalone-capability-router.js"
       - "software-directions/direction-stack.js"
       - "LICENSE"
@@ -87,16 +89,17 @@ jobs:
           assert index["schema"] == "axm.discovery-index/v0.1"
           assert index["visibility"] == "PUBLIC_SAFE_DECLARED_ONLY"
           assert index["summary"]["repositories"] == 1
-          assert index["summary"]["capability_records"] == 2
+          assert index["summary"]["capability_records"] == 3
 
           repo = index["repositories"][0]
           assert repo["repo"] == "mike-axiom-mir/axm-102-grammer"
           records = repo["capabilities"]["records"]
           assert [record["id"] for record in records] == [
+              "axm.code.program-compilation.v1",
               "axm.code.software-direction-stack.v1",
               "axm.code.standalone-capability-capsule.v1",
           ]
           assert all(record["status"] == "TEST" for record in records)
           assert repo["capabilities"]["sources"][0]["errors"] == 0
-          print("discovery-bridge: PASS · 1 repo · 2 TEST capability records")
+          print("discovery-bridge: PASS · 1 repo · 3 TEST capability records")
           PY

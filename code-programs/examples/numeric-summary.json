@@ -1,0 +1,141 @@
+{
+  "action": "compile",
+  "program": {
+    "schema": "axm.code.program.v1",
+    "name": "numericSummary",
+    "functions": [
+      {
+        "name": "summary",
+        "params": [
+          {
+            "name": "values",
+            "type": {
+              "list": "number"
+            }
+          }
+        ],
+        "returns": {
+          "record": {
+            "count": "number",
+            "total": "number",
+            "mean": "number"
+          }
+        },
+        "body": {
+          "op": "let",
+          "name": "totalValue",
+          "value": {
+            "op": "fold",
+            "input": {
+              "op": "ref",
+              "name": "values"
+            },
+            "item": "amount",
+            "acc": "total",
+            "initial": {
+              "op": "literal",
+              "type": "number",
+              "value": 0
+            },
+            "body": {
+              "op": "add",
+              "left": {
+                "op": "ref",
+                "name": "total"
+              },
+              "right": {
+                "op": "ref",
+                "name": "amount"
+              }
+            }
+          },
+          "body": {
+            "op": "record",
+            "fields": {
+              "count": {
+                "op": "length",
+                "value": {
+                  "op": "ref",
+                  "name": "values"
+                }
+              },
+              "total": {
+                "op": "ref",
+                "name": "totalValue"
+              },
+              "mean": {
+                "op": "if",
+                "condition": {
+                  "op": "equal",
+                  "left": {
+                    "op": "length",
+                    "value": {
+                      "op": "ref",
+                      "name": "values"
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "type": "number",
+                    "value": 0
+                  }
+                },
+                "then": {
+                  "op": "literal",
+                  "type": "number",
+                  "value": 0
+                },
+                "else": {
+                  "op": "divide",
+                  "left": {
+                    "op": "ref",
+                    "name": "totalValue"
+                  },
+                  "right": {
+                    "op": "length",
+                    "value": {
+                      "op": "ref",
+                      "name": "values"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "exports": [
+      "summary"
+    ]
+  },
+  "languageId": "javascript",
+  "cases": [
+    {
+      "function": "summary",
+      "args": [
+        [
+          2,
+          4,
+          6
+        ]
+      ],
+      "expected": {
+        "count": 3,
+        "total": 12,
+        "mean": 4
+      }
+    },
+    {
+      "function": "summary",
+      "args": [
+        []
+      ],
+      "expected": {
+        "count": 0,
+        "total": 0,
+        "mean": 0
+      }
+    }
+  ]
+}
