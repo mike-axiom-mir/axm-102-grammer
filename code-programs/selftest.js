@@ -136,6 +136,15 @@ try {
     python: `from module import FUNCTIONS\nchecks=[(lambda:FUNCTIONS['quotient'](float('nan'),1),'NUMBER_RANGE'),(lambda:FUNCTIONS['quotient'](float('inf'),1),'NUMBER_RANGE'),(lambda:FUNCTIONS['pick']([1]*4097,0),'LIST_LIMIT'),(lambda:FUNCTIONS['ord']('\\ud800'),'UNICODE_SURROGATE')]\nfor check,code in checks:\n    try:\n        check()\n    except Exception as error:\n        assert str(error)==code\n    else:\n        raise AssertionError('EXPECTED_REFUSAL')\n`
   });
 
+  // Numeric-looking and Unicode record keys use the same comparison order,
+  // including near the shared work budget. Native JS object order differs.
+  const numberedType = {record: {'2': {list: 'number'}, '10': 'boolean'}};
+  const repeatedEquality = program('recordOrderBudget', [fn('compareRepeated', {first: numberedType, second: numberedType}, 'number', {
+    op: 'fold', input: lit(Array(21).fill(0), {list: 'number'}), item: 'unused', acc: 'total', initial: lit(0),
+    body: {op: 'if', condition: binary('equal', ref('first'), ref('second')), then: binary('add', ref('total'), lit(1)), else: ref('total')}
+  })]);
+  runBoth(repeatedEquality, [{function: 'compareRepeated', args: [{'10': true, '2': Array(4096).fill(0)}, {'10': false, '2': Array(4096).fill(0)}], expected: 0}], 'numbered-record-order-budget');
+
   // Seeded scalar expression trees use a small independent numeric oracle.
   let seed = 0x102a7;
   const random = () => { seed = (Math.imul(seed,1664525)+1013904223)>>>0; return seed; };

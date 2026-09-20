@@ -23,8 +23,8 @@ license metadata were also repaired to match the already-existing MPL license.
 - Baseline: `node testing/run-all.js` — 37 passed, 0 failed.
 - Final: the same complete runner — 39 passed, 0 failed.
 - New compiler: 48 operations actually exercised across both targets.
-- 30 standalone compiled modules parsed and executed in real Node/Python processes.
-- 30 generated selftest runs and 1,602 behavior checks passed.
+- 32 standalone compiled modules parsed and executed in real Node/Python processes.
+- 32 generated selftest runs and 1,604 behavior checks passed.
 - Included 768 seeded independent-oracle cases per language.
 - 32 compiler/protocol/archive refusals checked, alongside runtime error cases.
 - Nine unique reusable functions captured; dependency-preserving restoration ran
@@ -34,8 +34,9 @@ license metadata were also repaired to match the already-existing MPL license.
 - All old source generation, parser, Foundry, crash/recovery, capsule and package
   checks remain in the suite. Discovery now runs in that complete suite too.
 
-`2026-09-20-code-programs-suite.txt` preserves the full output.
-`2026-09-20-code-programs-evidence.json` binds the current implementation files
+`2026-09-20-code-programs-suite-v2.txt` preserves the final full output.
+The original suite transcript remains as historical evidence.
+`2026-09-20-code-programs-evidence-v2.json` binds the current implementation files
 and log by SHA-256, with runtime versions and observation time.
 
 ## Specific fixes found during verification
@@ -51,6 +52,12 @@ and log by SHA-256, with runtime versions and observation time.
 - Discovery's old Apache-only check was inconsistent with current main's MPL
   migration. It now binds the actual MPL text; historical license files were
   not changed.
+
+Final review reproduced a cross-language budget mismatch for numbered record
+keys: JavaScript reached `STEP_LIMIT` while Python returned 0. Record comparison
+and validation now traverse keys in canonical Unicode order, arrays remain
+positional, and the exact regression returns 0 in both targets. The full suite
+was rerun after this correction. The earlier evidence remains preserved.
 
 ## Boundaries
 

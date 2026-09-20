@@ -1,0 +1,716 @@
+
+TEST 01/39: python3 language-organs/build-grammar-profiles.py --check
+{
+  "schema": "axm.code.language-grammar-profile-build-result.v1",
+  "mode": "CHECK",
+  "organCount": 102,
+  "knowledgeCount": 102,
+  "profileCount": 102,
+  "uniqueProfileDigests": 102,
+  "failures": [],
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 02/39: node language-organs/selftest-grammar-profiles.js
+{
+  "ok": true,
+  "profileCount": 102,
+  "mainPlannerGrammarCoverage": 102,
+  "uniqueProfileDigests": 102,
+  "snapshotSha256": "1b5616cdc5f0f55ecb43b86e48d602147c95801c3c5e7af6eabaafd21ded5e9c",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 03/39: python3 language-organs/build-specialist-eyes.py --check
+{
+  "ok": true,
+  "specialistEyeCount": 102,
+  "languageOpportunityHintCount": 102,
+  "humanPerspectiveDigest": "8000f61b2ef5c81ef3fdc54d4c67682f17059b040c599883d7bec769f661c4ea",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 04/39: node language-organs/selftest-specialist-eyes.js
+{
+  "ok": true,
+  "humanReviewDimensions": 8,
+  "specialistEyeCount": 102,
+  "uniqueEyeDigests": 102,
+  "rustDiscoveryState": "DISCOVERY_CANDIDATE",
+  "helmDiscoveryState": "DISCOVERY_CANDIDATE",
+  "daxDiscoveryState": "DISCOVERY_CANDIDATE",
+  "eyeSnapshotSha256": "3e2577cd3ae0b98005d74724c66b3a3e7a1961723611218f961def4be3e407c8",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 05/39: node language-organs/build-machine-templates.js --check
+{
+  "ok": true,
+  "mode": "--check",
+  "bankCount": 102,
+  "verifiedTemplateCount": 1224,
+  "skeletonCount": 816,
+  "changed": 0,
+  "snapshotSha256": "d82480317b3b087bfc08b4285ddf32c46b556a41c328c9b0c81d103b33742b4b"
+}
+TEST_RESULT: PASS
+
+TEST 06/39: node language-organs/selftest-machine-templates.js
+{
+  "ok": true,
+  "bankCount": 102,
+  "verifiedTemplateCount": 1224,
+  "structuralSkeletonCount": 816,
+  "minedCandidateCount": 1,
+  "snapshotSha256": "d82480317b3b087bfc08b4285ddf32c46b556a41c328c9b0c81d103b33742b4b",
+  "aiMachineSharedTopTemplate": "code.template.rust.safe-refactor-preflight.v1",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 07/39: node language-organs/build-machine-cheatcodes.js --check
+{
+  "ok": true,
+  "mode": "--check",
+  "bankCount": 102,
+  "totalRuleCount": 5100,
+  "changed": 0
+}
+TEST_RESULT: PASS
+
+TEST 08/39: node language-organs/selftest-machine-cheatcodes.js
+{
+  "ok": true,
+  "bankCount": 102,
+  "rulesPerBank": 50,
+  "totalRuleCount": 5100,
+  "phaseCount": 10,
+  "uniqueBankDigests": 102,
+  "snapshotSha256": "6ffa100c40706754864f6d98f86ed528bd3631c797ab6b64f447cd768340d746",
+  "rustMatchCount": 7,
+  "helmDiscoveryMatches": 2,
+  "daxDiscoveryMatches": 2,
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 09/39: node language-organs/selftest-machine-cheatcode-influence.js
+{
+  "ok": true,
+  "meshCount": 102,
+  "totalNodeCount": 5100,
+  "totalEdgeCount": 120125,
+  "snapshotSha256": "bb69e9e22829ef6fb2632d37e3fea723e3c77e77282dbc4e98c0b350554a8be1",
+  "rustHard": 7,
+  "rustSoft": 43,
+  "helmHard": 6,
+  "helmSoft": 44,
+  "daxHard": 7,
+  "daxSoft": 43,
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 10/39: node language-organs/build-machine-keyboards.js --check
+{
+  "schema": "axm.code.machine-keyboard-build-result.v1",
+  "mode": "CHECK",
+  "bankCount": 102,
+  "keysPerBank": 48,
+  "totalStableKeyCount": 4896,
+  "changed": 0,
+  "snapshotSha256": "72e510a51b497a86ae5577a47621682a868117ebd19d4ddc39922d25f79b008c",
+  "failures": [],
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 11/39: node language-organs/selftest-machine-keyboards.js
+{
+  "ok": true,
+  "bankCount": 102,
+  "keysPerBank": 48,
+  "totalStableKeyCount": 4896,
+  "layoutHotKeyCount": 12,
+  "editIntentResult": "EDIT_INTENT_READY",
+  "controlIntentResult": "CONTROL_INTENT_READY",
+  "programResult": "EDIT_PROGRAM_READY",
+  "snapshotSha256": "72e510a51b497a86ae5577a47621682a868117ebd19d4ddc39922d25f79b008c",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 12/39: node language-organs/selftest.js
+{
+  "ok": true,
+  "organCount": 102,
+  "uniqueDigests": 102,
+  "familyCount": 23,
+  "pythonSourceReviewedDonorBound": true,
+  "pythonRuntimeCorrectness": "UNKNOWN",
+  "ambiguity": [
+    ".m",
+    ".v"
+  ],
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 13/39: node language-organs/selftest-adversarial.js
+{
+  "ok": true,
+  "organCount": 102,
+  "signalRoundTrips": 263,
+  "extensionAmbiguities": 8,
+  "basenameAmbiguities": 0,
+  "pathAmbiguities": 0,
+  "shebangAmbiguities": 1,
+  "snapshotSha256": "d3ae157d5c6f43ea73fb85b3976ebf988830e99eb1615554de73f9744073ff46",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 14/39: node software-directions/selftest-direction-registry.js
+{
+  "ok": true,
+  "profileCount": 29,
+  "familyCounts": {
+    "human-interface": 8,
+    "service-network": 8,
+    "data-intelligence": 6,
+    "system-hardware": 3,
+    "creation-operations": 4
+  },
+  "runtimeAxisCount": 11,
+  "verificationAxisCount": 20,
+  "sourceCount": 12,
+  "snapshotSha256": "4f624f0678ed20caa19f43faf0ca7cb2d1f6686ee98a764227d79bca6d057628",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 15/39: node software-directions/selftest-direction-stack.js
+{
+  "ok": true,
+  "individuallyComposedProfiles": 29,
+  "hybridDirectionCount": 2,
+  "hybridCapabilityCount": 14,
+  "hybridVerifierCount": 7,
+  "hybridTensionCount": 1,
+  "gameSuggestionCount": 3,
+  "roboticsCapabilityCoverage": 28.57,
+  "roboticsVerifierCoverage": 16.67,
+  "allDirectionCapabilityCount": 194,
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 16/39: node software-directions/placement/selftest-placement-plane.js
+{
+  "ok": true,
+  "roleCount": 10,
+  "changeKindCount": 40,
+  "directionHintCount": 29,
+  "placementPlanCount": 58,
+  "extendExistingCount": 58,
+  "languageBindingCount": 102,
+  "extensionLanguageBindingCount": 97,
+  "basenameLanguageBindingCount": 3,
+  "pathContextLanguageBindingCount": 2,
+  "additionalPathContextProbePassed": true,
+  "createModuleProbePassed": true,
+  "adversarialHoldCount": 10,
+  "snapshotSha256": "3e12ebecc8dd0026f257375e6813c5bc3c767b0b3a4f1db67df8b52275f5ce6d",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 17/39: node software-directions/placement/selftest-project-map-hand.js
+{
+  "ok": true,
+  "observedBindingKinds": [
+    "extension",
+    "basename",
+    "path-context"
+  ],
+  "observedWorkspaceCount": 3,
+  "observedModuleCount": 6,
+  "ttlMs": 300000,
+  "noMutationProbePassed": true,
+  "byteDriftChangesMapDigest": true,
+  "adversarialHoldCount": 13,
+  "authority": "BOUNDED_WORKSPACE_READ_ONLY"
+}
+TEST_RESULT: PASS
+
+TEST 18/39: node software-directions/placement/selftest-toolchain-environment-hand.js
+{
+  "ok": true,
+  "installedToolCount": 4,
+  "usableToolCount": 3,
+  "fixedProbeCount": 4,
+  "liveToolPathBindings": 4,
+  "candidateExecutions": 0,
+  "workspaceReads": 0,
+  "workspaceMutations": 0,
+  "sandboxProvider": "bubblewrap",
+  "sandboxUsable": false,
+  "sandboxErrorCode": "NAMESPACE_PERMISSION_DENIED",
+  "adversarialHolds": 3
+}
+TEST_RESULT: PASS
+
+TEST 19/39: node software-directions/placement/selftest-hand-foundry-plane.js
+{
+  "ok": true,
+  "manifests": 2,
+  "pythonPlacementPlans": 1,
+  "javascriptPlacementPlans": 3,
+  "graphDigestBound": true,
+  "graphInstallationOrderBound": true,
+  "graphInputOrderCanonicalized": true,
+  "spawnedCapsules": 12,
+  "spawnedParserPasses": 3,
+  "spawnedParserSyntaxHolds": 1,
+  "spawnedParserBindingHolds": 2,
+  "candidateExecutions": 0,
+  "workspaceMutations": 0,
+  "environmentSandboxUsable": false,
+  "explicitCapabilityHolds": 8,
+  "adversarialManifestHolds": 9
+}
+TEST_RESULT: PASS
+
+TEST 20/39: node software-directions/placement/selftest-bounded-python-application.js
+{
+  "ok": true,
+  "donorImplementationDigestReproduced": true,
+  "pythonApplicationTransactionsCommitted": 1,
+  "provenanceLockedRuntimePasses": 1,
+  "pythonRollbackPasses": 1,
+  "pythonParserReceipts": 8,
+  "adversarialHolds": 11,
+  "exactTargetsPerTransaction": 2,
+  "hostNamespaceSandboxUsable": false,
+  "arbitraryPythonExecutionClaimed": false,
+  "generalPythonAuthoringClaimed": false
+}
+TEST_RESULT: PASS
+
+TEST 21/39: node software-directions/placement/selftest-bounded-python-recipe-registry.js
+{
+  "ok": true,
+  "registrySha256": "4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e",
+  "registeredRecipeCount": 2,
+  "independentlyBoundBuilderCount": 2,
+  "independentlyBoundVerifierRunnerCount": 2,
+  "requiredFieldsAuthorReceipts": 1,
+  "requiredFieldsProvenanceLockedVerifierPasses": 1,
+  "crossRecipeDispatches": 0,
+  "mutableModuleRouterSurfaces": 0,
+  "arbitraryCandidateExecutions": 0,
+  "workspaceMutations": 0,
+  "adversarialHolds": 8
+}
+TEST_RESULT: PASS
+
+TEST 22/39: node software-directions/placement/selftest-bounded-python-recipe-evidence-observer-hand.js
+{
+  "ok": true,
+  "exactDeclaredFilesObserved": 6,
+  "javascriptFilesParsedWithoutExecution": 2,
+  "jsonFilesParsed": 4,
+  "currentByteDigestMatches": 6,
+  "proposalCoreDigestBindings": 3,
+  "ttlMs": 300000,
+  "callerTestClaimsReproduced": false,
+  "semanticSafetyIndependentlyVerified": false,
+  "proposedModulesLoaded": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawned": 0,
+  "workspaceMutations": 0,
+  "registryMutations": 0,
+  "promotions": 0,
+  "adversarialHolds": 19
+}
+TEST_RESULT: PASS
+
+TEST 23/39: node software-directions/placement/selftest-bounded-python-recipe-replay-isolation-hand.js
+{
+  "ok": true,
+  "hostIsolationProvider": "bubblewrap",
+  "hostIsolationInstalled": true,
+  "hostIsolationUsable": false,
+  "hostIsolationErrorCode": "NAMESPACE_PERMISSION_DENIED",
+  "result": "RECIPE_REPLAY_ISOLATION_HELD_HOST_PROVIDER_UNAVAILABLE",
+  "isolationCertified": false,
+  "fixedPolicyProbeProcesses": 0,
+  "proposedSourceFilesReadByGate": 0,
+  "proposedBytesMountedInSandbox": 0,
+  "proposedModulesLoaded": 0,
+  "callerTestsExecuted": 0,
+  "callerTestClaimsReproduced": false,
+  "candidatesExecuted": 0,
+  "workspaceMutations": 0,
+  "registryMutations": 0,
+  "activationAuthorizations": 0,
+  "syntheticPolicyEvaluatorPasses": 1,
+  "syntheticPolicyEvaluatorHolds": 1,
+  "unresolvedGapCount": 4,
+  "adversarialHolds": 16
+}
+TEST_RESULT: PASS
+
+TEST 24/39: node software-directions/placement/selftest-bounded-python-recipe-admission-plane.js
+{
+  "ok": true,
+  "deterministicStageReceipts": 2,
+  "activeRegistryRecipeCount": 2,
+  "stagedCandidateEntryCount": 1,
+  "hypotheticalNextRegistryEntryCount": 3,
+  "activationGapCount": 6,
+  "evidenceFilesObservedByReadOnlyHand": 6,
+  "currentEvidenceByteDigestMatches": 6,
+  "evidenceFilesParsedWithoutImport": 6,
+  "replayIsolationResult": "RECIPE_REPLAY_ISOLATION_HELD_HOST_PROVIDER_UNAVAILABLE",
+  "replayIsolationCertified": false,
+  "replayIsolationReceiptBound": true,
+  "callerTestClaimsReproduced": false,
+  "semanticSafetyIndependentlyVerified": false,
+  "proposedSourceBytesReadByAdmissionPlane": 0,
+  "proposedSourceFilesReadByObserver": 2,
+  "proposedModulesLoaded": 0,
+  "authorsInvoked": 0,
+  "verifiersInvoked": 0,
+  "candidatesGenerated": 0,
+  "candidatesExecuted": 0,
+  "childProcessesSpawnedByAdmissionPlane": 0,
+  "activeRegistryMutations": 0,
+  "selectionsIssued": 0,
+  "activationAuthorizationsIssued": 0,
+  "promotions": 0,
+  "adversarialHolds": 24
+}
+TEST_RESULT: PASS
+
+TEST 25/39: node software-directions/placement/selftest-foundry-activation-plane.js
+{
+  "ok": true,
+  "registrySha256": "4e531b4d1a196aacd1d4e900fe7bc70867fff94f8a74887409d914ef8ef4853e",
+  "registeredRecipeCount": 2,
+  "distinctRegisteredRecipesActivated": 2,
+  "automaticHandAssembliesCommitted": 2,
+  "callerSuppliedCandidateBundles": 0,
+  "callerSuppliedParserContexts": 0,
+  "callerSuppliedVerifierAdapters": 0,
+  "authorReceipts": 2,
+  "pythonParserReceipts": 8,
+  "provenanceLockedVerifierPasses": 2,
+  "durableWriterTransactions": 2,
+  "rollbackCapsuleRequired": true,
+  "repeatedCommittedActivationsHeldByStateDrift": 1,
+  "underlyingDurableReplayProtectionReused": true,
+  "crossRecipeDispatches": 0,
+  "adversarialHolds": 16,
+  "foundrySelfAuthorizations": 0,
+  "arbitraryCandidateExecutions": 0,
+  "generalPythonAuthoringClaimed": false,
+  "hostNamespaceSandboxUsable": false
+}
+TEST_RESULT: PASS
+
+TEST 26/39: node software-directions/placement/selftest-edit-graph-plane.js
+{
+  "ok": true,
+  "focusedEntryCount": 3,
+  "focusedTargetNodeCount": 6,
+  "verifiedBoundaryTargetCounts": [
+    4,
+    6,
+    8
+  ],
+  "deterministicTopologicalOrder": true,
+  "adversarialHoldCount": 6,
+  "authority": {
+    "workspaceRead": false,
+    "workspaceMutation": false,
+    "toolExecution": false,
+    "codeGeneration": false,
+    "graphPlanning": true,
+    "authorization": false
+  }
+}
+TEST_RESULT: PASS
+
+TEST 27/39: node software-directions/placement/selftest-workspace-edit-hand.js
+{
+  "ok": true,
+  "successfulTransactionCount": 2,
+  "rollbackTransactionCount": 1,
+  "adversarialHoldCount": 10,
+  "languageParseReceiptCount": 14,
+  "registeredVerifierReceiptCount": 3,
+  "exactTargetCountPerTransaction": 2,
+  "maxAuthorizationTtlMs": 60000,
+  "maxCandidateBytes": 1048576,
+  "codeGeneratedByHand": false,
+  "productionRepositoryTrialClaimed": false,
+  "durableJournalProvided": true,
+  "workspaceLeaseProvided": true,
+  "authority": "EXPLICIT_SINGLE_TRANSACTION_WORKSPACE_EDIT"
+}
+TEST_RESULT: PASS
+
+TEST 28/39: node software-directions/placement/selftest-workspace-edit-recovery.js
+{
+  "ok": true,
+  "actualSigkillCrashCount": 25,
+  "replacePhaseCount": 11,
+  "createPhaseCount": 9,
+  "rollbackRecoveryCount": 14,
+  "commitRecoveryCount": 4,
+  "alreadyFinalCount": 2,
+  "durableReplayAcrossProcessRestartHeld": true,
+  "simultaneousWorkspaceLeaseHeld": true,
+  "tamperedJournalHeld": true,
+  "ambiguousWorkspaceStateHeld": true,
+  "modeDriftHeld": true,
+  "trailingPartialJournalRecovered": true,
+  "universalPowerLossProofClaimed": false
+}
+TEST_RESULT: PASS
+
+TEST 29/39: node software-directions/placement/selftest-workspace-edit-graph-hand.js
+{
+  "ok": true,
+  "graphEntryCount": 3,
+  "exactTargetCount": 6,
+  "successfulGraphTransactions": 1,
+  "rollbackGraphTransactions": 1,
+  "parserReceiptCount": 24,
+  "verifierReceiptCount": 6,
+  "adversarialHoldCount": 5,
+  "legacyTwoTargetApiPreserved": true,
+  "productionRepositoryTrialClaimed": false
+}
+TEST_RESULT: PASS
+
+TEST 30/39: node software-directions/placement/selftest-workspace-edit-graph-recovery.js
+{
+  "ok": true,
+  "graphEntryCount": 3,
+  "exactTargetCount": 6,
+  "journalBoundaryCount": 23,
+  "actualSigkillCrashCount": 28,
+  "rollbackRecoveryCount": 20,
+  "recoveredCommitCount": 2,
+  "alreadyCommittedCount": 1,
+  "durableReplayAcrossProcessRestartHeld": true,
+  "simultaneousGraphWorkspaceLeaseHeld": true,
+  "legacyPairHandHeldByGraphLease": true,
+  "tamperedJournalHeld": true,
+  "ambiguousWorkspaceStateHeld": true,
+  "modeDriftHeld": true,
+  "trailingPartialJournalRecovered": true,
+  "universalPowerLossProofClaimed": false
+}
+TEST_RESULT: PASS
+
+TEST 31/39: node software-directions/adapters/selftest-adapter-plane.js
+{
+  "ok": true,
+  "adapterCount": 10,
+  "supportedVerifierAdapterCount": 9,
+  "unsupportedVerifierIdCount": 11,
+  "buildCount": 58,
+  "runtimeReceiptCount": 58,
+  "verifiedReportCount": 58,
+  "verifierReceiptCount": 76,
+  "unsupportedTargetCount": 20,
+  "zeroCoverageBuildCount": 7,
+  "packetIdentityRegressionCount": 5,
+  "executionReportAdmissionRegressionCount": 9,
+  "snapshotSha256": "d9a5c21d82b31795cfcf963ebf06228a791218e946bd5fbde321de546eddd4e5",
+  "authority": "BOUNDED_LOCAL_ADAPTER_ONLY"
+}
+TEST_RESULT: PASS
+
+TEST 32/39: node software-directions/selftest-frontier-direction-workbench.js
+{
+  "ok": true,
+  "directionCount": 29,
+  "executedBuildCount": 58,
+  "passedBuildCount": 58,
+  "beginnerReferenceReadyCount": 29,
+  "productionReadyCount": 0,
+  "verifiedVerifierReceiptCount": 76,
+  "unsupportedVerifierTargetCount": 20,
+  "directionsWithConcreteVerifierAdapter": 26,
+  "directionsWithUnsupportedVerifierTargets": 10,
+  "placementPlanCount": 58,
+  "placementHoldCount": 0,
+  "singleFrontierModelTrial": true,
+  "reportSha256": "348e83e2ddd7b3e4e0918a7df9a75cec099e4efbf4b40d91aa7088d60c205e8f",
+  "result": "ALL_DIRECTIONS_BEGINNER_REFERENCE_READY",
+  "authority": "BOUNDED_LOCAL_ADAPTER_ONLY"
+}
+TEST_RESULT: PASS
+
+TEST 33/39: node language-organs/selftest-standalone-capability-router.js
+{
+  "ok": true,
+  "readyLanguage": "rust",
+  "readyResult": "CAPABILITY_CAPSULE_READY_NO_EXECUTION_AUTHORITY",
+  "hardCheatcodeActivations": 7,
+  "softInfluenceCandidates": 43,
+  "selectedTemplates": 5,
+  "hotKeys": 12,
+  "explicitLanguageResolutionCount": 102,
+  "ambiguityHeld": [
+    "code.organ.matlab-octave.v1",
+    "code.organ.objective-c.v1",
+    "code.organ.power-query-m.v1"
+  ],
+  "conflictHeld": "EXPLICIT_LANGUAGE_SIGNAL_CONFLICT",
+  "directionProfileCount": 29,
+  "suggestionOnlyTopCandidate": "information-website",
+  "hybridDirections": [
+    "collaboration-multiplayer",
+    "game"
+  ],
+  "hybridGapCount": 17,
+  "invalidDirectionHeld": "UNKNOWN_DIRECTION",
+  "capsuleSha256": "c95716a0a08c5283e17a83d11386243501d04992dcea72689ea89494c3a63390",
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 34/39: node local-backend/selftest-portable.js
+{
+  "ok": true,
+  "languageCount": 102,
+  "defaultCapability": "G0_IDENTITY",
+  "jsonCapability": "G5_VERIFIED_REWRITE",
+  "utf8ByteRanges": true,
+  "invalidUtf8Held": true,
+  "semanticGraph": true,
+  "projectImpact": true,
+  "verifiedIntentRewrite": true,
+  "evidencePassport": true,
+  "grammarBridge": true,
+  "ambiguousDetectionHeld": true,
+  "aiRequired": false,
+  "networkRequired": false
+}
+TEST_RESULT: PASS
+
+TEST 35/39: node code-programs/selftest.js
+{
+  "ok": true,
+  "languageEmitters": 2,
+  "operationsExecuted": 48,
+  "standaloneCompilationsExecuted": 32,
+  "generatedTestRuns": 32,
+  "behaviorChecks": 1604,
+  "seededOracleCasesPerLanguage": 768,
+  "compilerAndBoundaryRefusals": 32,
+  "capturedUniqueFunctions": 9,
+  "restoredDependenciesExecuted": true,
+  "offlineCliAndBackend": true,
+  "generatedSourcesSha256": "99c495b539771429d8e1f98bbdfc279c62a83d3a4ebd436c1ad572b47c4c6e49",
+  "runtimeScope": "Bounded typed data programs; not arbitrary JavaScript/Python or all 102 languages."
+}
+TEST_RESULT: PASS
+
+TEST 36/39: node --test tools/capability-discovery/test-registry.mjs
+✔ real repository exposes exactly three bounded TEST declarations (4.438944ms)
+✔ committed registry and receipt match exact generator output (1.395164ms)
+✔ status/result contract drift fails closed (3.069359ms)
+✔ authority drift fails closed (4.374544ms)
+✔ export surface drift fails closed (2.099479ms)
+✔ source symlink substitution fails closed (4.34029ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.116695
+TEST_RESULT: PASS
+
+TEST 37/39: node testing/selftest-package-consumer.js
+{
+  "ok": true,
+  "package": "axm-102-grammar-body",
+  "version": "1.1.0-test",
+  "packedFiles": 658,
+  "packedBytes": 1154011,
+  "unpackedBytes": 14867616,
+  "offlineInstall": true,
+  "externalImport": true,
+  "externalCli": true,
+  "installedCodeCompiler": true,
+  "installedGeneratedProgramExecuted": true,
+  "installedRecipeCaptureAndRestore": true,
+  "deterministicCli": true,
+  "invalidJsonRefused": true,
+  "authority": {
+    "workspaceRead": false,
+    "workspaceMutation": false,
+    "toolExecution": false,
+    "network": false,
+    "install": false,
+    "languageSwitch": false,
+    "promotion": false,
+    "canon": false
+  }
+}
+TEST_RESULT: PASS
+
+TEST 38/39: node testing/selftest-grammar-glass-package-bridge.js
+{
+  "ok": true,
+  "package": "axm-102-grammar-body",
+  "packedFiles": 658,
+  "packedBytes": 1154011,
+  "offlineInstall": true,
+  "exportedSubpath": true,
+  "installedCreateCli": true,
+  "deterministicExport": true,
+  "exactPackageReplay": true,
+  "resealedFalseSnapshotRefused": true,
+  "missingProvenanceRefused": true,
+  "grammarGlassConsumer": false,
+  "sharedLanguageCount": null,
+  "authority": "NONE"
+}
+TEST_RESULT: PASS
+
+TEST 39/39: node testing/selftest-repository-independence.js
+{
+  "ok": true,
+  "languageDirectoryCount": 102,
+  "perLanguagePayloadCount": 612,
+  "parsedJsonFileCount": 660,
+  "softwareDirectionProfileCount": 29,
+  "softwareDirectionAxisCount": 7,
+  "frontierDirectionTrialCount": 58,
+  "concreteAdapterCount": 10,
+  "unsupportedVerifierAdapterCount": 11,
+  "placementRoleCount": 10,
+  "placementChangeKindCount": 40,
+  "placementDirectionHintCount": 29,
+  "editGraphMaxTargetCount": 8,
+  "handFoundryMaxPlacementPlans": 4,
+  "symlinkCount": 0,
+  "submoduleFilePresent": false,
+  "capabilityContractAuthority": "NONE"
+}
+TEST_RESULT: PASS
+
+SUITE_RESULT: passed=39 failed=0 total=39

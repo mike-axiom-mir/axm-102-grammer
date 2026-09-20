@@ -37,7 +37,7 @@ function _axm_check(ctx, value, wanted, depth = 0) {
     return;
   }
   if (!value || typeof value !== 'object' || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) _axm_error('VALUE_TYPE');
-  const descriptors = Object.getOwnPropertyDescriptors(value), keys = Object.keys(wanted.record);
+  const descriptors = Object.getOwnPropertyDescriptors(value), keys = Object.keys(wanted.record).sort(_axm_compare);
   if (Reflect.ownKeys(descriptors).length !== keys.length) _axm_error('VALUE_TYPE');
   for (const key of keys) {
     const descriptor = descriptors[key];
@@ -62,7 +62,8 @@ function _axm_equal(ctx, left, right) {
   if (left === right && (left === null || typeof left !== 'object')) return true;
   if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
   if (Array.isArray(left) !== Array.isArray(right)) return false;
-  const keys = Object.keys(left);
+  if (Array.isArray(left)) return left.length === right.length && left.every((value, i) => _axm_equal(ctx, value, right[i]));
+  const keys = Object.keys(left).sort(_axm_compare);
   return keys.length === Object.keys(right).length && keys.every(k => Object.hasOwn(right, k) && _axm_equal(ctx, left[k], right[k]));
 }
 function _axm_seq(ctx, kind, values, fn) {

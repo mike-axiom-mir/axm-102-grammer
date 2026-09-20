@@ -64,7 +64,7 @@ def _axm_check(ctx, value, wanted, depth=0):
         return
     if _axm_b.type(value) is not _axm_b.dict or _axm_b.set(value) != _axm_b.set(wanted["record"]):
         _axm_error("VALUE_TYPE")
-    for key in wanted["record"]:
+    for key in _axm_b.sorted(wanted["record"]):
         _axm_check(ctx, value[key], wanted["record"][key], depth + 1)
 
 
@@ -107,7 +107,7 @@ def _axm_equal(ctx, left, right):
     if _axm_b.type(left) is _axm_b.list and _axm_b.type(right) is _axm_b.list:
         return _axm_b.len(left) == _axm_b.len(right) and _axm_b.all(_axm_equal(ctx, a, b) for a, b in _axm_b.zip(left, right))
     if _axm_b.type(left) is _axm_b.dict and _axm_b.type(right) is _axm_b.dict:
-        return _axm_b.set(left) == _axm_b.set(right) and _axm_b.all(_axm_equal(ctx, left[k], right[k]) for k in left)
+        return _axm_b.set(left) == _axm_b.set(right) and _axm_b.all(_axm_equal(ctx, left[k], right[k]) for k in _axm_b.sorted(left))
     return left == right
 
 
